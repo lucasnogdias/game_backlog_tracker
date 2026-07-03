@@ -34,4 +34,7 @@ yarn-error.log*
 # Build artifacts
 *.tsbuildinfo
 
+# Test coverage
+/coverage
+
 /src/generated/prisma
