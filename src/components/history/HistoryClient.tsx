@@ -12,7 +12,7 @@ import { HistoryToolbar } from "./HistoryToolbar";
 import { HistoryTable } from "./HistoryTable";
 import { HistoryCards } from "./HistoryCards";
 import { HistoryFormModal } from "./HistoryFormModal";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];

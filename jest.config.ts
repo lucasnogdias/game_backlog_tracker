@@ -16,14 +16,14 @@ const config: Config = {
   ],
   coverageDirectory: "coverage",
   coverageThreshold: {
-    // "global" applies across all files matched by collectCoverageFrom. Kept
-    // low for now since shared components (ConfirmDialog/TopNav) aren't
-    // tested yet; the backlog/history-specific thresholds below are the real gate.
+    // "global" is a safety net for the aggregate total. All files under
+    // src/components currently live in one of the thresholded subfolders
+    // below, which are the real gate.
     global: {
-      statements: 60,
-      branches: 45,
-      functions: 45,
-      lines: 60,
+      statements: 90,
+      branches: 80,
+      functions: 70,
+      lines: 90,
     },
     // Backlog and History components are covered by tests so far. Enforce a
     // floor here so coverage can't silently regress; raise this, and
@@ -42,6 +42,13 @@ const config: Config = {
     },
     // Shared, composable primitives used by both Backlog and History views.
     "./src/components/shared/**/*.tsx": {
+      statements: 90,
+      branches: 80,
+      functions: 70,
+      lines: 90,
+    },
+    // App-level chrome (e.g. TopNav), rendered once at the root layout.
+    "./src/components/layout/**/*.tsx": {
       statements: 90,
       branches: 80,
       functions: 70,
