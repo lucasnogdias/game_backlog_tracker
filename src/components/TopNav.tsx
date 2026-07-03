@@ -8,10 +8,9 @@ export function TopNav() {
         <Link href="/backlog" className="text-sm hover:underline">
           Backlog
         </Link>
-        {/* History page lands in a future task */}
-        <span className="text-sm text-neutral-400" title="Coming soon">
+        <Link href="/history" className="text-sm hover:underline">
           History
-        </span>
+        </Link>
       </div>
     </nav>
   );
