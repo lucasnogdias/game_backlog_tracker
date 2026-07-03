@@ -40,6 +40,13 @@ const config: Config = {
       functions: 70,
       lines: 90,
     },
+    // Shared, composable primitives used by both Backlog and History views.
+    "./src/components/shared/**/*.tsx": {
+      statements: 90,
+      branches: 80,
+      functions: 70,
+      lines: 90,
+    },
   },
 };
 
