@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// A local account. Each user has their own isolated Backlog and History.
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  /// Presentation name; falls back to username when not provided
+  displayName  String?
+  passwordHash String
+  /// One of: "admin" | "user". The first user ever created is always "admin".
+  role         String   @default("user")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  backlogGames   BacklogGame[]
+  historyEntries HistoryEntry[]
+}
+
+/// A game the user wants to play (or acquire) but hasn't started yet.
+model BacklogGame {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  owned          Boolean   @default(false)
+  /// Array of platform names, e.g. ["Switch", "PS5"]
+  platforms      Json
+  estimatedHours Float?
+  /// Stored as a date; only month/year are meaningful for display
+  releaseDate    DateTime?
+  /// 1-10 excitement rating; drives default sort order
+  hype           Int?
+  notes          String?
+  coverImageUrl  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+/// A game the user is playing, has finished, or has otherwise moved past the backlog.
+model HistoryEntry {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  /// One of: "In Progress" | "Finished" | "Completed" | "Recurrent" | "Abandoned" | "Paused"
+  status          String
+  /// Total playtime in minutes (manually entered/overwritten; UI displays as HH:mm)
+  playtimeMinutes Int?
+  finishedOn      DateTime?
+  /// Stored as a date; only month/year are meaningful for display
+  releaseDate     DateTime?
+  notes           String?
+  platform        String?
+  coverImageUrl   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+}
