@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Enforces commit messages to start with a task/bug reference, e.g.:
+#   TASK-0001: Set up git isolation and hooks
+#   BUG-0007: Fix backlog sort order
+COMMIT_MSG_FILE="$1"
+FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")
+PATTERN="^(TASK|BUG)-[0-9]{4}: .+"
+
+if ! [[ "$FIRST_LINE" =~ $PATTERN ]]; then
+  echo "Error: commit message must start with 'TASK-WXYZ: ' or 'BUG-WXYZ: ' (e.g. TASK-0001: message)." >&2
+  echo "Got: \"$FIRST_LINE\"" >&2
+  exit 1
+fi
