@@ -117,6 +117,21 @@ describe("HistoryCards", () => {
     promptSpy.mockRestore();
   });
 
+  it("falls back to placeholder text for missing platform and playtime", () => {
+    const entry = makeEntry({ platform: null, playtimeMinutes: null });
+    render(
+      <HistoryCards
+        entries={[entry]}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onSetCoverImage={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("No platform set")).toBeInTheDocument();
+    expect(screen.getByText("Playtime: —")).toBeInTheDocument();
+  });
+
   it("calls onEdit and onDelete when their buttons are clicked", async () => {
     const user = userEvent.setup();
     const onEdit = jest.fn();

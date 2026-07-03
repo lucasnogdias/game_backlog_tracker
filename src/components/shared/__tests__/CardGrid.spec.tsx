@@ -1,69 +1,73 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { BacklogCards } from "../BacklogCards";
-import type { BacklogGameDTO } from "@/types/backlog";
+import { CardGrid } from "../CardGrid";
 
-function makeGame(overrides: Partial<BacklogGameDTO> = {}): BacklogGameDTO {
+interface Item {
+  id: string;
+  title: string;
+  coverImageUrl: string | null;
+  subtitle: string;
+}
+
+function makeItem(overrides: Partial<Item> = {}): Item {
   return {
     id: "1",
-    title: "Hollow Knight",
-    owned: true,
-    platforms: ["Switch", "PC"],
-    estimatedHours: 30,
-    releaseDate: "2017-02-01T00:00:00.000Z",
-    hype: 9,
-    notes: "Recommended by a friend",
+    title: "Item One",
     coverImageUrl: null,
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z",
+    subtitle: "Some meta info",
     ...overrides,
   };
 }
 
-describe("BacklogCards", () => {
-  it("renders an empty state message when there are no games", () => {
+describe("CardGrid", () => {
+  it("renders the empty message when there are no items", () => {
     render(
-      <BacklogCards
-        games={[]}
+      <CardGrid
+        items={[]}
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        emptyMessage="Nothing here yet."
       />
     );
 
-    expect(
-      screen.getByText(/no games in your backlog yet/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText("Nothing here yet.")).toBeInTheDocument();
   });
 
   it("renders a placeholder button when no cover image is set", () => {
-    const game = makeGame({ coverImageUrl: null });
+    const item = makeItem();
     render(
-      <BacklogCards
-        games={[game]}
+      <CardGrid
+        items={[item]}
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        emptyMessage="Nothing here yet."
       />
     );
 
     expect(
       screen.getByRole("button", { name: /add cover image/i })
     ).toBeInTheDocument();
+    expect(screen.getByText("Some meta info")).toBeInTheDocument();
   });
 
   it("renders an image when a cover image URL is set", () => {
-    const game = makeGame({ coverImageUrl: "https://example.com/cover.jpg" });
+    const item = makeItem({ coverImageUrl: "https://example.com/cover.jpg" });
     render(
-      <BacklogCards
-        games={[game]}
+      <CardGrid
+        items={[item]}
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        emptyMessage="Nothing here yet."
       />
     );
 
-    const image = screen.getByRole("img", { name: "Hollow Knight cover art" });
+    const image = screen.getByRole("img", { name: "Item One cover art" });
     expect(image).toHaveAttribute("src", "https://example.com/cover.jpg");
   });
 
@@ -73,40 +77,43 @@ describe("BacklogCards", () => {
     const promptSpy = jest
       .spyOn(window, "prompt")
       .mockReturnValue("https://example.com/new-cover.jpg");
-    const game = makeGame({ coverImageUrl: null });
+    const item = makeItem();
 
     render(
-      <BacklogCards
-        games={[game]}
+      <CardGrid
+        items={[item]}
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
+        renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        emptyMessage="Nothing here yet."
       />
     );
 
     await user.click(screen.getByRole("button", { name: /add cover image/i }));
 
-    expect(promptSpy).toHaveBeenCalled();
     expect(onSetCoverImage).toHaveBeenCalledWith(
-      game,
+      item,
       "https://example.com/new-cover.jpg"
     );
 
     promptSpy.mockRestore();
   });
 
-  it("does not call onSetCoverImage if the prompt is cancelled", async () => {
+  it("does not call onSetCoverImage if the prompt is cancelled or blank", async () => {
     const user = userEvent.setup();
     const onSetCoverImage = jest.fn();
     const promptSpy = jest.spyOn(window, "prompt").mockReturnValue(null);
-    const game = makeGame({ coverImageUrl: null });
+    const item = makeItem();
 
     render(
-      <BacklogCards
-        games={[game]}
+      <CardGrid
+        items={[item]}
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
+        renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        emptyMessage="Nothing here yet."
       />
     );
 
@@ -117,40 +124,27 @@ describe("BacklogCards", () => {
     promptSpy.mockRestore();
   });
 
-  it("falls back to placeholder text for missing platforms and hype", () => {
-    const game = makeGame({ platforms: [], hype: null });
-    render(
-      <BacklogCards
-        games={[game]}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
-        onSetCoverImage={jest.fn()}
-      />
-    );
-
-    expect(screen.getByText("No platform set")).toBeInTheDocument();
-    expect(screen.getByText("Hype: —/10")).toBeInTheDocument();
-  });
-
   it("calls onEdit and onDelete when their buttons are clicked", async () => {
     const user = userEvent.setup();
     const onEdit = jest.fn();
     const onDelete = jest.fn();
-    const game = makeGame();
+    const item = makeItem();
 
     render(
-      <BacklogCards
-        games={[game]}
+      <CardGrid
+        items={[item]}
         onEdit={onEdit}
         onDelete={onDelete}
         onSetCoverImage={jest.fn()}
+        renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        emptyMessage="Nothing here yet."
       />
     );
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(onEdit).toHaveBeenCalledWith(game);
-    expect(onDelete).toHaveBeenCalledWith(game);
+    expect(onEdit).toHaveBeenCalledWith(item);
+    expect(onDelete).toHaveBeenCalledWith(item);
   });
 });

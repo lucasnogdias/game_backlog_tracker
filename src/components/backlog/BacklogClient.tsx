@@ -12,7 +12,7 @@ import { BacklogToolbar } from "./BacklogToolbar";
 import { BacklogTable } from "./BacklogTable";
 import { BacklogCards } from "./BacklogCards";
 import { GameFormModal } from "./GameFormModal";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 interface BacklogClientProps {
   initialGames: BacklogGameDTO[];
