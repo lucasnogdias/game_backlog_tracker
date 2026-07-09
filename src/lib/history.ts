@@ -3,7 +3,7 @@ import { getOrCreateDefaultUser } from "@/lib/current-user";
 import type { HistoryEntryDTO, HistoryEntryInput } from "@/types/history";
 import type { HistoryEntry } from "@/generated/prisma/client";
 
-function toDTO(entry: HistoryEntry): HistoryEntryDTO {
+export function historyEntryToDTO(entry: HistoryEntry): HistoryEntryDTO {
   return {
     id: entry.id,
     title: entry.title,
@@ -27,7 +27,7 @@ export async function listHistoryEntries(): Promise<HistoryEntryDTO[]> {
     // Default sort: oldest added-to-History first (UI can re-sort/toggle).
     orderBy: { createdAt: "asc" },
   });
-  return entries.map(toDTO);
+  return entries.map(historyEntryToDTO);
 }
 
 export async function createHistoryEntry(
@@ -47,7 +47,7 @@ export async function createHistoryEntry(
       coverImageUrl: input.coverImageUrl,
     },
   });
-  return toDTO(entry);
+  return historyEntryToDTO(entry);
 }
 
 export async function updateHistoryEntry(
@@ -75,9 +75,16 @@ export async function updateHistoryEntry(
       }),
     },
   });
-  return toDTO(entry);
+  return historyEntryToDTO(entry);
 }
 
 export async function deleteHistoryEntry(id: string): Promise<void> {
   await prisma.historyEntry.delete({ where: { id } });
+}
+
+export async function getHistoryEntryById(
+  id: string
+): Promise<HistoryEntryDTO | null> {
+  const entry = await prisma.historyEntry.findUnique({ where: { id } });
+  return entry ? historyEntryToDTO(entry) : null;
 }

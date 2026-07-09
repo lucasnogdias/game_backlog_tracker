@@ -136,6 +136,35 @@ describe("BacklogClient", () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
+  it("moves a game to history via the modal and removes it from the backlog", async () => {
+    const user = userEvent.setup();
+    const game = makeGame({ platforms: ["Switch"] });
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      jsonResponse({ id: "history-1" }, true)
+    );
+
+    render(<BacklogClient initialGames={[game]} />);
+
+    await user.click(screen.getByRole("button", { name: "Move to History" }));
+    expect(
+      screen.getByText(/move "hollow knight" to history/i)
+    ).toBeInTheDocument();
+
+    const moveButtons = screen.getAllByRole("button", {
+      name: "Move to History",
+    });
+    await user.click(moveButtons[moveButtons.length - 1]);
+
+    await waitFor(() => {
+      expect(screen.queryByText("Hollow Knight")).not.toBeInTheDocument();
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/backlog/1/move-to-history",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
   it("sorts games according to the selected field and direction", async () => {
     const user = userEvent.setup();
     const gameA = makeGame({ id: "1", title: "Alpha Game", hype: 3 });

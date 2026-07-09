@@ -20,6 +20,8 @@ interface DataTableProps<T extends { id: string }> {
   onEdit: (item: T) => void;
   onDelete: (item: T) => void;
   emptyMessage: string;
+  /** Optional extra row actions rendered before Edit/Delete (e.g. "Move to History"). */
+  renderExtraActions?: (item: T) => React.ReactNode;
 }
 
 export function DataTable<T extends { id: string }>({
@@ -28,6 +30,7 @@ export function DataTable<T extends { id: string }>({
   onEdit,
   onDelete,
   emptyMessage,
+  renderExtraActions,
 }: DataTableProps<T>) {
   if (items.length === 0) {
     return <p className="py-12 text-center text-neutral-500">{emptyMessage}</p>;
@@ -62,6 +65,7 @@ export function DataTable<T extends { id: string }>({
                 </td>
               ))}
               <td className="whitespace-nowrap px-4 py-2 text-right">
+                {renderExtraActions?.(item)}
                 <button
                   type="button"
                   onClick={() => onEdit(item)}

@@ -9,6 +9,7 @@ interface HistoryCardsProps {
   onEdit: (entry: HistoryEntryDTO) => void;
   onDelete: (entry: HistoryEntryDTO) => void;
   onSetCoverImage: (entry: HistoryEntryDTO, url: string) => void;
+  onMoveToBacklog: (entry: HistoryEntryDTO) => void;
 }
 
 export function HistoryCards({
@@ -16,6 +17,7 @@ export function HistoryCards({
   onEdit,
   onDelete,
   onSetCoverImage,
+  onMoveToBacklog,
 }: HistoryCardsProps) {
   return (
     <CardGrid
@@ -24,6 +26,15 @@ export function HistoryCards({
       onDelete={onDelete}
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your history yet. Add one once you start playing!"
+      renderExtraActions={(entry) => (
+        <button
+          type="button"
+          onClick={() => onMoveToBacklog(entry)}
+          className="text-neutral-600 hover:underline dark:text-neutral-300"
+        >
+          Move to Backlog
+        </button>
+      )}
       renderMeta={(entry) => (
         <>
           <p className="text-xs text-neutral-500">{entry.status}</p>

@@ -8,6 +8,7 @@ interface BacklogCardsProps {
   onEdit: (game: BacklogGameDTO) => void;
   onDelete: (game: BacklogGameDTO) => void;
   onSetCoverImage: (game: BacklogGameDTO, url: string) => void;
+  onMoveToHistory: (game: BacklogGameDTO) => void;
 }
 
 export function BacklogCards({
@@ -15,6 +16,7 @@ export function BacklogCards({
   onEdit,
   onDelete,
   onSetCoverImage,
+  onMoveToHistory,
 }: BacklogCardsProps) {
   return (
     <CardGrid
@@ -23,6 +25,15 @@ export function BacklogCards({
       onDelete={onDelete}
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your backlog yet. Add one to get started!"
+      renderExtraActions={(game) => (
+        <button
+          type="button"
+          onClick={() => onMoveToHistory(game)}
+          className="text-neutral-600 hover:underline dark:text-neutral-300"
+        >
+          Move to History
+        </button>
+      )}
       renderMeta={(game) => (
         <>
           <p className="text-xs text-neutral-500">

@@ -8,6 +8,7 @@ interface HistoryTableProps {
   entries: HistoryEntryDTO[];
   onEdit: (entry: HistoryEntryDTO) => void;
   onDelete: (entry: HistoryEntryDTO) => void;
+  onMoveToBacklog: (entry: HistoryEntryDTO) => void;
 }
 
 function formatDate(isoDate: string | null): string {
@@ -52,7 +53,12 @@ const COLUMNS: DataTableColumn<HistoryEntryDTO>[] = [
   },
 ];
 
-export function HistoryTable({ entries, onEdit, onDelete }: HistoryTableProps) {
+export function HistoryTable({
+  entries,
+  onEdit,
+  onDelete,
+  onMoveToBacklog,
+}: HistoryTableProps) {
   return (
     <DataTable
       items={entries}
@@ -60,6 +66,15 @@ export function HistoryTable({ entries, onEdit, onDelete }: HistoryTableProps) {
       onEdit={onEdit}
       onDelete={onDelete}
       emptyMessage="No games in your history yet. Add one once you start playing!"
+      renderExtraActions={(entry) => (
+        <button
+          type="button"
+          onClick={() => onMoveToBacklog(entry)}
+          className="mr-2 text-neutral-600 hover:underline dark:text-neutral-300"
+        >
+          Move to Backlog
+        </button>
+      )}
     />
   );
 }

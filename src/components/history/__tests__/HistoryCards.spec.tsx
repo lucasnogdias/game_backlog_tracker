@@ -28,6 +28,7 @@ describe("HistoryCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToBacklog={jest.fn()}
       />
     );
 
@@ -44,6 +45,7 @@ describe("HistoryCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToBacklog={jest.fn()}
       />
     );
 
@@ -60,6 +62,7 @@ describe("HistoryCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToBacklog={jest.fn()}
       />
     );
 
@@ -81,6 +84,7 @@ describe("HistoryCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
+        onMoveToBacklog={jest.fn()}
       />
     );
 
@@ -107,6 +111,7 @@ describe("HistoryCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
+        onMoveToBacklog={jest.fn()}
       />
     );
 
@@ -125,6 +130,7 @@ describe("HistoryCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToBacklog={jest.fn()}
       />
     );
 
@@ -144,6 +150,7 @@ describe("HistoryCards", () => {
         onEdit={onEdit}
         onDelete={onDelete}
         onSetCoverImage={jest.fn()}
+        onMoveToBacklog={jest.fn()}
       />
     );
 
@@ -152,5 +159,25 @@ describe("HistoryCards", () => {
 
     expect(onEdit).toHaveBeenCalledWith(entry);
     expect(onDelete).toHaveBeenCalledWith(entry);
+  });
+
+  it("calls onMoveToBacklog with the entry when Move to Backlog is clicked", async () => {
+    const user = userEvent.setup();
+    const onMoveToBacklog = jest.fn();
+    const entry = makeEntry();
+
+    render(
+      <HistoryCards
+        entries={[entry]}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onSetCoverImage={jest.fn()}
+        onMoveToBacklog={onMoveToBacklog}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Move to Backlog" }));
+
+    expect(onMoveToBacklog).toHaveBeenCalledWith(entry);
   });
 });

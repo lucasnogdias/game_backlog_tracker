@@ -18,6 +18,8 @@ interface CardGridProps<T extends CardItem> {
   /** Renders the meta lines shown below the title (e.g. platform, hype, status). */
   renderMeta: (item: T) => React.ReactNode;
   emptyMessage: string;
+  /** Optional extra actions rendered before Edit/Delete (e.g. "Move to History"). */
+  renderExtraActions?: (item: T) => React.ReactNode;
 }
 
 export function CardGrid<T extends CardItem>({
@@ -27,6 +29,7 @@ export function CardGrid<T extends CardItem>({
   onSetCoverImage,
   renderMeta,
   emptyMessage,
+  renderExtraActions,
 }: CardGridProps<T>) {
   if (items.length === 0) {
     return <p className="py-12 text-center text-neutral-500">{emptyMessage}</p>;
@@ -67,6 +70,7 @@ export function CardGrid<T extends CardItem>({
             <h3 className="text-sm font-semibold">{item.title}</h3>
             {renderMeta(item)}
             <div className="mt-auto flex justify-between pt-2 text-xs">
+              {renderExtraActions?.(item)}
               <button
                 type="button"
                 onClick={() => onEdit(item)}

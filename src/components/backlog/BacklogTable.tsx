@@ -7,6 +7,7 @@ interface BacklogTableProps {
   games: BacklogGameDTO[];
   onEdit: (game: BacklogGameDTO) => void;
   onDelete: (game: BacklogGameDTO) => void;
+  onMoveToHistory: (game: BacklogGameDTO) => void;
 }
 
 function formatReleaseDate(isoDate: string | null): string {
@@ -43,7 +44,12 @@ const COLUMNS: DataTableColumn<BacklogGameDTO>[] = [
   },
 ];
 
-export function BacklogTable({ games, onEdit, onDelete }: BacklogTableProps) {
+export function BacklogTable({
+  games,
+  onEdit,
+  onDelete,
+  onMoveToHistory,
+}: BacklogTableProps) {
   return (
     <DataTable
       items={games}
@@ -51,6 +57,15 @@ export function BacklogTable({ games, onEdit, onDelete }: BacklogTableProps) {
       onEdit={onEdit}
       onDelete={onDelete}
       emptyMessage="No games in your backlog yet. Add one to get started!"
+      renderExtraActions={(game) => (
+        <button
+          type="button"
+          onClick={() => onMoveToHistory(game)}
+          className="mr-2 text-neutral-600 hover:underline dark:text-neutral-300"
+        >
+          Move to History
+        </button>
+      )}
     />
   );
 }

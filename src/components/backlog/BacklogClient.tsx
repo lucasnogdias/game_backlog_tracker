@@ -12,7 +12,9 @@ import { BacklogToolbar } from "./BacklogToolbar";
 import { BacklogTable } from "./BacklogTable";
 import { BacklogCards } from "./BacklogCards";
 import { GameFormModal } from "./GameFormModal";
+import { MoveToHistoryModal } from "./MoveToHistoryModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import type { HistoryStatus } from "@/types/history";
 
 interface BacklogClientProps {
   initialGames: BacklogGameDTO[];
@@ -26,6 +28,7 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingGame, setEditingGame] = useState<BacklogGameDTO | null>(null);
   const [deletingGame, setDeletingGame] = useState<BacklogGameDTO | null>(null);
+  const [movingGame, setMovingGame] = useState<BacklogGameDTO | null>(null);
 
   const sortedGames = useMemo(
     () => sortBacklogGames(games, sortField, sortDirection),
@@ -69,6 +72,20 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
     await handleEdit(game.id, { coverImageUrl: url });
   }
 
+  async function handleMoveToHistory(
+    game: BacklogGameDTO,
+    input: { status: HistoryStatus; platform: string | null }
+  ) {
+    const response = await fetch(`/api/backlog/${game.id}/move-to-history`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw new Error("Failed to move game to history");
+    setGames((prev) => prev.filter((g) => g.id !== game.id));
+    setMovingGame(null);
+  }
+
   return (
     <div>
       <BacklogToolbar
@@ -88,6 +105,7 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
           games={sortedGames}
           onEdit={setEditingGame}
           onDelete={setDeletingGame}
+          onMoveToHistory={setMovingGame}
         />
       ) : (
         <BacklogCards
@@ -95,6 +113,7 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
           onEdit={setEditingGame}
           onDelete={setDeletingGame}
           onSetCoverImage={handleSetCoverImage}
+          onMoveToHistory={setMovingGame}
         />
       )}
 
@@ -118,6 +137,14 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
           message={`Remove "${deletingGame.title}" from your backlog? This cannot be undone.`}
           onConfirm={() => handleDelete(deletingGame)}
           onCancel={() => setDeletingGame(null)}
+        />
+      )}
+
+      {movingGame && (
+        <MoveToHistoryModal
+          game={movingGame}
+          onSubmit={(input) => handleMoveToHistory(movingGame, input)}
+          onClose={() => setMovingGame(null)}
         />
       )}
     </div>

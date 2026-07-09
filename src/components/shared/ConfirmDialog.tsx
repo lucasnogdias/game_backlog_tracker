@@ -4,12 +4,18 @@ interface ConfirmDialogProps {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** Defaults to "Delete" for the existing destructive-delete use case. */
+  confirmLabel?: string;
+  /** Defaults to "danger" (red button), matching the existing delete use case. */
+  variant?: "danger" | "default";
 }
 
 export function ConfirmDialog({
   message,
   onConfirm,
   onCancel,
+  confirmLabel = "Delete",
+  variant = "danger",
 }: ConfirmDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -26,9 +32,13 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded bg-red-600 px-4 py-2 text-sm text-white"
+            className={
+              variant === "danger"
+                ? "rounded bg-red-600 px-4 py-2 text-sm text-white"
+                : "rounded bg-neutral-900 px-4 py-2 text-sm text-white dark:bg-white dark:text-neutral-900"
+            }
           >
-            Delete
+            {confirmLabel}
           </button>
         </div>
       </div>
