@@ -154,8 +154,10 @@ describe("BacklogCards", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(onEdit).toHaveBeenCalledWith(game);
     expect(onDelete).toHaveBeenCalledWith(game);

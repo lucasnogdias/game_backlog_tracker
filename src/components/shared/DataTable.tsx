@@ -1,7 +1,7 @@
 "use client";
 
 // Generic list/table view shared by any feature that renders a collection of
-// items as rows with per-column rendering plus Edit/Delete row actions
+// items as rows with per-column rendering plus a fully custom actions cell
 // (currently used by the Backlog and History pages).
 
 export interface DataTableColumn<T> {
@@ -17,20 +17,16 @@ export interface DataTableColumn<T> {
 interface DataTableProps<T extends { id: string }> {
   items: T[];
   columns: DataTableColumn<T>[];
-  onEdit: (item: T) => void;
-  onDelete: (item: T) => void;
   emptyMessage: string;
-  /** Optional extra row actions rendered before Edit/Delete (e.g. "Move to History"). */
-  renderExtraActions?: (item: T) => React.ReactNode;
+  /** Renders the row's action cell content (e.g. buttons, an actions menu). */
+  renderActions: (item: T) => React.ReactNode;
 }
 
 export function DataTable<T extends { id: string }>({
   items,
   columns,
-  onEdit,
-  onDelete,
   emptyMessage,
-  renderExtraActions,
+  renderActions,
 }: DataTableProps<T>) {
   if (items.length === 0) {
     return <p className="py-12 text-center text-neutral-500">{emptyMessage}</p>;
@@ -65,21 +61,7 @@ export function DataTable<T extends { id: string }>({
                 </td>
               ))}
               <td className="whitespace-nowrap px-4 py-2 text-right">
-                {renderExtraActions?.(item)}
-                <button
-                  type="button"
-                  onClick={() => onEdit(item)}
-                  className="mr-2 text-neutral-600 hover:underline dark:text-neutral-300"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDelete(item)}
-                  className="text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
+                {renderActions(item)}
               </td>
             </tr>
           ))}

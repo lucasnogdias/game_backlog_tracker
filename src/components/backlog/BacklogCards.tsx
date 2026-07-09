@@ -2,6 +2,7 @@
 
 import type { BacklogGameDTO } from "@/types/backlog";
 import { CardGrid } from "@/components/shared/CardGrid";
+import { ActionsMenu } from "@/components/shared/ActionsMenu";
 
 interface BacklogCardsProps {
   games: BacklogGameDTO[];
@@ -21,18 +22,28 @@ export function BacklogCards({
   return (
     <CardGrid
       items={games}
-      onEdit={onEdit}
-      onDelete={onDelete}
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your backlog yet. Add one to get started!"
-      renderExtraActions={(game) => (
-        <button
-          type="button"
-          onClick={() => onMoveToHistory(game)}
-          className="text-neutral-600 hover:underline dark:text-neutral-300"
-        >
-          Move to History
-        </button>
+      renderActions={(game) => (
+        <div className="flex w-full items-center justify-between">
+          <button
+            type="button"
+            onClick={() => onMoveToHistory(game)}
+            className="text-neutral-600 hover:underline dark:text-neutral-300"
+          >
+            Move to History
+          </button>
+          <ActionsMenu
+            items={[
+              { label: "Edit", onClick: () => onEdit(game) },
+              {
+                label: "Delete",
+                onClick: () => onDelete(game),
+                destructive: true,
+              },
+            ]}
+          />
+        </div>
       )}
       renderMeta={(game) => (
         <>

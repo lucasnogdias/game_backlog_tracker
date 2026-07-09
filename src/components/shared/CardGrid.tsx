@@ -1,8 +1,8 @@
 "use client";
 
 // Generic card-grid view shared by any feature that renders a collection of
-// items as cards with cover art (or an "add cover image" placeholder) plus
-// Edit/Delete actions (currently used by the Backlog and History pages).
+// items as cards with cover art (or an "add cover image" placeholder) plus a
+// fully custom actions row (currently used by the Backlog and History pages).
 
 interface CardItem {
   id: string;
@@ -12,24 +12,20 @@ interface CardItem {
 
 interface CardGridProps<T extends CardItem> {
   items: T[];
-  onEdit: (item: T) => void;
-  onDelete: (item: T) => void;
   onSetCoverImage: (item: T, url: string) => void;
   /** Renders the meta lines shown below the title (e.g. platform, hype, status). */
   renderMeta: (item: T) => React.ReactNode;
   emptyMessage: string;
-  /** Optional extra actions rendered before Edit/Delete (e.g. "Move to History"). */
-  renderExtraActions?: (item: T) => React.ReactNode;
+  /** Renders the card's action row content (e.g. buttons, an actions menu). */
+  renderActions: (item: T) => React.ReactNode;
 }
 
 export function CardGrid<T extends CardItem>({
   items,
-  onEdit,
-  onDelete,
   onSetCoverImage,
   renderMeta,
   emptyMessage,
-  renderExtraActions,
+  renderActions,
 }: CardGridProps<T>) {
   if (items.length === 0) {
     return <p className="py-12 text-center text-neutral-500">{emptyMessage}</p>;
@@ -69,22 +65,8 @@ export function CardGrid<T extends CardItem>({
           <div className="flex flex-1 flex-col gap-1 p-3">
             <h3 className="text-sm font-semibold">{item.title}</h3>
             {renderMeta(item)}
-            <div className="mt-auto flex justify-between pt-2 text-xs">
-              {renderExtraActions?.(item)}
-              <button
-                type="button"
-                onClick={() => onEdit(item)}
-                className="text-neutral-600 hover:underline dark:text-neutral-300"
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => onDelete(item)}
-                className="text-red-600 hover:underline"
-              >
-                Delete
-              </button>
+            <div className="mt-auto flex items-center pt-2 text-xs">
+              {renderActions(item)}
             </div>
           </div>
         </div>

@@ -154,8 +154,10 @@ describe("HistoryCards", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(onEdit).toHaveBeenCalledWith(entry);
     expect(onDelete).toHaveBeenCalledWith(entry);
@@ -176,7 +178,8 @@ describe("HistoryCards", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Move to Backlog" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Move to Backlog" }));
 
     expect(onMoveToBacklog).toHaveBeenCalledWith(entry);
   });

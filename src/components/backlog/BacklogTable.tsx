@@ -2,6 +2,7 @@
 
 import type { BacklogGameDTO } from "@/types/backlog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
+import { ActionsMenu } from "@/components/shared/ActionsMenu";
 
 interface BacklogTableProps {
   games: BacklogGameDTO[];
@@ -54,17 +55,27 @@ export function BacklogTable({
     <DataTable
       items={games}
       columns={COLUMNS}
-      onEdit={onEdit}
-      onDelete={onDelete}
       emptyMessage="No games in your backlog yet. Add one to get started!"
-      renderExtraActions={(game) => (
-        <button
-          type="button"
-          onClick={() => onMoveToHistory(game)}
-          className="mr-2 text-neutral-600 hover:underline dark:text-neutral-300"
-        >
-          Move to History
-        </button>
+      renderActions={(game) => (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => onMoveToHistory(game)}
+            className="text-neutral-600 hover:underline dark:text-neutral-300"
+          >
+            Move to History
+          </button>
+          <ActionsMenu
+            items={[
+              { label: "Edit", onClick: () => onEdit(game) },
+              {
+                label: "Delete",
+                onClick: () => onDelete(game),
+                destructive: true,
+              },
+            ]}
+          />
+        </div>
       )}
     />
   );

@@ -83,7 +83,8 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
     const platformInput = screen.getByLabelText("Platform");
     await user.clear(platformInput);
     await user.type(platformInput, "PC");
@@ -106,14 +107,13 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
     expect(
       screen.getByText(/remove "hollow knight" from your history/i)
     ).toBeInTheDocument();
 
-    // Two "Delete" buttons now exist: the row action and the confirm dialog's.
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
-    await user.click(deleteButtons[deleteButtons.length - 1]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
 
     await waitFor(() => {
       expect(screen.queryByText("Hollow Knight")).not.toBeInTheDocument();
@@ -131,7 +131,8 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
@@ -147,15 +148,13 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Move to Backlog" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Move to Backlog" }));
     expect(
       screen.getByText(/move "hollow knight" back to your backlog/i)
     ).toBeInTheDocument();
 
-    const moveButtons = screen.getAllByRole("button", {
-      name: "Move to Backlog",
-    });
-    await user.click(moveButtons[moveButtons.length - 1]);
+    await user.click(screen.getByRole("button", { name: "Move to Backlog" }));
 
     await waitFor(() => {
       expect(screen.queryByText("Hollow Knight")).not.toBeInTheDocument();
@@ -173,7 +172,8 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Move to Backlog" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Move to Backlog" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();

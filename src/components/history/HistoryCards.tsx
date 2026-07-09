@@ -3,6 +3,7 @@
 import type { HistoryEntryDTO } from "@/types/history";
 import { formatPlaytime } from "@/lib/playtime";
 import { CardGrid } from "@/components/shared/CardGrid";
+import { ActionsMenu } from "@/components/shared/ActionsMenu";
 
 interface HistoryCardsProps {
   entries: HistoryEntryDTO[];
@@ -22,18 +23,22 @@ export function HistoryCards({
   return (
     <CardGrid
       items={entries}
-      onEdit={onEdit}
-      onDelete={onDelete}
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your history yet. Add one once you start playing!"
-      renderExtraActions={(entry) => (
-        <button
-          type="button"
-          onClick={() => onMoveToBacklog(entry)}
-          className="text-neutral-600 hover:underline dark:text-neutral-300"
-        >
-          Move to Backlog
-        </button>
+      renderActions={(entry) => (
+        <div className="flex w-full justify-end">
+          <ActionsMenu
+            items={[
+              { label: "Edit", onClick: () => onEdit(entry) },
+              { label: "Move to Backlog", onClick: () => onMoveToBacklog(entry) },
+              {
+                label: "Delete",
+                onClick: () => onDelete(entry),
+                destructive: true,
+              },
+            ]}
+          />
+        </div>
       )}
       renderMeta={(entry) => (
         <>

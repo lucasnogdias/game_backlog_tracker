@@ -68,7 +68,8 @@ describe("HistoryTable", () => {
       <HistoryTable entries={[entry]} onEdit={onEdit} onDelete={jest.fn()} onMoveToBacklog={jest.fn()} />
     );
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
 
     expect(onEdit).toHaveBeenCalledWith(entry);
   });
@@ -81,7 +82,8 @@ describe("HistoryTable", () => {
       <HistoryTable entries={[entry]} onEdit={jest.fn()} onDelete={onDelete} onMoveToBacklog={jest.fn()} />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(onDelete).toHaveBeenCalledWith(entry);
   });
@@ -99,7 +101,8 @@ describe("HistoryTable", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Move to Backlog" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Move to Backlog" }));
 
     expect(onMoveToBacklog).toHaveBeenCalledWith(entry);
   });

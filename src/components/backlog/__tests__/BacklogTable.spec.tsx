@@ -65,7 +65,8 @@ describe("BacklogTable", () => {
     const game = makeGame();
     render(<BacklogTable games={[game]} onEdit={onEdit} onDelete={jest.fn()} onMoveToHistory={jest.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
 
     expect(onEdit).toHaveBeenCalledWith(game);
   });
@@ -78,7 +79,8 @@ describe("BacklogTable", () => {
       <BacklogTable games={[game]} onEdit={jest.fn()} onDelete={onDelete} onMoveToHistory={jest.fn()} />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(onDelete).toHaveBeenCalledWith(game);
   });
