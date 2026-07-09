@@ -22,7 +22,7 @@ function makeGame(overrides: Partial<BacklogGameDTO> = {}): BacklogGameDTO {
 
 describe("BacklogTable", () => {
   it("renders an empty state message when there are no games", () => {
-    render(<BacklogTable games={[]} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<BacklogTable games={[]} onEdit={jest.fn()} onDelete={jest.fn()} onMoveToHistory={jest.fn()} />);
 
     expect(
       screen.getByText(/no games in your backlog yet/i)
@@ -32,7 +32,7 @@ describe("BacklogTable", () => {
   it("renders a row per game with the expected fields", () => {
     const game = makeGame();
     render(
-      <BacklogTable games={[game]} onEdit={jest.fn()} onDelete={jest.fn()} />
+      <BacklogTable games={[game]} onEdit={jest.fn()} onDelete={jest.fn()} onMoveToHistory={jest.fn()} />
     );
 
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("BacklogTable", () => {
       notes: null,
     });
     render(
-      <BacklogTable games={[game]} onEdit={jest.fn()} onDelete={jest.fn()} />
+      <BacklogTable games={[game]} onEdit={jest.fn()} onDelete={jest.fn()} onMoveToHistory={jest.fn()} />
     );
 
     // Multiple "—" placeholders are expected (owned, platform, hours, date, hype, notes)
@@ -63,9 +63,10 @@ describe("BacklogTable", () => {
     const user = userEvent.setup();
     const onEdit = jest.fn();
     const game = makeGame();
-    render(<BacklogTable games={[game]} onEdit={onEdit} onDelete={jest.fn()} />);
+    render(<BacklogTable games={[game]} onEdit={onEdit} onDelete={jest.fn()} onMoveToHistory={jest.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
 
     expect(onEdit).toHaveBeenCalledWith(game);
   });
@@ -75,11 +76,30 @@ describe("BacklogTable", () => {
     const onDelete = jest.fn();
     const game = makeGame();
     render(
-      <BacklogTable games={[game]} onEdit={jest.fn()} onDelete={onDelete} />
+      <BacklogTable games={[game]} onEdit={jest.fn()} onDelete={onDelete} onMoveToHistory={jest.fn()} />
     );
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(onDelete).toHaveBeenCalledWith(game);
+  });
+
+  it("calls onMoveToHistory with the game when Move to History is clicked", async () => {
+    const user = userEvent.setup();
+    const onMoveToHistory = jest.fn();
+    const game = makeGame();
+    render(
+      <BacklogTable
+        games={[game]}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onMoveToHistory={onMoveToHistory}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Move to History" }));
+
+    expect(onMoveToHistory).toHaveBeenCalledWith(game);
   });
 });

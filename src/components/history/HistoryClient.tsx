@@ -31,6 +31,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
   const [deletingEntry, setDeletingEntry] = useState<HistoryEntryDTO | null>(
     null
   );
+  const [movingEntry, setMovingEntry] = useState<HistoryEntryDTO | null>(null);
 
   const sortedEntries = useMemo(
     () => sortHistoryEntries(entries, sortField, sortDirection),
@@ -74,6 +75,16 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
     await handleEdit(entry.id, { coverImageUrl: url });
   }
 
+  async function handleMoveToBacklog(entry: HistoryEntryDTO) {
+    const response = await fetch(`/api/history/${entry.id}/move-to-backlog`, {
+      method: "POST",
+    });
+    if (response.ok) {
+      setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+    }
+    setMovingEntry(null);
+  }
+
   return (
     <div>
       <HistoryToolbar
@@ -93,6 +104,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
           entries={sortedEntries}
           onEdit={setEditingEntry}
           onDelete={setDeletingEntry}
+          onMoveToBacklog={setMovingEntry}
         />
       ) : (
         <HistoryCards
@@ -100,6 +112,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
           onEdit={setEditingEntry}
           onDelete={setDeletingEntry}
           onSetCoverImage={handleSetCoverImage}
+          onMoveToBacklog={setMovingEntry}
         />
       )}
 
@@ -126,6 +139,16 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
           message={`Remove "${deletingEntry.title}" from your history? This cannot be undone.`}
           onConfirm={() => handleDelete(deletingEntry)}
           onCancel={() => setDeletingEntry(null)}
+        />
+      )}
+
+      {movingEntry && (
+        <ConfirmDialog
+          message={`Move "${movingEntry.title}" back to your backlog? Status, playtime, and finished date will be lost.`}
+          confirmLabel="Move to Backlog"
+          variant="default"
+          onConfirm={() => handleMoveToBacklog(movingEntry)}
+          onCancel={() => setMovingEntry(null)}
         />
       )}
     </div>

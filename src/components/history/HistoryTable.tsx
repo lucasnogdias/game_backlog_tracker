@@ -3,11 +3,13 @@
 import type { HistoryEntryDTO } from "@/types/history";
 import { formatPlaytime } from "@/lib/playtime";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
+import { ActionsMenu } from "@/components/shared/ActionsMenu";
 
 interface HistoryTableProps {
   entries: HistoryEntryDTO[];
   onEdit: (entry: HistoryEntryDTO) => void;
   onDelete: (entry: HistoryEntryDTO) => void;
+  onMoveToBacklog: (entry: HistoryEntryDTO) => void;
 }
 
 function formatDate(isoDate: string | null): string {
@@ -52,14 +54,30 @@ const COLUMNS: DataTableColumn<HistoryEntryDTO>[] = [
   },
 ];
 
-export function HistoryTable({ entries, onEdit, onDelete }: HistoryTableProps) {
+export function HistoryTable({
+  entries,
+  onEdit,
+  onDelete,
+  onMoveToBacklog,
+}: HistoryTableProps) {
   return (
     <DataTable
       items={entries}
       columns={COLUMNS}
-      onEdit={onEdit}
-      onDelete={onDelete}
       emptyMessage="No games in your history yet. Add one once you start playing!"
+      renderActions={(entry) => (
+        <ActionsMenu
+          items={[
+            { label: "Edit", onClick: () => onEdit(entry) },
+            { label: "Move to Backlog", onClick: () => onMoveToBacklog(entry) },
+            {
+              label: "Delete",
+              onClick: () => onDelete(entry),
+              destructive: true,
+            },
+          ]}
+        />
+      )}
     />
   );
 }

@@ -83,7 +83,8 @@ describe("BacklogClient", () => {
 
     render(<BacklogClient initialGames={[game]} />);
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
     const hypeInput = screen.getByLabelText("Hype (1-10)");
     await user.clear(hypeInput);
     await user.type(hypeInput, "10");
@@ -106,12 +107,11 @@ describe("BacklogClient", () => {
 
     render(<BacklogClient initialGames={[game]} />);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
     expect(screen.getByText(/remove "hollow knight" from your backlog/i)).toBeInTheDocument();
 
-    // Two "Delete" buttons now exist: the row action and the confirm dialog's.
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
-    await user.click(deleteButtons[deleteButtons.length - 1]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
 
     await waitFor(() => {
       expect(screen.queryByText("Hollow Knight")).not.toBeInTheDocument();
@@ -129,11 +129,41 @@ describe("BacklogClient", () => {
 
     render(<BacklogClient initialGames={[game]} />);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("moves a game to history via the modal and removes it from the backlog", async () => {
+    const user = userEvent.setup();
+    const game = makeGame({ platforms: ["Switch"] });
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      jsonResponse({ id: "history-1" }, true)
+    );
+
+    render(<BacklogClient initialGames={[game]} />);
+
+    await user.click(screen.getByRole("button", { name: "Move to History" }));
+    expect(
+      screen.getByText(/move "hollow knight" to history/i)
+    ).toBeInTheDocument();
+
+    const moveButtons = screen.getAllByRole("button", {
+      name: "Move to History",
+    });
+    await user.click(moveButtons[moveButtons.length - 1]);
+
+    await waitFor(() => {
+      expect(screen.queryByText("Hollow Knight")).not.toBeInTheDocument();
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/backlog/1/move-to-history",
+      expect.objectContaining({ method: "POST" })
+    );
   });
 
   it("sorts games according to the selected field and direction", async () => {

@@ -3,7 +3,7 @@ import { getOrCreateDefaultUser } from "@/lib/current-user";
 import type { BacklogGameDTO, BacklogGameInput } from "@/types/backlog";
 import type { BacklogGame } from "@/generated/prisma/client";
 
-function toDTO(game: BacklogGame): BacklogGameDTO {
+export function backlogGameToDTO(game: BacklogGame): BacklogGameDTO {
   return {
     id: game.id,
     title: game.title,
@@ -26,7 +26,7 @@ export async function listBacklogGames(): Promise<BacklogGameDTO[]> {
     // Default sort: highest hype first; UI can re-sort client-side.
     orderBy: { hype: "desc" },
   });
-  return games.map(toDTO);
+  return games.map(backlogGameToDTO);
 }
 
 export async function createBacklogGame(
@@ -46,7 +46,7 @@ export async function createBacklogGame(
       coverImageUrl: input.coverImageUrl,
     },
   });
-  return toDTO(game);
+  return backlogGameToDTO(game);
 }
 
 export async function updateBacklogGame(
@@ -72,9 +72,16 @@ export async function updateBacklogGame(
       }),
     },
   });
-  return toDTO(game);
+  return backlogGameToDTO(game);
 }
 
 export async function deleteBacklogGame(id: string): Promise<void> {
   await prisma.backlogGame.delete({ where: { id } });
+}
+
+export async function getBacklogGameById(
+  id: string
+): Promise<BacklogGameDTO | null> {
+  const game = await prisma.backlogGame.findUnique({ where: { id } });
+  return game ? backlogGameToDTO(game) : null;
 }

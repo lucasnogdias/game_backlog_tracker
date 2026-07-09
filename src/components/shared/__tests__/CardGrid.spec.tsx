@@ -24,10 +24,9 @@ describe("CardGrid", () => {
     render(
       <CardGrid
         items={[]}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
         renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        renderActions={() => null}
         emptyMessage="Nothing here yet."
       />
     );
@@ -40,10 +39,9 @@ describe("CardGrid", () => {
     render(
       <CardGrid
         items={[item]}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
         renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        renderActions={() => null}
         emptyMessage="Nothing here yet."
       />
     );
@@ -59,10 +57,9 @@ describe("CardGrid", () => {
     render(
       <CardGrid
         items={[item]}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
         renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        renderActions={() => null}
         emptyMessage="Nothing here yet."
       />
     );
@@ -82,10 +79,9 @@ describe("CardGrid", () => {
     render(
       <CardGrid
         items={[item]}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
         renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        renderActions={() => null}
         emptyMessage="Nothing here yet."
       />
     );
@@ -109,10 +105,9 @@ describe("CardGrid", () => {
     render(
       <CardGrid
         items={[item]}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
         renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        renderActions={() => null}
         emptyMessage="Nothing here yet."
       />
     );
@@ -124,27 +119,27 @@ describe("CardGrid", () => {
     promptSpy.mockRestore();
   });
 
-  it("calls onEdit and onDelete when their buttons are clicked", async () => {
+  it("renders whatever renderActions returns for each item", async () => {
     const user = userEvent.setup();
-    const onEdit = jest.fn();
-    const onDelete = jest.fn();
+    const onAction = jest.fn();
     const item = makeItem();
 
     render(
       <CardGrid
         items={[item]}
-        onEdit={onEdit}
-        onDelete={onDelete}
         onSetCoverImage={jest.fn()}
         renderMeta={(i: Item) => <p>{i.subtitle}</p>}
+        renderActions={(i) => (
+          <button type="button" onClick={() => onAction(i)}>
+            Custom Action
+          </button>
+        )}
         emptyMessage="Nothing here yet."
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Custom Action" }));
 
-    expect(onEdit).toHaveBeenCalledWith(item);
-    expect(onDelete).toHaveBeenCalledWith(item);
+    expect(onAction).toHaveBeenCalledWith(item);
   });
 });

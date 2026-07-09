@@ -28,9 +28,8 @@ describe("DataTable", () => {
       <DataTable
         items={[]}
         columns={columns}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         emptyMessage="Nothing here yet."
+        renderActions={() => null}
       />
     );
 
@@ -43,9 +42,8 @@ describe("DataTable", () => {
       <DataTable
         items={[item]}
         columns={columns}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         emptyMessage="Nothing here yet."
+        renderActions={() => null}
       />
     );
 
@@ -61,9 +59,8 @@ describe("DataTable", () => {
       <DataTable
         items={[item]}
         columns={columns}
-        onEdit={jest.fn()}
-        onDelete={jest.fn()}
         emptyMessage="Nothing here yet."
+        renderActions={() => null}
       />
     );
 
@@ -73,26 +70,26 @@ describe("DataTable", () => {
     );
   });
 
-  it("calls onEdit and onDelete with the item when the row actions are clicked", async () => {
+  it("renders whatever renderActions returns for each item", async () => {
     const user = userEvent.setup();
-    const onEdit = jest.fn();
-    const onDelete = jest.fn();
+    const onAction = jest.fn();
     const item = makeItem();
 
     render(
       <DataTable
         items={[item]}
         columns={columns}
-        onEdit={onEdit}
-        onDelete={onDelete}
         emptyMessage="Nothing here yet."
+        renderActions={(i) => (
+          <button type="button" onClick={() => onAction(i)}>
+            Custom Action
+          </button>
+        )}
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Custom Action" }));
 
-    expect(onEdit).toHaveBeenCalledWith(item);
-    expect(onDelete).toHaveBeenCalledWith(item);
+    expect(onAction).toHaveBeenCalledWith(item);
   });
 });

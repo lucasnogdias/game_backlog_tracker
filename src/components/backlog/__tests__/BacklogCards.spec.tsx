@@ -28,6 +28,7 @@ describe("BacklogCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToHistory={jest.fn()}
       />
     );
 
@@ -44,6 +45,7 @@ describe("BacklogCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToHistory={jest.fn()}
       />
     );
 
@@ -60,6 +62,7 @@ describe("BacklogCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToHistory={jest.fn()}
       />
     );
 
@@ -81,6 +84,7 @@ describe("BacklogCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
+        onMoveToHistory={jest.fn()}
       />
     );
 
@@ -107,6 +111,7 @@ describe("BacklogCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={onSetCoverImage}
+        onMoveToHistory={jest.fn()}
       />
     );
 
@@ -125,6 +130,7 @@ describe("BacklogCards", () => {
         onEdit={jest.fn()}
         onDelete={jest.fn()}
         onSetCoverImage={jest.fn()}
+        onMoveToHistory={jest.fn()}
       />
     );
 
@@ -144,13 +150,36 @@ describe("BacklogCards", () => {
         onEdit={onEdit}
         onDelete={onDelete}
         onSetCoverImage={jest.fn()}
+        onMoveToHistory={jest.fn()}
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(onEdit).toHaveBeenCalledWith(game);
     expect(onDelete).toHaveBeenCalledWith(game);
+  });
+
+  it("calls onMoveToHistory with the game when Move to History is clicked", async () => {
+    const user = userEvent.setup();
+    const onMoveToHistory = jest.fn();
+    const game = makeGame();
+
+    render(
+      <BacklogCards
+        games={[game]}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onSetCoverImage={jest.fn()}
+        onMoveToHistory={onMoveToHistory}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Move to History" }));
+
+    expect(onMoveToHistory).toHaveBeenCalledWith(game);
   });
 });

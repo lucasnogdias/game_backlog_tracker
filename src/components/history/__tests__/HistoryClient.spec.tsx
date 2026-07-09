@@ -83,7 +83,8 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
     const platformInput = screen.getByLabelText("Platform");
     await user.clear(platformInput);
     await user.type(platformInput, "PC");
@@ -106,14 +107,13 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
     expect(
       screen.getByText(/remove "hollow knight" from your history/i)
     ).toBeInTheDocument();
 
-    // Two "Delete" buttons now exist: the row action and the confirm dialog's.
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
-    await user.click(deleteButtons[deleteButtons.length - 1]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
 
     await waitFor(() => {
       expect(screen.queryByText("Hollow Knight")).not.toBeInTheDocument();
@@ -131,7 +131,49 @@ describe("HistoryClient", () => {
 
     render(<HistoryClient initialEntries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("moves an entry back to the backlog after confirming, and removes it from the list", async () => {
+    const user = userEvent.setup();
+    const entry = makeEntry();
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      jsonResponse({ id: "backlog-1" }, true)
+    );
+
+    render(<HistoryClient initialEntries={[entry]} />);
+
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Move to Backlog" }));
+    expect(
+      screen.getByText(/move "hollow knight" back to your backlog/i)
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Move to Backlog" }));
+
+    await waitFor(() => {
+      expect(screen.queryByText("Hollow Knight")).not.toBeInTheDocument();
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/history/1/move-to-backlog",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
+  it("does not move the entry if the confirmation is cancelled", async () => {
+    const user = userEvent.setup();
+    const entry = makeEntry();
+
+    render(<HistoryClient initialEntries={[entry]} />);
+
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Move to Backlog" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
