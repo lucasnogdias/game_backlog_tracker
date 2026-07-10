@@ -3,6 +3,8 @@
 import { useState, FormEvent } from "react";
 import type { BacklogGameDTO } from "@/types/backlog";
 import { HISTORY_STATUSES, type HistoryStatus } from "@/types/history";
+import styles from "./MoveToHistoryModal.module.css";
+import shared from "@/styles/shared.module.css";
 
 interface MoveToHistoryModalProps {
   game: BacklogGameDTO;
@@ -47,16 +49,16 @@ export function MoveToHistoryModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-neutral-900">
-        <h2 className="mb-4 text-lg font-semibold">
+    <div className={shared.overlay}>
+      <div className={`${shared.dialog} ${styles.dialog}`}>
+        <h2 className={shared.dialogTitle}>
           Move &quot;{game.title}&quot; to History
         </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-sm">
+        <form onSubmit={handleSubmit} className={shared.form}>
+          <label className={shared.fieldGroup}>
             Status
             <select
-              className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+              className={shared.select}
               value={status}
               onChange={(e) => setStatus(e.target.value as HistoryStatus)}
               autoFocus
@@ -70,10 +72,10 @@ export function MoveToHistoryModal({
           </label>
 
           {needsPlatformChoice && (
-            <label className="flex flex-col gap-1 text-sm">
+            <label className={shared.fieldGroup}>
               Platform
               <select
-                className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+                className={shared.select}
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
               >
@@ -87,20 +89,16 @@ export function MoveToHistoryModal({
             </label>
           )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className={shared.errorText}>{error}</p>}
 
-          <div className="mt-2 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded px-4 py-2 text-sm"
-            >
+          <div className={shared.actionsRow}>
+            <button type="button" onClick={onClose} className={shared.button}>
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
+              className={`${shared.button} ${shared.buttonPrimary}`}
             >
               {isSubmitting ? "Moving..." : "Move to History"}
             </button>

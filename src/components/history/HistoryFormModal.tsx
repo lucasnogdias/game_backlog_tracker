@@ -4,6 +4,8 @@ import { useState, FormEvent } from "react";
 import type { HistoryEntryDTO, HistoryEntryInput } from "@/types/history";
 import { HISTORY_STATUSES } from "@/types/history";
 import { parsePlaytime, formatPlaytime } from "@/lib/playtime";
+import styles from "./HistoryFormModal.module.css";
+import shared from "@/styles/shared.module.css";
 
 interface HistoryFormModalProps {
   initialEntry?: HistoryEntryDTO;
@@ -83,26 +85,26 @@ export function HistoryFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-neutral-900">
-        <h2 className="mb-4 text-lg font-semibold">
+    <div className={shared.overlay}>
+      <div className={`${shared.dialog} ${styles.dialog}`}>
+        <h2 className={shared.dialogTitle}>
           {initialEntry ? "Edit Entry" : "Add Entry"}
         </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-sm">
+        <form onSubmit={handleSubmit} className={shared.form}>
+          <label className={shared.fieldGroup}>
             Title
             <input
-              className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+              className={shared.textInput}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               autoFocus
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm">
+          <label className={shared.fieldGroup}>
             Status
             <select
-              className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+              className={shared.select}
               value={status}
               onChange={(e) =>
                 setStatus(e.target.value as (typeof HISTORY_STATUSES)[number])
@@ -116,83 +118,79 @@ export function HistoryFormModal({
             </select>
           </label>
 
-          <div className="grid grid-cols-2 gap-4">
-            <label className="flex flex-col gap-1 text-sm">
+          <div className={shared.fieldRow}>
+            <label className={shared.fieldGroup}>
               Playtime (HH:mm)
               <input
-                className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+                className={shared.textInput}
                 value={playtime}
                 placeholder="e.g. 45:30"
                 onChange={(e) => setPlaytime(e.target.value)}
               />
             </label>
-            <label className="flex flex-col gap-1 text-sm">
+            <label className={shared.fieldGroup}>
               Finished On
               <input
                 type="date"
-                className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+                className={shared.textInput}
                 value={finishedOn}
                 onChange={(e) => setFinishedOn(e.target.value)}
               />
             </label>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <label className="flex flex-col gap-1 text-sm">
+          <div className={shared.fieldRow}>
+            <label className={shared.fieldGroup}>
               Platform
               <input
-                className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+                className={shared.textInput}
                 value={platform}
                 placeholder="e.g. Switch"
                 onChange={(e) => setPlatform(e.target.value)}
               />
             </label>
-            <label className="flex flex-col gap-1 text-sm">
+            <label className={shared.fieldGroup}>
               Release Date
               <input
                 type="month"
-                className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+                className={shared.textInput}
                 value={releaseDate}
                 onChange={(e) => setReleaseDate(e.target.value)}
               />
             </label>
           </div>
 
-          <label className="flex flex-col gap-1 text-sm">
+          <label className={shared.fieldGroup}>
             Cover Image URL
             <input
               type="url"
-              className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+              className={shared.textInput}
               value={coverImageUrl}
               placeholder="https://..."
               onChange={(e) => setCoverImageUrl(e.target.value)}
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm">
+          <label className={shared.fieldGroup}>
             Notes / Review
             <textarea
-              className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+              className={shared.textarea}
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
           </label>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className={shared.errorText}>{error}</p>}
 
-          <div className="mt-2 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded px-4 py-2 text-sm"
-            >
+          <div className={shared.actionsRow}>
+            <button type="button" onClick={onClose} className={shared.button}>
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
+              className={`${shared.button} ${shared.buttonPrimary}`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>

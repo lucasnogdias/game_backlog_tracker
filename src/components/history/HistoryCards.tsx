@@ -4,6 +4,8 @@ import type { HistoryEntryDTO } from "@/types/history";
 import { formatPlaytime } from "@/lib/playtime";
 import { CardGrid } from "@/components/shared/CardGrid";
 import { ActionsMenu } from "@/components/shared/ActionsMenu";
+import styles from "./HistoryCards.module.css";
+import shared from "@/styles/shared.module.css";
 
 interface HistoryCardsProps {
   entries: HistoryEntryDTO[];
@@ -26,7 +28,7 @@ export function HistoryCards({
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your history yet. Add one once you start playing!"
       renderActions={(entry) => (
-        <div className="flex w-full justify-end">
+        <div className={styles.cardActionsRow}>
           <ActionsMenu
             items={[
               { label: "Edit", onClick: () => onEdit(entry) },
@@ -42,11 +44,11 @@ export function HistoryCards({
       )}
       renderMeta={(entry) => (
         <>
-          <p className="text-xs text-neutral-500">{entry.status}</p>
-          <p className="text-xs text-neutral-500">
+          <p className={shared.metaText}>{entry.status}</p>
+          <p className={shared.metaText}>
             {entry.platform ?? "No platform set"}
           </p>
-          <p className="text-xs text-neutral-500">
+          <p className={shared.metaText}>
             Playtime: {formatPlaytime(entry.playtimeMinutes) || "—"}
           </p>
         </>

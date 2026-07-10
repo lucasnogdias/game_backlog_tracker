@@ -4,12 +4,14 @@
 // items as rows with per-column rendering plus a fully custom actions cell
 // (currently used by the Backlog and History pages).
 
+import styles from "./DataTable.module.css";
+
 export interface DataTableColumn<T> {
   header: string;
   /** Renders the cell content for a given item. */
   render: (item: T) => React.ReactNode;
-  /** Defaults to "px-4 py-2" if not provided. */
-  className?: string;
+  /** Defaults to "default" if not provided. */
+  variant?: "default" | "emphasis" | "truncate";
   /** Optional `title` attribute for the cell, e.g. for truncated text. */
   cellTitle?: (item: T) => string | undefined;
 }
@@ -22,6 +24,12 @@ interface DataTableProps<T extends { id: string }> {
   renderActions: (item: T) => React.ReactNode;
 }
 
+function cellClassName(variant: DataTableColumn<unknown>["variant"]): string {
+  if (variant === "emphasis") return `${styles.cell} ${styles.cellEmphasis}`;
+  if (variant === "truncate") return `${styles.cell} ${styles.cellTruncate}`;
+  return styles.cell;
+}
+
 export function DataTable<T extends { id: string }>({
   items,
   columns,
@@ -29,40 +37,35 @@ export function DataTable<T extends { id: string }>({
   renderActions,
 }: DataTableProps<T>) {
   if (items.length === 0) {
-    return <p className="py-12 text-center text-neutral-500">{emptyMessage}</p>;
+    return <p className={styles.emptyMessage}>{emptyMessage}</p>;
   }
 
   return (
-    <div className="overflow-x-auto rounded border border-neutral-200 dark:border-neutral-800">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-neutral-100 dark:bg-neutral-800">
+    <div className={styles.wrapper}>
+      <table className={styles.table}>
+        <thead className={styles.headerRow}>
           <tr>
             {columns.map((column) => (
-              <th key={column.header} className="px-4 py-2">
+              <th key={column.header} className={styles.headerCell}>
                 {column.header}
               </th>
             ))}
-            <th className="px-4 py-2"></th>
+            <th className={styles.headerCell}></th>
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr
-              key={item.id}
-              className="border-t border-neutral-200 dark:border-neutral-800"
-            >
+            <tr key={item.id} className={styles.row}>
               {columns.map((column) => (
                 <td
                   key={column.header}
-                  className={column.className ?? "px-4 py-2"}
+                  className={cellClassName(column.variant)}
                   title={column.cellTitle?.(item)}
                 >
                   {column.render(item)}
                 </td>
               ))}
-              <td className="whitespace-nowrap px-4 py-2 text-right">
-                {renderActions(item)}
-              </td>
+              <td className={styles.actionsCell}>{renderActions(item)}</td>
             </tr>
           ))}
         </tbody>

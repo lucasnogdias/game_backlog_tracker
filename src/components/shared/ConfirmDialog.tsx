@@ -1,5 +1,8 @@
 "use client";
 
+import styles from "./ConfirmDialog.module.css";
+import shared from "@/styles/shared.module.css";
+
 interface ConfirmDialogProps {
   message: string;
   onConfirm: () => void;
@@ -18,24 +21,20 @@ export function ConfirmDialog({
   variant = "danger",
 }: ConfirmDialogProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl dark:bg-neutral-900">
-        <p className="mb-4 text-sm">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded px-4 py-2 text-sm"
-          >
+    <div className={shared.overlay}>
+      <div className={`${shared.dialog} ${styles.dialog}`}>
+        <p className={styles.message}>{message}</p>
+        <div className={shared.actionsRow}>
+          <button type="button" onClick={onCancel} className={shared.button}>
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className={
-              variant === "danger"
-                ? "rounded bg-red-600 px-4 py-2 text-sm text-white"
-                : "rounded bg-neutral-900 px-4 py-2 text-sm text-white dark:bg-white dark:text-neutral-900"
+              `${shared.button} ${
+                variant === "danger" ? shared.buttonDanger : shared.buttonPrimary
+              }`
             }
           >
             {confirmLabel}

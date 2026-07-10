@@ -1,0 +1,49 @@
+.dialog {
+  max-width: 32rem; /* max-w-lg */
+}
+
+.platformPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.platformPill {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  background: var(--color-surface-subtle);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.removePlatformButton {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+
+.removePlatformButton:hover {
+  color: var(--color-text);
+}
+
+.platformInputRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.platformInput {
+  flex: 1 1 auto;
+}
+
+.addPlatformButton {
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border-strong);
+  background: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: inherit;
+}

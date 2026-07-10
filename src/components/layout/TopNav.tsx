@@ -1,14 +1,15 @@
 import Link from "next/link";
+import styles from "./TopNav.module.css";
 
 export function TopNav() {
   return (
-    <nav className="border-b border-neutral-200 px-6 py-3 dark:border-neutral-800">
-      <div className="mx-auto flex max-w-6xl items-center gap-6">
-        <span className="font-bold">Game Backlog Tracker</span>
-        <Link href="/backlog" className="text-sm hover:underline">
+    <nav className={styles.nav}>
+      <div className={styles.inner}>
+        <span className={styles.brand}>Game Backlog Tracker</span>
+        <Link href="/backlog" className={styles.link}>
           Backlog
         </Link>
-        <Link href="/history" className="text-sm hover:underline">
+        <Link href="/history" className={styles.link}>
           History
         </Link>
       </div>

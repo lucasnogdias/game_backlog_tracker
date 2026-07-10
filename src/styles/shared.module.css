@@ -1,0 +1,109 @@
+/**
+ * Reusable style primitives shared across feature components (mainly the
+ * modal/form pattern repeated by ConfirmDialog, GameFormModal,
+ * HistoryFormModal and MoveToHistoryModal). Components apply these classes
+ * alongside their own CSS Module classes when they need specific additions.
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-overlay);
+  padding: 1rem;
+}
+
+.dialog {
+  width: 100%;
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+}
+
+.dialogTitle {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.textInput,
+.select,
+.textarea {
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  padding: 0.5rem 0.75rem;
+}
+
+.errorText {
+  font-size: 0.875rem;
+  color: var(--color-danger);
+}
+
+.actionsRow {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.button {
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: inherit;
+}
+
+.buttonPrimary {
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+}
+
+.buttonPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonDanger {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.metaText {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}

@@ -1,0 +1,8 @@
+.dialog {
+  max-width: 24rem; /* max-w-sm */
+}
+
+.message {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+}

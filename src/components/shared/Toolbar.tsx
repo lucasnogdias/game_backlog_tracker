@@ -4,6 +4,8 @@
 // direction toggle, a list/card view switch, and an "add" button (currently
 // used by the Backlog and History pages).
 
+import styles from "./Toolbar.module.css";
+
 export interface SortOption<TField extends string> {
   value: TField;
   label: string;
@@ -34,13 +36,11 @@ export function Toolbar<TField extends string>({
   addButtonLabel = "+ Add Game",
 }: ToolbarProps<TField>) {
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <label className="text-sm text-neutral-600 dark:text-neutral-400">
-          Sort by
-        </label>
+    <div className={styles.toolbar}>
+      <div className={styles.sortGroup}>
+        <label className={styles.sortLabel}>Sort by</label>
         <select
-          className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+          className={styles.select}
           value={sortField}
           onChange={(e) => onSortChange(e.target.value as TField, sortDirection)}
         >
@@ -55,43 +55,39 @@ export function Toolbar<TField extends string>({
           onClick={() =>
             onSortChange(sortField, sortDirection === "asc" ? "desc" : "asc")
           }
-          className="rounded border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700"
+          className={styles.directionButton}
           aria-label="Toggle sort direction"
         >
           {directionLabel(sortDirection)}
         </button>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="flex overflow-hidden rounded border border-neutral-300 dark:border-neutral-700">
+      <div className={styles.viewGroup}>
+        <div className={styles.viewToggle}>
           <button
             type="button"
             onClick={() => onViewChange("list")}
-            className={`px-3 py-1 text-sm ${
+            className={
               view === "list"
-                ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
-                : ""
-            }`}
+                ? `${styles.viewButton} ${styles.viewButtonActive}`
+                : styles.viewButton
+            }
           >
             List
           </button>
           <button
             type="button"
             onClick={() => onViewChange("card")}
-            className={`px-3 py-1 text-sm ${
+            className={
               view === "card"
-                ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
-                : ""
-            }`}
+                ? `${styles.viewButton} ${styles.viewButtonActive}`
+                : styles.viewButton
+            }
           >
             Card
           </button>
         </div>
-        <button
-          type="button"
-          onClick={onAddClick}
-          className="rounded bg-neutral-900 px-4 py-1.5 text-sm text-white dark:bg-white dark:text-neutral-900"
-        >
+        <button type="button" onClick={onAddClick} className={styles.addButton}>
           {addButtonLabel}
         </button>
       </div>
