@@ -1,0 +1,45 @@
+.trigger {
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--color-text-subtle);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.trigger:hover {
+  background: var(--color-surface-hover);
+}
+
+.menu {
+  position: fixed;
+  z-index: 50;
+  width: 10rem; /* keep in sync with MENU_WIDTH_PX in ActionsMenu.tsx */
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  color: var(--color-text-subtle);
+}
+
+.menuItem:hover {
+  background: var(--color-surface-hover);
+}
+
+.menuItemDestructive {
+  color: var(--color-danger);
+}

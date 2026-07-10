@@ -29,7 +29,7 @@ function formatReleaseYear(isoDate: string | null): string {
 const COLUMNS: DataTableColumn<HistoryEntryDTO>[] = [
   {
     header: "Game",
-    className: "px-4 py-2 font-medium",
+    variant: "emphasis",
     render: (entry) => entry.title,
   },
   { header: "Status", render: (entry) => entry.status },
@@ -48,7 +48,7 @@ const COLUMNS: DataTableColumn<HistoryEntryDTO>[] = [
   },
   {
     header: "Notes / Review",
-    className: "max-w-xs truncate px-4 py-2 text-neutral-500",
+    variant: "truncate",
     cellTitle: (entry) => entry.notes ?? undefined,
     render: (entry) => entry.notes ?? "—",
   },

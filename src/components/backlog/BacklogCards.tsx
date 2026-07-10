@@ -3,6 +3,8 @@
 import type { BacklogGameDTO } from "@/types/backlog";
 import { CardGrid } from "@/components/shared/CardGrid";
 import { ActionsMenu } from "@/components/shared/ActionsMenu";
+import styles from "./BacklogCards.module.css";
+import shared from "@/styles/shared.module.css";
 
 interface BacklogCardsProps {
   games: BacklogGameDTO[];
@@ -25,11 +27,11 @@ export function BacklogCards({
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your backlog yet. Add one to get started!"
       renderActions={(game) => (
-        <div className="flex w-full items-center justify-between">
+        <div className={styles.cardActionsRow}>
           <button
             type="button"
             onClick={() => onMoveToHistory(game)}
-            className="text-neutral-600 hover:underline dark:text-neutral-300"
+            className={styles.moveLink}
           >
             Move to History
           </button>
@@ -47,10 +49,10 @@ export function BacklogCards({
       )}
       renderMeta={(game) => (
         <>
-          <p className="text-xs text-neutral-500">
+          <p className={shared.metaText}>
             {game.platforms.join(", ") || "No platform set"}
           </p>
-          <p className="text-xs text-neutral-500">Hype: {game.hype ?? "—"}/10</p>
+          <p className={shared.metaText}>Hype: {game.hype ?? "—"}/10</p>
         </>
       )}
     />

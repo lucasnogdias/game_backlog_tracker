@@ -9,10 +9,10 @@ interface Item {
 }
 
 const columns: DataTableColumn<Item>[] = [
-  { header: "Name", className: "px-4 py-2 font-medium", render: (i) => i.name },
+  { header: "Name", variant: "emphasis", render: (i) => i.name },
   {
     header: "Notes",
-    className: "max-w-xs truncate px-4 py-2 text-neutral-500",
+    variant: "truncate",
     cellTitle: (i) => i.notes ?? undefined,
     render: (i) => i.notes ?? "—",
   },

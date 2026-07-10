@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import styles from "./ActionsMenu.module.css";
 
 export interface ActionsMenuItem {
   label: string;
@@ -79,7 +80,7 @@ export function ActionsMenu({ items }: ActionsMenuProps) {
         aria-label="Actions"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className="rounded px-2 py-1 text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+        className={styles.trigger}
       >
         &#8942;
       </button>
@@ -91,7 +92,7 @@ export function ActionsMenu({ items }: ActionsMenuProps) {
             ref={menuRef}
             role="menu"
             style={{ top: position.top, left: position.left }}
-            className="fixed z-50 w-40 rounded border border-neutral-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+            className={styles.menu}
           >
             {items.map((item) => (
               <button
@@ -103,8 +104,9 @@ export function ActionsMenu({ items }: ActionsMenuProps) {
                   item.onClick();
                 }}
                 className={
-                  "block w-full px-3 py-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-800 " +
-                  (item.destructive ? "text-red-600" : "text-neutral-700 dark:text-neutral-200")
+                  item.destructive
+                    ? `${styles.menuItem} ${styles.menuItemDestructive}`
+                    : styles.menuItem
                 }
               >
                 {item.label}

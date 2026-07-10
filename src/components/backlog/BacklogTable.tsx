@@ -3,6 +3,7 @@
 import type { BacklogGameDTO } from "@/types/backlog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { ActionsMenu } from "@/components/shared/ActionsMenu";
+import styles from "./BacklogTable.module.css";
 
 interface BacklogTableProps {
   games: BacklogGameDTO[];
@@ -20,7 +21,7 @@ function formatReleaseDate(isoDate: string | null): string {
 const COLUMNS: DataTableColumn<BacklogGameDTO>[] = [
   {
     header: "Game",
-    className: "px-4 py-2 font-medium",
+    variant: "emphasis",
     render: (game) => game.title,
   },
   { header: "Owned", render: (game) => (game.owned ? "✅" : "—") },
@@ -39,7 +40,7 @@ const COLUMNS: DataTableColumn<BacklogGameDTO>[] = [
   { header: "Hype", render: (game) => game.hype ?? "—" },
   {
     header: "Notes",
-    className: "max-w-xs truncate px-4 py-2 text-neutral-500",
+    variant: "truncate",
     cellTitle: (game) => game.notes ?? undefined,
     render: (game) => game.notes ?? "—",
   },
@@ -57,11 +58,11 @@ export function BacklogTable({
       columns={COLUMNS}
       emptyMessage="No games in your backlog yet. Add one to get started!"
       renderActions={(game) => (
-        <div className="flex items-center justify-end gap-2">
+        <div className={styles.actionsRow}>
           <button
             type="button"
             onClick={() => onMoveToHistory(game)}
-            className="text-neutral-600 hover:underline dark:text-neutral-300"
+            className={styles.moveLink}
           >
             Move to History
           </button>

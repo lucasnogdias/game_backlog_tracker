@@ -15,7 +15,7 @@ Originally based on a personal spreadsheet, reimagined as a polished local app.
 
 ## Tech Stack
 
-- **Frontend**: React + Next.js + Tailwind CSS
+- **Frontend**: React + Next.js + CSS Modules
 - **Desktop shell**: Electron (runs locally, no hosting required)
 - **Backend**: Next.js API routes acting as a lightweight BFF
 - **Database**: SQLite via Prisma

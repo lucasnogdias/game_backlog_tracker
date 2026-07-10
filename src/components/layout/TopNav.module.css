@@ -1,0 +1,26 @@
+.nav {
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem 1.5rem;
+}
+
+.inner {
+  margin: 0 auto;
+  display: flex;
+  max-width: 72rem; /* max-w-6xl */
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.brand {
+  font-weight: 700;
+}
+
+.link {
+  font-size: 0.875rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
