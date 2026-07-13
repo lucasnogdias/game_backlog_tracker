@@ -2,8 +2,11 @@
 
 import { useState, FormEvent } from "react";
 import type { BacklogGameDTO, BacklogGameInput } from "@/types/backlog";
+import type { GameLookupResult } from "@/types/game-lookup";
 import styles from "./GameFormModal.module.css";
 import shared from "@/styles/shared.module.css";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { GameLookupModal } from "@/components/shared/GameLookupModal";
 
 interface GameFormModalProps {
   initialGame?: BacklogGameDTO;
@@ -40,6 +43,9 @@ export function GameFormModal({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [pendingLookupResult, setPendingLookupResult] =
+    useState<GameLookupResult | null>(null);
 
   function addPlatform() {
     const trimmed = platformDraft.trim();
@@ -51,6 +57,44 @@ export function GameFormModal({
 
   function removePlatform(platform: string) {
     setPlatforms(platforms.filter((p) => p !== platform));
+  }
+
+  function applyLookupResult(result: GameLookupResult) {
+    if (result.estimatedHours !== null) {
+      setEstimatedHours(result.estimatedHours.toString());
+    }
+    if (result.releaseDate) {
+      setReleaseDate(result.releaseDate.slice(0, 7));
+    }
+    setPendingLookupResult(null);
+    setIsLookingUp(false);
+  }
+
+  function handleLookupSelect(result: GameLookupResult) {
+    const overwritesEstimatedHours =
+      result.estimatedHours !== null && estimatedHours !== "";
+    const overwritesReleaseDate = result.releaseDate !== null && releaseDate !== "";
+
+    if (overwritesEstimatedHours || overwritesReleaseDate) {
+      setPendingLookupResult(result);
+      setIsLookingUp(false);
+      return;
+    }
+
+    applyLookupResult(result);
+  }
+
+  function lookupOverwriteMessage(result: GameLookupResult): string {
+    const fields = [
+      result.estimatedHours !== null && estimatedHours !== ""
+        ? "estimated hours"
+        : null,
+      result.releaseDate !== null && releaseDate !== "" ? "release date" : null,
+    ].filter(Boolean);
+
+    return `Applying "${result.title}" will replace the existing ${fields.join(
+      " and "
+    )}. Continue?`;
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -89,12 +133,22 @@ export function GameFormModal({
         <form onSubmit={handleSubmit} className={shared.form}>
           <label className={shared.fieldGroup}>
             Title
-            <input
-              className={shared.textInput}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              autoFocus
-            />
+            <div className={styles.titleInputRow}>
+              <input
+                className={`${shared.textInput} ${styles.titleInput}`}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setIsLookingUp(true)}
+                className={styles.lookupButton}
+                disabled={!title.trim()}
+              >
+                Find details
+              </button>
+            </div>
           </label>
 
           <label className={shared.checkboxLabel}>
@@ -218,6 +272,24 @@ export function GameFormModal({
           </div>
         </form>
       </div>
+
+      {isLookingUp && (
+        <GameLookupModal
+          initialQuery={title}
+          onSelect={handleLookupSelect}
+          onClose={() => setIsLookingUp(false)}
+        />
+      )}
+
+      {pendingLookupResult && (
+        <ConfirmDialog
+          message={lookupOverwriteMessage(pendingLookupResult)}
+          confirmLabel="Apply details"
+          variant="default"
+          onConfirm={() => applyLookupResult(pendingLookupResult)}
+          onCancel={() => setPendingLookupResult(null)}
+        />
+      )}
     </div>
   );
 }

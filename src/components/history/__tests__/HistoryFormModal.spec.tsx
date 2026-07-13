@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HistoryFormModal } from "../HistoryFormModal";
 import type { HistoryEntryDTO } from "@/types/history";
+import type { GameLookupResult } from "@/types/game-lookup";
 
 function makeEntry(overrides: Partial<HistoryEntryDTO> = {}): HistoryEntryDTO {
   return {
@@ -21,6 +22,14 @@ function makeEntry(overrides: Partial<HistoryEntryDTO> = {}): HistoryEntryDTO {
 }
 
 describe("HistoryFormModal", () => {
+  beforeEach(() => {
+    global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("renders the 'Add Entry' heading and empty fields when no initialEntry is given", () => {
     render(<HistoryFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);
 
@@ -171,5 +180,63 @@ describe("HistoryFormModal", () => {
     expect(
       await screen.findByText(/something went wrong saving this entry/i)
     ).toBeInTheDocument();
+  });
+
+  it("fills an empty release date from a selected lookup result", async () => {
+    const user = userEvent.setup();
+    const lookupResult: GameLookupResult = {
+      id: 9767,
+      title: "Hollow Knight",
+      releaseDate: "2017-02-23",
+      estimatedHours: 7,
+    };
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([lookupResult]),
+      } as Response)
+    );
+
+    render(<HistoryFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);
+
+    await user.type(screen.getByLabelText("Title"), "Hollow Knight");
+    await user.click(screen.getByRole("button", { name: "Find details" }));
+    await user.click(screen.getByRole("button", { name: /hollow knight/i }));
+
+    expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
+  });
+
+  it("asks before replacing an existing release date from a lookup result", async () => {
+    const user = userEvent.setup();
+    const lookupResult: GameLookupResult = {
+      id: 9767,
+      title: "Hollow Knight",
+      releaseDate: "2017-02-23",
+      estimatedHours: 7,
+    };
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([lookupResult]),
+      } as Response)
+    );
+
+    render(
+      <HistoryFormModal
+        initialEntry={makeEntry()}
+        onSubmit={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Find details" }));
+    await user.click(screen.getByRole("button", { name: /hollow knight/i }));
+
+    expect(
+      screen.getByText(/will replace the existing release date/i)
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Apply details" }));
+
+    expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
   });
 });

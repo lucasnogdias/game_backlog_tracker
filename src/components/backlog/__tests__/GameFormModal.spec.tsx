@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { GameFormModal } from "../GameFormModal";
 import type { BacklogGameDTO } from "@/types/backlog";
+import type { GameLookupResult } from "@/types/game-lookup";
 
 function makeGame(overrides: Partial<BacklogGameDTO> = {}): BacklogGameDTO {
   return {
@@ -21,6 +22,14 @@ function makeGame(overrides: Partial<BacklogGameDTO> = {}): BacklogGameDTO {
 }
 
 describe("GameFormModal", () => {
+  beforeEach(() => {
+    global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("renders the 'Add Game' heading and empty fields when no initialGame is given", () => {
     render(<GameFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);
 
@@ -113,5 +122,69 @@ describe("GameFormModal", () => {
     expect(
       await screen.findByText(/something went wrong saving this game/i)
     ).toBeInTheDocument();
+  });
+
+  it("fills empty release date and estimated hours from a selected lookup result", async () => {
+    const user = userEvent.setup();
+    const lookupResult: GameLookupResult = {
+      id: 9767,
+      title: "Hollow Knight",
+      releaseDate: "2017-02-23",
+      estimatedHours: 7,
+    };
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([lookupResult]),
+      } as Response)
+    );
+
+    render(<GameFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);
+
+    await user.type(screen.getByLabelText("Title"), "Hollow Knight");
+    await user.click(screen.getByRole("button", { name: "Find details" }));
+    await user.click(screen.getByRole("button", { name: /hollow knight/i }));
+
+    expect(screen.getByLabelText("Est. Hours")).toHaveValue(7);
+    expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
+  });
+
+  it("asks before replacing lookup fields that already have values", async () => {
+    const user = userEvent.setup();
+    const lookupResult: GameLookupResult = {
+      id: 9767,
+      title: "Hollow Knight",
+      releaseDate: "2017-02-23",
+      estimatedHours: 7,
+    };
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([lookupResult]),
+      } as Response)
+    );
+
+    render(
+      <GameFormModal
+        initialGame={makeGame()}
+        onSubmit={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Find details" }));
+    await user.click(screen.getByRole("button", { name: /hollow knight/i }));
+
+    expect(
+      screen.getByText(
+        /will replace the existing estimated hours and release date/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Est. Hours")).toHaveValue(30);
+
+    await user.click(screen.getByRole("button", { name: "Apply details" }));
+
+    expect(screen.getByLabelText("Est. Hours")).toHaveValue(7);
+    expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
   });
 });
