@@ -2,10 +2,13 @@
 
 import { useState, FormEvent } from "react";
 import type { HistoryEntryDTO, HistoryEntryInput } from "@/types/history";
+import type { GameLookupResult } from "@/types/game-lookup";
 import { HISTORY_STATUSES } from "@/types/history";
 import { parsePlaytime, formatPlaytime } from "@/lib/playtime";
 import styles from "./HistoryFormModal.module.css";
 import shared from "@/styles/shared.module.css";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { GameLookupModal } from "@/components/shared/GameLookupModal";
 
 interface HistoryFormModalProps {
   initialEntry?: HistoryEntryDTO;
@@ -48,6 +51,27 @@ export function HistoryFormModal({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [pendingLookupResult, setPendingLookupResult] =
+    useState<GameLookupResult | null>(null);
+
+  function applyLookupResult(result: GameLookupResult) {
+    if (result.releaseDate) {
+      setReleaseDate(result.releaseDate.slice(0, 7));
+    }
+    setPendingLookupResult(null);
+    setIsLookingUp(false);
+  }
+
+  function handleLookupSelect(result: GameLookupResult) {
+    if (result.releaseDate && releaseDate !== "") {
+      setPendingLookupResult(result);
+      setIsLookingUp(false);
+      return;
+    }
+
+    applyLookupResult(result);
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -93,12 +117,22 @@ export function HistoryFormModal({
         <form onSubmit={handleSubmit} className={shared.form}>
           <label className={shared.fieldGroup}>
             Title
-            <input
-              className={shared.textInput}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              autoFocus
-            />
+            <div className={styles.titleInputRow}>
+              <input
+                className={`${shared.textInput} ${styles.titleInput}`}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setIsLookingUp(true)}
+                className={styles.lookupButton}
+                disabled={!title.trim()}
+              >
+                Find details
+              </button>
+            </div>
           </label>
 
           <label className={shared.fieldGroup}>
@@ -197,6 +231,25 @@ export function HistoryFormModal({
           </div>
         </form>
       </div>
+
+      {isLookingUp && (
+        <GameLookupModal
+          initialQuery={title}
+          onSelect={handleLookupSelect}
+          onClose={() => setIsLookingUp(false)}
+          showEstimatedHours={false}
+        />
+      )}
+
+      {pendingLookupResult && (
+        <ConfirmDialog
+          message={`Applying "${pendingLookupResult.title}" will replace the existing release date. Continue?`}
+          confirmLabel="Apply details"
+          variant="default"
+          onConfirm={() => applyLookupResult(pendingLookupResult)}
+          onCancel={() => setPendingLookupResult(null)}
+        />
+      )}
     </div>
   );
 }
