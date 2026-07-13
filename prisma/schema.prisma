@@ -69,5 +69,18 @@ model HistoryEntry {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  journalEntries JournalEntry[]
+
   @@index([userId])
+}
+
+/// An immutable note recorded while playing a game in History.
+model JournalEntry {
+  id             String       @id @default(cuid())
+  historyEntryId String
+  historyEntry   HistoryEntry @relation(fields: [historyEntryId], references: [id], onDelete: Cascade)
+  content        String
+  createdAt      DateTime     @default(now())
+
+  @@index([historyEntryId, createdAt])
 }

@@ -10,6 +10,8 @@ import shared from "@/styles/shared.module.css";
 interface HistoryCardsProps {
   entries: HistoryEntryDTO[];
   onEdit: (entry: HistoryEntryDTO) => void;
+  onAddJournalEntry?: (entry: HistoryEntryDTO) => void;
+  onViewJournal?: (entry: HistoryEntryDTO) => void;
   onDelete: (entry: HistoryEntryDTO) => void;
   onSetCoverImage: (entry: HistoryEntryDTO, url: string) => void;
   onMoveToBacklog: (entry: HistoryEntryDTO) => void;
@@ -18,6 +20,8 @@ interface HistoryCardsProps {
 export function HistoryCards({
   entries,
   onEdit,
+  onAddJournalEntry,
+  onViewJournal,
   onDelete,
   onSetCoverImage,
   onMoveToBacklog,
@@ -29,9 +33,21 @@ export function HistoryCards({
       emptyMessage="No games in your history yet. Add one once you start playing!"
       renderActions={(entry) => (
         <div className={styles.cardActionsRow}>
+          {onAddJournalEntry && (
+            <button
+              type="button"
+              onClick={() => onAddJournalEntry(entry)}
+              className={styles.journalButton}
+            >
+              Add Journal Entry
+            </button>
+          )}
           <ActionsMenu
             items={[
               { label: "Edit", onClick: () => onEdit(entry) },
+              ...(onViewJournal
+                ? [{ label: "View Journal", onClick: () => onViewJournal(entry) }]
+                : []),
               { label: "Move to Backlog", onClick: () => onMoveToBacklog(entry) },
               {
                 label: "Delete",

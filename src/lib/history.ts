@@ -85,6 +85,9 @@ export async function deleteHistoryEntry(id: string): Promise<void> {
 export async function getHistoryEntryById(
   id: string
 ): Promise<HistoryEntryDTO | null> {
-  const entry = await prisma.historyEntry.findUnique({ where: { id } });
+  const user = await getOrCreateDefaultUser();
+  const entry = await prisma.historyEntry.findFirst({
+    where: { id, userId: user.id },
+  });
   return entry ? historyEntryToDTO(entry) : null;
 }

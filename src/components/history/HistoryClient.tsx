@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type {
   HistoryEntryDTO,
   HistoryEntryInput,
@@ -13,12 +14,14 @@ import { HistoryTable } from "./HistoryTable";
 import { HistoryCards } from "./HistoryCards";
 import { HistoryFormModal } from "./HistoryFormModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { JournalEntryModal } from "./JournalEntryModal";
 
 interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];
 }
 
 export function HistoryClient({ initialEntries }: HistoryClientProps) {
+  const router = useRouter();
   const [entries, setEntries] = useState(initialEntries);
   const [view, setView] = useState<"list" | "card">("list");
   const [sortField, setSortField] = useState<HistorySortField>("addedAt");
@@ -32,6 +35,8 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
     null
   );
   const [movingEntry, setMovingEntry] = useState<HistoryEntryDTO | null>(null);
+  const [addingJournalEntry, setAddingJournalEntry] =
+    useState<HistoryEntryDTO | null>(null);
 
   const sortedEntries = useMemo(
     () => sortHistoryEntries(entries, sortField, sortDirection),
@@ -85,6 +90,16 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
     setMovingEntry(null);
   }
 
+  async function handleAddJournalEntry(entry: HistoryEntryDTO, content: string) {
+    const response = await fetch(`/api/history/${entry.id}/journal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    if (!response.ok) throw new Error("Failed to add journal entry");
+    setAddingJournalEntry(null);
+  }
+
   return (
     <div>
       <HistoryToolbar
@@ -103,6 +118,8 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
         <HistoryTable
           entries={sortedEntries}
           onEdit={setEditingEntry}
+          onAddJournalEntry={setAddingJournalEntry}
+          onViewJournal={(entry) => router.push(`/history/${entry.id}/journal`)}
           onDelete={setDeletingEntry}
           onMoveToBacklog={setMovingEntry}
         />
@@ -110,6 +127,8 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
         <HistoryCards
           entries={sortedEntries}
           onEdit={setEditingEntry}
+          onAddJournalEntry={setAddingJournalEntry}
+          onViewJournal={(entry) => router.push(`/history/${entry.id}/journal`)}
           onDelete={setDeletingEntry}
           onSetCoverImage={handleSetCoverImage}
           onMoveToBacklog={setMovingEntry}
@@ -149,6 +168,14 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
           variant="default"
           onConfirm={() => handleMoveToBacklog(movingEntry)}
           onCancel={() => setMovingEntry(null)}
+        />
+      )}
+
+      {addingJournalEntry && (
+        <JournalEntryModal
+          gameTitle={addingJournalEntry.title}
+          onSubmit={(content) => handleAddJournalEntry(addingJournalEntry, content)}
+          onClose={() => setAddingJournalEntry(null)}
         />
       )}
     </div>

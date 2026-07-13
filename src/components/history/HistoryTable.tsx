@@ -4,10 +4,13 @@ import type { HistoryEntryDTO } from "@/types/history";
 import { formatPlaytime } from "@/lib/playtime";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { ActionsMenu } from "@/components/shared/ActionsMenu";
+import styles from "./HistoryTable.module.css";
 
 interface HistoryTableProps {
   entries: HistoryEntryDTO[];
   onEdit: (entry: HistoryEntryDTO) => void;
+  onAddJournalEntry?: (entry: HistoryEntryDTO) => void;
+  onViewJournal?: (entry: HistoryEntryDTO) => void;
   onDelete: (entry: HistoryEntryDTO) => void;
   onMoveToBacklog: (entry: HistoryEntryDTO) => void;
 }
@@ -57,6 +60,8 @@ const COLUMNS: DataTableColumn<HistoryEntryDTO>[] = [
 export function HistoryTable({
   entries,
   onEdit,
+  onAddJournalEntry,
+  onViewJournal,
   onDelete,
   onMoveToBacklog,
 }: HistoryTableProps) {
@@ -66,17 +71,31 @@ export function HistoryTable({
       columns={COLUMNS}
       emptyMessage="No games in your history yet. Add one once you start playing!"
       renderActions={(entry) => (
-        <ActionsMenu
-          items={[
-            { label: "Edit", onClick: () => onEdit(entry) },
-            { label: "Move to Backlog", onClick: () => onMoveToBacklog(entry) },
-            {
-              label: "Delete",
-              onClick: () => onDelete(entry),
-              destructive: true,
-            },
-          ]}
-        />
+        <div className={styles.actionsRow}>
+          {onAddJournalEntry && (
+            <button
+              type="button"
+              onClick={() => onAddJournalEntry(entry)}
+              className={styles.journalButton}
+            >
+              Add Journal Entry
+            </button>
+          )}
+          <ActionsMenu
+            items={[
+              { label: "Edit", onClick: () => onEdit(entry) },
+              ...(onViewJournal
+                ? [{ label: "View Journal", onClick: () => onViewJournal(entry) }]
+                : []),
+              { label: "Move to Backlog", onClick: () => onMoveToBacklog(entry) },
+              {
+                label: "Delete",
+                onClick: () => onDelete(entry),
+                destructive: true,
+              },
+            ]}
+          />
+        </div>
       )}
     />
   );
