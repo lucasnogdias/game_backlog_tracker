@@ -2,6 +2,7 @@
 
 import type { HistoryEntryDTO } from "@/types/history";
 import { formatPlaytime } from "@/lib/playtime";
+import { formatDate } from "@/lib/format-date";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { ActionsMenu } from "@/components/shared/ActionsMenu";
 import styles from "./HistoryTable.module.css";
@@ -13,15 +14,6 @@ interface HistoryTableProps {
   onViewJournal?: (entry: HistoryEntryDTO) => void;
   onDelete: (entry: HistoryEntryDTO) => void;
   onMoveToBacklog: (entry: HistoryEntryDTO) => void;
-}
-
-function formatDate(isoDate: string | null): string {
-  if (!isoDate) return "—";
-  return new Date(isoDate).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 function formatReleaseYear(isoDate: string | null): string {
@@ -42,7 +34,7 @@ const COLUMNS: DataTableColumn<HistoryEntryDTO>[] = [
   },
   {
     header: "Finished On",
-    render: (entry) => formatDate(entry.finishedOn),
+    render: (entry) => (entry.finishedOn ? formatDate(entry.finishedOn) : "—"),
   },
   { header: "Platform", render: (entry) => entry.platform ?? "—" },
   {
