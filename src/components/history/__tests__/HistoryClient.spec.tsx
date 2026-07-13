@@ -1,5 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+const mockPush = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 import { HistoryClient } from "../HistoryClient";
 import type { HistoryEntryDTO } from "@/types/history";
 
@@ -34,6 +40,7 @@ describe("HistoryClient", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    mockPush.mockReset();
   });
 
   it("renders the initial entries in list view by default", () => {
@@ -96,6 +103,44 @@ describe("HistoryClient", () => {
         expect.objectContaining({ method: "PATCH" })
       );
     });
+  });
+
+  it("adds a journal entry from the visible row action", async () => {
+    const user = userEvent.setup();
+    const entry = makeEntry();
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      jsonResponse({
+        id: "journal-1",
+        historyEntryId: entry.id,
+        content: "Reached Greenpath.",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      })
+    );
+
+    render(<HistoryClient initialEntries={[entry]} />);
+
+    await user.click(screen.getByRole("button", { name: "Add Journal Entry" }));
+    await user.type(screen.getByLabelText("Journal Entry"), "Reached Greenpath.");
+    await user.click(screen.getByRole("button", { name: "Save Entry" }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/history/1/journal",
+        expect.objectContaining({ method: "POST" })
+      );
+    });
+  });
+
+  it("navigates to the game journal from the actions menu", async () => {
+    const user = userEvent.setup();
+    const entry = makeEntry();
+
+    render(<HistoryClient initialEntries={[entry]} />);
+
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "View Journal" }));
+
+    expect(mockPush).toHaveBeenCalledWith("/history/1/journal");
   });
 
   it("deletes an entry after confirming, and removes it from the list", async () => {

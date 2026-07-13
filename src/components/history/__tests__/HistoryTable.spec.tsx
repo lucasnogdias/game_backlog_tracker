@@ -74,6 +74,29 @@ describe("HistoryTable", () => {
     expect(onEdit).toHaveBeenCalledWith(entry);
   });
 
+  it("renders Add Journal Entry as a visible action and calls its callback", async () => {
+    const user = userEvent.setup();
+    const onAddJournalEntry = jest.fn();
+    const entry = makeEntry();
+    render(
+      <HistoryTable
+        entries={[entry]}
+        onEdit={jest.fn()}
+        onAddJournalEntry={onAddJournalEntry}
+        onDelete={jest.fn()}
+        onMoveToBacklog={jest.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add Journal Entry" }));
+
+    expect(onAddJournalEntry).toHaveBeenCalledWith(entry);
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    expect(
+      screen.queryByRole("menuitem", { name: "Add Journal Entry" })
+    ).not.toBeInTheDocument();
+  });
+
   it("calls onDelete with the entry when Delete is clicked", async () => {
     const user = userEvent.setup();
     const onDelete = jest.fn();

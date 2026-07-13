@@ -138,9 +138,11 @@ describe("HistoryCards", () => {
     expect(screen.getByText("Playtime: —")).toBeInTheDocument();
   });
 
-  it("calls onEdit and onDelete when their buttons are clicked", async () => {
+  it("calls its visible and menu action callbacks with the entry", async () => {
     const user = userEvent.setup();
     const onEdit = jest.fn();
+    const onAddJournalEntry = jest.fn();
+    const onViewJournal = jest.fn();
     const onDelete = jest.fn();
     const entry = makeEntry();
 
@@ -148,6 +150,8 @@ describe("HistoryCards", () => {
       <HistoryCards
         entries={[entry]}
         onEdit={onEdit}
+        onAddJournalEntry={onAddJournalEntry}
+        onViewJournal={onViewJournal}
         onDelete={onDelete}
         onSetCoverImage={jest.fn()}
         onMoveToBacklog={jest.fn()}
@@ -156,10 +160,15 @@ describe("HistoryCards", () => {
 
     await user.click(screen.getByRole("button", { name: "Actions" }));
     await user.click(screen.getByRole("menuitem", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Add Journal Entry" }));
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "View Journal" }));
     await user.click(screen.getByRole("button", { name: "Actions" }));
     await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(onEdit).toHaveBeenCalledWith(entry);
+    expect(onAddJournalEntry).toHaveBeenCalledWith(entry);
+    expect(onViewJournal).toHaveBeenCalledWith(entry);
     expect(onDelete).toHaveBeenCalledWith(entry);
   });
 
