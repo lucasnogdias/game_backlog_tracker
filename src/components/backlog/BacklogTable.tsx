@@ -3,6 +3,7 @@
 import type { BacklogGameDTO } from "@/types/backlog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { ActionsMenu } from "@/components/shared/ActionsMenu";
+import { formatMonthYear } from "@/lib/format-date";
 import styles from "./BacklogTable.module.css";
 
 interface BacklogTableProps {
@@ -14,8 +15,7 @@ interface BacklogTableProps {
 
 function formatReleaseDate(isoDate: string | null): string {
   if (!isoDate) return "—";
-  const date = new Date(isoDate);
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  return formatMonthYear(isoDate);
 }
 
 const COLUMNS: DataTableColumn<BacklogGameDTO>[] = [

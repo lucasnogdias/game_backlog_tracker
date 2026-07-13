@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { GameLookupResult } from "@/types/game-lookup";
+import { formatDate } from "@/lib/format-date";
 import styles from "./GameLookupModal.module.css";
 import shared from "@/styles/shared.module.css";
 
@@ -14,11 +15,7 @@ interface GameLookupModalProps {
 
 function formatReleaseDate(releaseDate: string | null): string {
   if (!releaseDate) return "Release date unavailable";
-  return new Date(`${releaseDate}T00:00:00`).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatDate(`${releaseDate}T00:00:00Z`);
 }
 
 export function GameLookupModal({

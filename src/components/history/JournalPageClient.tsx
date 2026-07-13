@@ -4,22 +4,13 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { HistoryEntryDTO } from "@/types/history";
 import type { JournalEntryDTO } from "@/types/journal";
+import { formatDateTime } from "@/lib/format-date";
 import { JournalEntryModal } from "./JournalEntryModal";
 import styles from "./JournalPageClient.module.css";
 
 interface JournalPageClientProps {
   historyEntry: HistoryEntryDTO;
   initialEntries: JournalEntryDTO[];
-}
-
-function formatEntryDate(isoDate: string): string {
-  return new Date(isoDate).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
 }
 
 export function JournalPageClient({
@@ -88,7 +79,7 @@ export function JournalPageClient({
         <div className={styles.entries}>
           {sortedEntries.map((entry) => (
             <article key={entry.id} className={styles.entry}>
-              <p className={styles.entryDate}>{formatEntryDate(entry.createdAt)}</p>
+              <p className={styles.entryDate}>{formatDateTime(entry.createdAt)}</p>
               <p className={styles.entryContent}>{entry.content}</p>
             </article>
           ))}
