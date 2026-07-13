@@ -62,6 +62,7 @@
   border-radius: 0.25rem;
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface);
+  color: var(--color-text);
   padding: 0.5rem 0.75rem;
 }
 
