@@ -12,6 +12,9 @@ export function TopNav() {
         <Link href="/history" className={styles.link}>
           History
         </Link>
+        <Link href="/data" className={styles.link}>
+          Data
+        </Link>
       </div>
     </nav>
   );

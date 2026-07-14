@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { TopNav } from "../TopNav";
 
 describe("TopNav", () => {
-  it("renders the app title and links to Backlog and History", () => {
+  it("renders the app title and primary navigation links", () => {
     render(<TopNav />);
 
     expect(screen.getByText("Game Backlog Tracker")).toBeInTheDocument();
@@ -12,5 +12,8 @@ describe("TopNav", () => {
 
     const historyLink = screen.getByRole("link", { name: "History" });
     expect(historyLink).toHaveAttribute("href", "/history");
+
+    const dataLink = screen.getByRole("link", { name: "Data" });
+    expect(dataLink).toHaveAttribute("href", "/data");
   });
 });
