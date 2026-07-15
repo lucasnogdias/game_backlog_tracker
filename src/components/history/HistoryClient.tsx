@@ -15,6 +15,7 @@ import { HistoryCards } from "./HistoryCards";
 import { HistoryFormModal } from "./HistoryFormModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { JournalEntryModal } from "./JournalEntryModal";
+import { PlaytimeSummary } from "./PlaytimeSummary";
 
 interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];
@@ -113,6 +114,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
         }}
         onAddClick={() => setIsAdding(true)}
       />
+      <PlaytimeSummary entries={entries} />
 
       {view === "list" ? (
         <HistoryTable
