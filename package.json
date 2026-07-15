@@ -1,6 +1,6 @@
 {
   "name": "game-backlog-tracker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local-first desktop app for tracking game backlog and history.",
   "author": "lucasnogdias",
   "private": true,
@@ -104,6 +104,9 @@
       "target": [
         "dmg"
       ]
+    },
+    "linux": {
+      "maintainer": "lucasnogdias"
     }
   }
 }
