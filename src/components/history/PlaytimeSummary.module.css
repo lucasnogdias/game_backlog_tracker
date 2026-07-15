@@ -1,0 +1,87 @@
+.summary {
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  padding: 1rem;
+}
+
+.heading {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.total {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.accordionSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  list-style: none;
+  cursor: pointer;
+}
+
+.accordionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.accordionSummary::after {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--color-text-subtle);
+  border-bottom: 2px solid var(--color-text-subtle);
+  content: "";
+  margin-left: auto;
+  transform: rotate(45deg);
+}
+
+.accordion[open] .accordionSummary::after {
+  transform: rotate(225deg);
+}
+
+.controls {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.button {
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0.25rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+}
+
+.buttonActive {
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+}
+
+.dateLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.dateInput {
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0.25rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0.5rem;
+}
+
+.rangeNote {
+  margin: 0.75rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
