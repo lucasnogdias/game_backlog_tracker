@@ -42,9 +42,15 @@ function repairSymlinks(root, sourceRoot, directory = root) {
       ? target
       : path.join(root, path.relative(sourceRoot, target));
     fs.unlinkSync(entryPath);
+    const isDirectory = fs.statSync(packagedTarget).isDirectory();
+    const linkTarget =
+      process.platform === "win32" && isDirectory
+        ? packagedTarget
+        : path.relative(path.dirname(entryPath), packagedTarget);
     fs.symlinkSync(
-      path.relative(path.dirname(entryPath), packagedTarget),
-      entryPath
+      linkTarget,
+      entryPath,
+      isDirectory ? (process.platform === "win32" ? "junction" : "dir") : "file"
     );
   }
 }
