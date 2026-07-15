@@ -78,6 +78,26 @@ describe("GameLookupModal", () => {
     expect(await screen.findByText("RAWG lookup failed.")).toBeInTheDocument();
   });
 
+  it("guides users to Settings when no RAWG API key is configured", async () => {
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      jsonResponse({ error: "RAWG API key is not configured." }, false)
+    );
+
+    render(
+      <GameLookupModal
+        initialQuery="Hollow Knight"
+        onSelect={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      await screen.findByText(
+        "Game lookup is not configured. Add a RAWG API key in Settings."
+      )
+    ).toBeInTheDocument();
+  });
+
   it("validates an empty manual search and can be cancelled", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

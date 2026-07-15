@@ -15,6 +15,9 @@ export function TopNav() {
         <Link href="/data" className={styles.link}>
           Data
         </Link>
+        <Link href="/settings" className={styles.link}>
+          Settings
+        </Link>
       </div>
     </nav>
   );
