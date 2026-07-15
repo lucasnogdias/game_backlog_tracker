@@ -109,5 +109,6 @@ jobs:
           VERSION: ${{ needs.validate-version.outputs.version }}
         run: |
           gh release create "$RELEASE_TAG" release-assets/* \
+            --repo "$GITHUB_REPOSITORY" \
             --title "Game Backlog Tracker $VERSION" \
             --generate-notes
