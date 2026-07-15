@@ -1,6 +1,6 @@
 const { spawnSync } = require("child_process");
 
-const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const pnpm = "pnpm";
 const builderArgs = process.argv.slice(2);
 
 if (builderArgs[0] === "--") {
@@ -8,7 +8,10 @@ if (builderArgs[0] === "--") {
 }
 
 function run(args) {
-  const result = spawnSync(pnpm, args, { stdio: "inherit" });
+  const result = spawnSync(pnpm, args, {
+    shell: process.platform === "win32",
+    stdio: "inherit",
+  });
 
   if (result.error) {
     throw result.error;
@@ -26,7 +29,7 @@ try {
   run(["electron:clean"]);
   run(["build"]);
   run(["electron:prepare"]);
-  run(["exec", "electron-builder", ...builderArgs]);
+  run(["exec", "electron-builder", ...builderArgs, "--publish", "never"]);
 } catch (error) {
   packagingError = error;
 }

@@ -70,7 +70,7 @@ git push origin v0.2.0
 ```
 
 The release workflow validates that the tag and package version match, then builds public keyless
-installers for macOS (arm64 and x64), Windows (x64), and Linux (AppImage and `.deb`). It publishes
+installers for macOS (Apple Silicon), Windows (x64), and Linux (AppImage and `.deb`). It publishes
 those artifacts and generated release notes to a GitHub Release.
 
 Before tagging, verify the packaged app on the platforms available to you:
