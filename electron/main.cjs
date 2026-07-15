@@ -18,6 +18,10 @@ function databasePath() {
   return path.join(app.getPath("userData"), "game-backlog-tracker.db");
 }
 
+function backupsPath() {
+  return path.join(app.getPath("userData"), "backups");
+}
+
 function rawgKeyPath() {
   return path.join(app.getPath("userData"), "rawg-api-key.bin");
 }
@@ -75,12 +79,23 @@ function runElectronNode(scriptPath, args) {
           .filter(Boolean)
           .join(path.delimiter),
       },
-      stdio: "inherit",
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+    let errorOutput = "";
+    child.stderr.on("data", (data) => {
+      errorOutput += data.toString();
     });
     child.once("error", reject);
     child.once("exit", (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`Desktop setup exited with code ${code}.`));
+      else {
+        reject(
+          new Error(
+            errorOutput.trim() ||
+              `Desktop database setup exited with code ${code}.`
+          )
+        );
+      }
     });
   });
 }
@@ -90,6 +105,7 @@ async function initializePackagedDatabase() {
   await runElectronNode(packagedResourcePath("desktop", "database.cjs"), [
     databasePath(),
     packagedResourcePath("prisma", "migrations"),
+    backupsPath(),
   ]);
 }
 
@@ -259,7 +275,7 @@ if (!hasSingleInstanceLock) {
     } catch (error) {
       await dialog.showMessageBox({
         type: "error",
-        title: "Game Backlog Tracker could not start",
+        title: "Game Backlog Tracker could not update its data",
         message: error instanceof Error ? error.message : "Unknown startup error.",
       });
       app.quit();

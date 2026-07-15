@@ -45,6 +45,16 @@ Private builds intentionally contain the key and must not be published to GitHub
 For local desktop development, run `pnpm dev` in one terminal and `pnpm electron:dev` in
 another.
 
+## Desktop updates and recovery
+
+Packaged updates preserve the SQLite database in the operating-system application-data directory.
+When an update contains a database migration, the app creates a `pre-migration-*.db` snapshot in
+its `backups` directory before changing the schema. If migration fails, the app restores that
+snapshot automatically and shows its location in the startup error message.
+
+Use the **Data** page for portable ZIP/CSV backups. The migration snapshots are database recovery
+files for this device, not portable imports.
+
 ## Status
 
 🚧 Active development. Desktop update safety and release automation are still in progress.
