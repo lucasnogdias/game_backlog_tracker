@@ -18,8 +18,16 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "coverage/**",
+      "dist/**",
+      ".electron-build/**",
       "next-env.d.ts",
     ],
+  },
+  {
+    files: ["electron/**/*.cjs", "scripts/**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
   },
 ];
 

@@ -27,6 +27,7 @@ describe("HistoryFormModal", () => {
   });
 
   afterEach(() => {
+    delete window.desktopSettings;
     jest.restoreAllMocks();
   });
 
@@ -238,5 +239,27 @@ describe("HistoryFormModal", () => {
     await user.click(screen.getByRole("button", { name: "Apply details" }));
 
     expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
+  });
+
+  it("disables lookup and links to Settings when the packaged app has no key", async () => {
+    Object.defineProperty(window, "desktopSettings", {
+      configurable: true,
+      value: {
+        getGameLookupStatus: jest.fn().mockResolvedValue({
+          canConfigure: true,
+          configured: false,
+        }),
+      },
+    });
+
+    render(<HistoryFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);
+
+    expect(
+      await screen.findByText("Game lookup is unavailable.")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Find details" })).toBeDisabled();
+    expect(
+      screen.getByRole("link", { name: "Configure it in Settings." })
+    ).toHaveAttribute("href", "/settings");
   });
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, FormEvent } from "react";
 import type { BacklogGameDTO, BacklogGameInput } from "@/types/backlog";
 import type { GameLookupResult } from "@/types/game-lookup";
@@ -7,6 +8,7 @@ import styles from "./GameFormModal.module.css";
 import shared from "@/styles/shared.module.css";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { GameLookupModal } from "@/components/shared/GameLookupModal";
+import { useGameLookupAvailability } from "@/components/shared/useGameLookupAvailability";
 
 interface GameFormModalProps {
   initialGame?: BacklogGameDTO;
@@ -46,6 +48,7 @@ export function GameFormModal({
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [pendingLookupResult, setPendingLookupResult] =
     useState<GameLookupResult | null>(null);
+  const gameLookup = useGameLookupAvailability();
 
   function addPlatform() {
     const trimmed = platformDraft.trim();
@@ -144,11 +147,27 @@ export function GameFormModal({
                 type="button"
                 onClick={() => setIsLookingUp(true)}
                 className={styles.lookupButton}
-                disabled={!title.trim()}
+                disabled={!title.trim() || !gameLookup.available}
+                title={
+                  gameLookup.available
+                    ? undefined
+                    : "Unavailable until a RAWG API key is configured."
+                }
               >
                 Find details
               </button>
             </div>
+            {!gameLookup.available && (
+              <span className={styles.lookupUnavailable}>
+                Game lookup is unavailable.
+                {gameLookup.canConfigure && (
+                  <>
+                    {" "}
+                    <Link href="/settings">Configure it in Settings.</Link>
+                  </>
+                )}
+              </span>
+            )}
           </label>
 
           <label className={shared.checkboxLabel}>

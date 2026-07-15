@@ -1,11 +1,19 @@
 {
   "name": "game-backlog-tracker",
   "version": "0.1.0",
+  "description": "A local-first desktop app for tracking game backlog and history.",
+  "author": "lucasnogdias",
   "private": true,
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
+    "electron:dev": "electron electron/main.cjs",
+    "electron:prepare": "node scripts/prepare-electron.cjs",
+    "electron:rebuild": "electron-rebuild -f -w better-sqlite3",
+    "electron:build": "pnpm electron:rebuild && rm -rf .next .electron-build && pnpm build && pnpm electron:prepare && electron-builder --mac dmg && pnpm rebuild better-sqlite3 && pnpm install --frozen-lockfile",
+    "electron:build:private": "INCLUDE_RAWG_KEY=true pnpm electron:build",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
@@ -23,6 +31,7 @@
     "react-dom": "19.1.0"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
     "@eslint/eslintrc": "^3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -33,11 +42,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.20",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "prisma": "^7.8.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   },
   "pnpm": {
@@ -47,5 +59,46 @@
       "prisma",
       "better-sqlite3"
     ]
+  },
+  "build": {
+    "appId": "com.lucasnogdias.gamebacklogtracker",
+    "productName": "Game Backlog Tracker",
+    "asar": true,
+    "npmRebuild": false,
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**"
+    ],
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "next"
+      },
+      {
+        "from": ".electron-build/server-modules",
+        "to": "server-modules"
+      },
+      {
+        "from": ".electron-build/desktop",
+        "to": "desktop"
+      },
+      {
+        "from": ".electron-build/default-settings.json",
+        "to": "default-settings.json"
+      },
+      {
+        "from": "prisma/migrations",
+        "to": "prisma/migrations"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "target": [
+        "dmg"
+      ]
+    }
   }
 }

@@ -8,11 +8,13 @@ out/
 # Electron
 dist/
 release/
+.electron-build/
 
 # Environment variables
 .env
 .env.local
 .env.*.local
+.env.private
 
 # Database
 *.db

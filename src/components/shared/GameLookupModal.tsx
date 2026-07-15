@@ -48,7 +48,11 @@ export function GameLookupModal({
         | { error: string };
       if (!response.ok || !Array.isArray(body)) {
         throw new Error(
-          Array.isArray(body) ? "Unable to search for game details." : body.error
+          Array.isArray(body)
+            ? "Unable to search for game details."
+            : body.error === "RAWG API key is not configured."
+              ? "Game lookup is not configured. Add a RAWG API key in Settings."
+              : body.error
         );
       }
       setResults(body);

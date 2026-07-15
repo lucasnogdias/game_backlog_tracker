@@ -15,5 +15,8 @@ describe("TopNav", () => {
 
     const dataLink = screen.getByRole("link", { name: "Data" });
     expect(dataLink).toHaveAttribute("href", "/data");
+
+    const settingsLink = screen.getByRole("link", { name: "Settings" });
+    expect(settingsLink).toHaveAttribute("href", "/settings");
   });
 });
