@@ -37,6 +37,18 @@ desktop app, where it is stored using OS secure storage.
 Use `pnpm electron:build:win` or `pnpm electron:build:linux` to make a local Windows or Linux
 installer on a matching platform. GitHub Actions builds all supported platforms for releases.
 
+### Installing an unsigned macOS release
+
+Public macOS releases are not signed or notarized. After dragging **Game Backlog Tracker** into
+Applications, macOS may report that it is damaged. If you downloaded the app from this repository's
+GitHub Release, remove that download's quarantine attribute with:
+
+```bash
+sudo xattr -dr com.apple.quarantine "/Applications/Game Backlog Tracker.app"
+```
+
+You only need to run this once per installed version.
+
 To build a private app with a default RAWG key for personal/friend use, copy
 `.env.private.example` to the ignored `.env.private`, add the key, then run:
 
