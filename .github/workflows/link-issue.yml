@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Link matching issue by TASK/BUG prefix
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prefixPattern = /\b(TASK|BUG)-(\d+)\b/i;
