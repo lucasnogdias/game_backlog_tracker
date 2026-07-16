@@ -1,97 +1,116 @@
 # Game Backlog Tracker
 
-A local-first desktop app for tracking a game backlog, play history, and per-game journal.
+A local-first desktop app for tracking games to play, games in progress or completed, and
+per-game Journal notes.
 
-## Core Features
+## For users
 
-- **Backlog** — games I want to play, with relevant tracking info.
-- **Post-log / History** — games I'm currently playing, have finished, or dropped, including
-  short personal reviews/impressions.
-- **Journal** — timestamped notes for each History game.
-- **Data Management** — ZIP/CSV backup and restore with title-based conflict resolution.
-- **Game lookup** — optional RAWG lookup for release dates and estimated playtime.
+Download installers and release notes from
+[GitHub Releases](https://github.com/lucasnogdias/game_backlog_tracker/releases). The
+[User Guide](docs/USER_GUIDE.md) covers installation, game tracking, optional RAWG lookup,
+backups, recovery, and manual updates.
 
-(Detailed feature specs to be added as each area is planned.)
+Public releases are keyless: game tracking works normally, while RAWG lookup can be enabled with
+your own key in **Settings**. A public release never contains a RAWG API key.
 
-## Tech Stack
+## Features
 
-- **Frontend**: React + Next.js + CSS Modules
-- **Desktop shell**: Electron (runs locally, no hosting required)
-- **Backend**: Next.js API routes acting as a lightweight BFF
-- **Database**: SQLite via Prisma
+- **Backlog** -- track games to play, ownership, platforms, excitement, estimated completion time,
+  release date, notes, and a cover-image URL.
+- **History** -- track games in progress, finished, completed, recurrent, abandoned, or paused,
+  including playtime and impressions.
+- **Journal** -- add timestamped notes to History games.
+- **Data management** -- export and restore ZIP/CSV backups with per-title conflict resolution.
+- **Game lookup** -- optionally use RAWG to fill release-date and estimated-playtime details.
 
-## Desktop builds
+## Development
 
-Electron packages the Next.js server locally and stores its SQLite database in the operating
-system application-data directory. GitHub Releases provide installers for macOS, Windows, and
-Linux; users do not need Node, pnpm, or the repository to run them.
+### Requirements
 
-```bash
-pnpm electron:build
-```
+- Node.js version from [`.nvmrc`](.nvmrc)
+- pnpm 10.22.0
 
-This produces a public, keyless macOS build for the architecture of the machine that creates it.
-Tracking features work without RAWG; users can add their own key from **Settings** in the packaged
-desktop app, where it is stored using OS secure storage.
-
-Use `pnpm electron:build:win` or `pnpm electron:build:linux` to make a local Windows or Linux
-installer on a matching platform. GitHub Actions builds all supported platforms for releases.
-
-### Installing an unsigned macOS release
-
-Public macOS releases are not signed or notarized. After dragging **Game Backlog Tracker** into
-Applications, macOS may report that it is damaged. If you downloaded the app from this repository's
-GitHub Release, remove that download's quarantine attribute with:
+Install dependencies and generate the Prisma client:
 
 ```bash
-sudo xattr -dr com.apple.quarantine "/Applications/Game Backlog Tracker.app"
+pnpm install --frozen-lockfile
+pnpm exec prisma generate
 ```
 
-You only need to run this once per installed version.
+Run the browser development server:
 
-To build a private app with a default RAWG key for personal/friend use, copy
-`.env.private.example` to the ignored `.env.private`, add the key, then run:
+```bash
+pnpm dev
+```
+
+To run the desktop shell during development, start `pnpm dev` first, then in another terminal:
+
+```bash
+pnpm electron:dev
+```
+
+Development game lookup reads `RAWG_API_KEY` from an untracked `.env` file. Do not use
+`NEXT_PUBLIC_RAWG_API_KEY`.
+
+### Quality checks
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+### Architecture
+
+- **Frontend and BFF:** React, Next.js App Router, and API routes.
+- **Desktop shell:** Electron runs the bundled Next.js server only on `127.0.0.1`.
+- **Data:** SQLite with Prisma; packaged databases live in the operating system's app-data
+  directory.
+- **Styles:** CSS Modules and semantic variables in `src/app/globals.css`.
+
+## Desktop packaging
+
+Electron packages the Next.js server, its Electron-compatible native SQLite dependency, and the
+database migrations. Public builds remain keyless:
+
+```bash
+pnpm electron:build:mac
+pnpm electron:build:win
+pnpm electron:build:linux
+```
+
+`pnpm electron:build` is an alias for the macOS build. Build Windows and Linux installers on their
+matching platforms. For a private macOS build with a default RAWG key, copy
+`.env.private.example` to ignored `.env.private`, add the key, then run:
 
 ```bash
 pnpm electron:build:private
 ```
 
-Private builds intentionally contain the key and must not be published to GitHub Releases.
+Private builds contain that key and must never be published to GitHub Releases.
 
-For local desktop development, run `pnpm dev` in one terminal and `pnpm electron:dev` in
-another.
+## Releases
 
-## Desktop updates and recovery
-
-Packaged updates preserve the SQLite database in the operating-system application-data directory.
-When an update contains a database migration, the app creates a `pre-migration-*.db` snapshot in
-its `backups` directory before changing the schema. If migration fails, the app restores that
-snapshot automatically and shows its location in the startup error message.
-
-Use the **Data** page for portable ZIP/CSV backups. The migration snapshots are database recovery
-files for this device, not portable imports.
-
-## Publishing a release
-
-Release tags use the app version from `package.json`, prefixed with `v`. For example, after
-changing the package version to `0.2.0`, create and push `v0.2.0`:
+Version tags trigger the cross-platform release workflow. Update `package.json`, merge the release
+commit to `main`, then create and push the matching tag:
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
-The release workflow validates that the tag and package version match, then builds public keyless
-installers for macOS (Apple Silicon), Windows (x64), and Linux (AppImage and `.deb`). It publishes
-those artifacts and generated release notes to a GitHub Release.
+The workflow verifies that the tag matches `package.json`, builds public keyless installers for
+macOS Apple Silicon, Windows x64, and Linux x64 (AppImage and `.deb`), then publishes a GitHub
+Release with generated notes.
 
-Before tagging, verify the packaged app on the platforms available to you:
+Before tagging:
 
-1. Launch the installer, add a game, close it, and confirm the data remains after reopening.
+1. Install the packaged app and confirm a game remains after closing and reopening it.
 2. Export and preview a Data backup.
-3. Confirm a public build leaves game lookup disabled until a key is configured in Settings.
-4. Check the Settings version equals the release tag without its `v` prefix.
+3. Confirm a public build explains that lookup needs a key configured in Settings.
+4. Confirm the Settings version matches the tag without its `v` prefix.
 
-## Status
+## License
 
-🚧 Active development. The app is approaching its first public release.
+This is a personal, non-commercial project. No license has been selected yet.
