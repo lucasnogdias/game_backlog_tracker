@@ -33,7 +33,7 @@ function defaultSettingsPath() {
 }
 
 function serverModulesPath() {
-  return packagedResourcePath("server-modules");
+  return packagedResourcePath("next", "node_modules");
 }
 
 function defaultRawgApiKey() {

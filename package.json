@@ -1,6 +1,6 @@
 {
   "name": "game-backlog-tracker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A local-first desktop app for tracking game backlog and history.",
   "author": "lucasnogdias",
   "private": true,
@@ -84,7 +84,7 @@
       },
       {
         "from": ".electron-build/server-modules",
-        "to": "server-modules"
+        "to": "next/node_modules"
       },
       {
         "from": ".electron-build/desktop",
