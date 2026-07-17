@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchRawgGames } from "@/lib/rawg";
+import { searchIgdbGames } from "@/lib/igdb";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("query")?.trim();
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const results = await searchRawgGames(query);
+    const results = await searchIgdbGames(query);
     return NextResponse.json(results);
   } catch (error) {
     const message =

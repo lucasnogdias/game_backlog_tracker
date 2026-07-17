@@ -22,8 +22,8 @@ function backupsPath() {
   return path.join(app.getPath("userData"), "backups");
 }
 
-function rawgKeyPath() {
-  return path.join(app.getPath("userData"), "rawg-api-key.bin");
+function igdbCredentialsPath() {
+  return path.join(app.getPath("userData"), "igdb-credentials.bin");
 }
 
 function defaultSettingsPath() {
@@ -36,37 +36,58 @@ function serverModulesPath() {
   return packagedResourcePath("next", "node_modules");
 }
 
-function defaultRawgApiKey() {
+function defaultIgdbCredentials() {
   try {
     const settings = JSON.parse(fs.readFileSync(defaultSettingsPath(), "utf8"));
-    return typeof settings.rawgApiKey === "string" ? settings.rawgApiKey : "";
+    if (
+      typeof settings.igdbClientId === "string" &&
+      typeof settings.igdbClientSecret === "string"
+    ) {
+      return {
+        clientId: settings.igdbClientId,
+        clientSecret: settings.igdbClientSecret,
+      };
+    }
   } catch {
-    return "";
+    // Public builds intentionally have no default credentials.
   }
+  return { clientId: "", clientSecret: "" };
 }
 
-function savedRawgApiKey() {
-  const keyPath = rawgKeyPath();
-  if (!fs.existsSync(keyPath)) return "";
+function savedIgdbCredentials() {
+  const credentialsPath = igdbCredentialsPath();
+  if (!fs.existsSync(credentialsPath)) return null;
   if (!safeStorage.isEncryptionAvailable()) {
     throw new Error("Secure storage is unavailable on this system.");
   }
-  return safeStorage.decryptString(fs.readFileSync(keyPath));
+  const credentials = JSON.parse(
+    safeStorage.decryptString(fs.readFileSync(credentialsPath))
+  );
+  if (
+    typeof credentials.clientId !== "string" ||
+    typeof credentials.clientSecret !== "string"
+  ) {
+    throw new Error("Saved IGDB credentials are invalid.");
+  }
+  return credentials;
 }
 
-function rawgApiKey() {
-  return savedRawgApiKey() || defaultRawgApiKey();
+function igdbCredentials() {
+  return savedIgdbCredentials() || defaultIgdbCredentials();
 }
 
-function saveRawgApiKey(apiKey) {
+function saveIgdbCredentials(clientId, clientSecret) {
   if (!safeStorage.isEncryptionAvailable()) {
     throw new Error("Secure storage is unavailable on this system.");
   }
-  fs.writeFileSync(rawgKeyPath(), safeStorage.encryptString(apiKey));
+  fs.writeFileSync(
+    igdbCredentialsPath(),
+    safeStorage.encryptString(JSON.stringify({ clientId, clientSecret }))
+  );
 }
 
-function clearRawgApiKey() {
-  fs.rmSync(rawgKeyPath(), { force: true });
+function clearIgdbCredentials() {
+  fs.rmSync(igdbCredentialsPath(), { force: true });
 }
 
 function runElectronNode(scriptPath, args) {
@@ -163,7 +184,8 @@ async function startPackagedServer() {
         .join(path.delimiter),
       NODE_ENV: "production",
       PORT: String(serverPort),
-      RAWG_API_KEY: rawgApiKey(),
+      IGDB_CLIENT_ID: igdbCredentials().clientId,
+      IGDB_CLIENT_SECRET: igdbCredentials().clientSecret,
     },
     stdio: "pipe",
   });
@@ -234,25 +256,35 @@ function createWindow() {
 
 ipcMain.handle("game-lookup:status", () => ({
   canConfigure: app.isPackaged && safeStorage.isEncryptionAvailable(),
-  configured: Boolean(rawgApiKey()),
+  configured: Boolean(
+    igdbCredentials().clientId && igdbCredentials().clientSecret
+  ),
 }));
 
-ipcMain.handle("game-lookup:save-key", async (_event, apiKey) => {
-  if (typeof apiKey !== "string" || !apiKey.trim()) {
-    throw new Error("A RAWG API key is required.");
+ipcMain.handle(
+  "game-lookup:save-credentials",
+  async (_event, clientId, clientSecret) => {
+    if (
+      typeof clientId !== "string" ||
+      !clientId.trim() ||
+      typeof clientSecret !== "string" ||
+      !clientSecret.trim()
+    ) {
+      throw new Error("An IGDB client ID and client secret are required.");
+    }
+    if (!app.isPackaged) {
+      throw new Error("Game lookup settings are available in the packaged app.");
+    }
+    saveIgdbCredentials(clientId.trim(), clientSecret.trim());
+    await restartPackagedServer();
   }
-  if (!app.isPackaged) {
-    throw new Error("Game lookup settings are available in the packaged app.");
-  }
-  saveRawgApiKey(apiKey.trim());
-  await restartPackagedServer();
-});
+);
 
-ipcMain.handle("game-lookup:clear-key", async () => {
+ipcMain.handle("game-lookup:clear-credentials", async () => {
   if (!app.isPackaged) {
     throw new Error("Game lookup settings are available in the packaged app.");
   }
-  clearRawgApiKey();
+  clearIgdbCredentials();
   await restartPackagedServer();
 });
 

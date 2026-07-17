@@ -132,6 +132,7 @@ describe("GameFormModal", () => {
       title: "Hollow Knight",
       releaseDate: "2017-02-23",
       estimatedHours: 7,
+      coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
       Promise.resolve({
@@ -148,6 +149,9 @@ describe("GameFormModal", () => {
 
     expect(screen.getByLabelText("Est. Hours")).toHaveValue(7);
     expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
+    expect(screen.getByLabelText("Cover Image URL")).toHaveValue(
+      "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg"
+    );
   });
 
   it("asks before replacing lookup fields that already have values", async () => {
@@ -157,6 +161,7 @@ describe("GameFormModal", () => {
       title: "Hollow Knight",
       releaseDate: "2017-02-23",
       estimatedHours: 7,
+      coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
       Promise.resolve({

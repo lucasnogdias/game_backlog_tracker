@@ -7,8 +7,11 @@ declare global {
         canConfigure: boolean;
         configured: boolean;
       }>;
-      saveRawgApiKey: (apiKey: string) => Promise<void>;
-      clearRawgApiKey: () => Promise<void>;
+      saveIgdbCredentials: (
+        clientId: string,
+        clientSecret: string
+      ) => Promise<void>;
+      clearIgdbCredentials: () => Promise<void>;
     };
   }
 }

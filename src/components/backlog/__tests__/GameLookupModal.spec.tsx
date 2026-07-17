@@ -8,6 +8,7 @@ const result: GameLookupResult = {
   title: "Hollow Knight",
   releaseDate: "2017-02-23",
   estimatedHours: 7,
+  coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
 };
 
 function jsonResponse(body: unknown, ok = true) {
@@ -64,7 +65,7 @@ describe("GameLookupModal", () => {
 
   it("shows the server error when the lookup fails", async () => {
     (global.fetch as jest.Mock).mockReturnValueOnce(
-      jsonResponse({ error: "RAWG lookup failed." }, false)
+      jsonResponse({ error: "IGDB lookup failed." }, false)
     );
 
     render(
@@ -75,12 +76,12 @@ describe("GameLookupModal", () => {
       />
     );
 
-    expect(await screen.findByText("RAWG lookup failed.")).toBeInTheDocument();
+    expect(await screen.findByText("IGDB lookup failed.")).toBeInTheDocument();
   });
 
-  it("guides users to Settings when no RAWG API key is configured", async () => {
+  it("guides users to Settings when no IGDB credentials are configured", async () => {
     (global.fetch as jest.Mock).mockReturnValueOnce(
-      jsonResponse({ error: "RAWG API key is not configured." }, false)
+      jsonResponse({ error: "IGDB credentials are not configured." }, false)
     );
 
     render(
@@ -93,7 +94,7 @@ describe("GameLookupModal", () => {
 
     expect(
       await screen.findByText(
-        "Game lookup is not configured. Add a RAWG API key in Settings."
+        "Game lookup is not configured. Add your IGDB credentials in Settings."
       )
     ).toBeInTheDocument();
   });

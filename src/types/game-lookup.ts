@@ -3,4 +3,5 @@ export interface GameLookupResult {
   title: string;
   releaseDate: string | null;
   estimatedHours: number | null;
+  coverImageUrl: string | null;
 }

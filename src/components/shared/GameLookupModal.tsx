@@ -50,8 +50,8 @@ export function GameLookupModal({
         throw new Error(
           Array.isArray(body)
             ? "Unable to search for game details."
-            : body.error === "RAWG API key is not configured."
-              ? "Game lookup is not configured. Add a RAWG API key in Settings."
+            : body.error === "IGDB credentials are not configured."
+              ? "Game lookup is not configured. Add your IGDB credentials in Settings."
               : body.error
         );
       }
@@ -110,13 +110,25 @@ export function GameLookupModal({
               className={styles.result}
               onClick={() => onSelect(result)}
             >
-              <p className={styles.resultTitle}>{result.title}</p>
-              <p className={styles.resultDetails}>
-                {formatReleaseDate(result.releaseDate)}
-                {showEstimatedHours &&
-                  result.estimatedHours !== null &&
-                  ` · Average playtime: ${result.estimatedHours}h`}
-              </p>
+              <div className={styles.resultContent}>
+                {result.coverImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element -- external IGDB image URLs bypass the local optimizer
+                  <img
+                    src={result.coverImageUrl}
+                    alt=""
+                    className={styles.cover}
+                  />
+                )}
+                <div>
+                  <p className={styles.resultTitle}>{result.title}</p>
+                  <p className={styles.resultDetails}>
+                    {formatReleaseDate(result.releaseDate)}
+                    {showEstimatedHours &&
+                      result.estimatedHours !== null &&
+                      ` · Average playtime: ${result.estimatedHours}h`}
+                  </p>
+                </div>
+              </div>
             </button>
           ))}
         </div>

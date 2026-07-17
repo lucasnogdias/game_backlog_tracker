@@ -190,6 +190,7 @@ describe("HistoryFormModal", () => {
       title: "Hollow Knight",
       releaseDate: "2017-02-23",
       estimatedHours: 7,
+      coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
       Promise.resolve({
@@ -205,6 +206,9 @@ describe("HistoryFormModal", () => {
     await user.click(screen.getByRole("button", { name: /hollow knight/i }));
 
     expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
+    expect(screen.getByLabelText("Cover Image URL")).toHaveValue(
+      "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg"
+    );
   });
 
   it("asks before replacing an existing release date from a lookup result", async () => {
@@ -214,6 +218,7 @@ describe("HistoryFormModal", () => {
       title: "Hollow Knight",
       releaseDate: "2017-02-23",
       estimatedHours: 7,
+      coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
       Promise.resolve({
