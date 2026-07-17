@@ -7,6 +7,7 @@ import type { JournalEntryDTO } from "@/types/journal";
 import { formatDateTime } from "@/lib/format-date";
 import { JournalEntryModal } from "./JournalEntryModal";
 import styles from "./JournalPageClient.module.css";
+import shared from "@/styles/shared.module.css";
 
 interface JournalPageClientProps {
   historyEntry: HistoryEntryDTO;
@@ -72,7 +73,7 @@ export function JournalPageClient({
       </header>
 
       {sortedEntries.length === 0 ? (
-        <p className={styles.emptyMessage}>
+        <p className={shared.emptyState}>
           No journal entries yet. Add one to start recording your adventure!
         </p>
       ) : (

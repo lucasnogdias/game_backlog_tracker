@@ -2,9 +2,8 @@
 
 import type { BacklogGameDTO } from "@/types/backlog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
-import { ActionsMenu } from "@/components/shared/ActionsMenu";
 import { formatMonthYear } from "@/lib/format-date";
-import styles from "./BacklogTable.module.css";
+import { BacklogItemActions } from "./BacklogItemActions";
 
 interface BacklogTableProps {
   games: BacklogGameDTO[];
@@ -58,25 +57,13 @@ export function BacklogTable({
       columns={COLUMNS}
       emptyMessage="No games in your backlog yet. Add one to get started!"
       renderActions={(game) => (
-        <div className={styles.actionsRow}>
-          <button
-            type="button"
-            onClick={() => onMoveToHistory(game)}
-            className={styles.moveLink}
-          >
-            Move to History
-          </button>
-          <ActionsMenu
-            items={[
-              { label: "Edit", onClick: () => onEdit(game) },
-              {
-                label: "Delete",
-                onClick: () => onDelete(game),
-                destructive: true,
-              },
-            ]}
-          />
-        </div>
+        <BacklogItemActions
+          game={game}
+          layout="table"
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onMoveToHistory={onMoveToHistory}
+        />
       )}
     />
   );

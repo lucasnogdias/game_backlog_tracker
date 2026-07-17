@@ -9,16 +9,12 @@ import shared from "@/styles/shared.module.css";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { GameLookupModal } from "@/components/shared/GameLookupModal";
 import { useGameLookupAvailability } from "@/components/shared/useGameLookupAvailability";
+import { toMonthInputValue } from "@/lib/date-input";
 
 interface GameFormModalProps {
   initialGame?: BacklogGameDTO;
   onSubmit: (input: BacklogGameInput) => Promise<void>;
   onClose: () => void;
-}
-
-function toMonthInputValue(isoDate: string | null): string {
-  if (!isoDate) return "";
-  return isoDate.slice(0, 7); // "YYYY-MM"
 }
 
 export function GameFormModal({
@@ -136,9 +132,9 @@ export function GameFormModal({
         <form onSubmit={handleSubmit} className={shared.form}>
           <label className={shared.fieldGroup}>
             Title
-            <div className={styles.titleInputRow}>
+            <div className={shared.inlineInputRow}>
               <input
-                className={`${shared.textInput} ${styles.titleInput}`}
+                className={`${shared.textInput} ${shared.flexibleInput}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 autoFocus
@@ -146,7 +142,7 @@ export function GameFormModal({
               <button
                 type="button"
                 onClick={() => setIsLookingUp(true)}
-                className={styles.lookupButton}
+                className={shared.lookupButton}
                 disabled={!title.trim() || !gameLookup.available}
                 title={
                   gameLookup.available
@@ -158,7 +154,7 @@ export function GameFormModal({
               </button>
             </div>
             {!gameLookup.available && (
-              <span className={styles.lookupUnavailable}>
+              <span className={shared.lookupUnavailable}>
                 Game lookup is unavailable.
                 {gameLookup.canConfigure && (
                   <>

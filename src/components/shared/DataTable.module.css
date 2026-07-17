@@ -44,9 +44,3 @@
   white-space: nowrap;
   text-align: right;
 }
-
-.emptyMessage {
-  padding: 3rem 0;
-  text-align: center;
-  color: var(--color-text-muted);
-}

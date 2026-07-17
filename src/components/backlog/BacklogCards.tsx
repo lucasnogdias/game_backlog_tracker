@@ -2,9 +2,8 @@
 
 import type { BacklogGameDTO } from "@/types/backlog";
 import { CardGrid } from "@/components/shared/CardGrid";
-import { ActionsMenu } from "@/components/shared/ActionsMenu";
-import styles from "./BacklogCards.module.css";
 import shared from "@/styles/shared.module.css";
+import { BacklogItemActions } from "./BacklogItemActions";
 
 interface BacklogCardsProps {
   games: BacklogGameDTO[];
@@ -27,25 +26,13 @@ export function BacklogCards({
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your backlog yet. Add one to get started!"
       renderActions={(game) => (
-        <div className={styles.cardActionsRow}>
-          <button
-            type="button"
-            onClick={() => onMoveToHistory(game)}
-            className={styles.moveLink}
-          >
-            Move to History
-          </button>
-          <ActionsMenu
-            items={[
-              { label: "Edit", onClick: () => onEdit(game) },
-              {
-                label: "Delete",
-                onClick: () => onDelete(game),
-                destructive: true,
-              },
-            ]}
-          />
-        </div>
+        <BacklogItemActions
+          game={game}
+          layout="card"
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onMoveToHistory={onMoveToHistory}
+        />
       )}
       renderMeta={(game) => (
         <>

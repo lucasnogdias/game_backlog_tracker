@@ -70,9 +70,3 @@
   margin: 0;
   white-space: pre-wrap;
 }
-
-.emptyMessage {
-  padding: 3rem 0;
-  color: var(--color-text-muted);
-  text-align: center;
-}
