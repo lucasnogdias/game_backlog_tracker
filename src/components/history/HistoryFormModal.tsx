@@ -58,18 +58,37 @@ export function HistoryFormModal({
     if (result.releaseDate) {
       setReleaseDate(result.releaseDate.slice(0, 7));
     }
+    if (result.coverImageUrl) {
+      setCoverImageUrl(result.coverImageUrl);
+    }
     setPendingLookupResult(null);
     setIsLookingUp(false);
   }
 
   function handleLookupSelect(result: GameLookupResult) {
-    if (result.releaseDate && releaseDate !== "") {
+    if (
+      (result.releaseDate && releaseDate !== "") ||
+      (result.coverImageUrl && coverImageUrl !== "")
+    ) {
       setPendingLookupResult(result);
       setIsLookingUp(false);
       return;
     }
 
     applyLookupResult(result);
+  }
+
+  function lookupOverwriteMessage(result: GameLookupResult): string {
+    const fields = [
+      result.releaseDate !== null && releaseDate !== "" ? "release date" : null,
+      result.coverImageUrl !== null && coverImageUrl !== ""
+        ? "cover image"
+        : null,
+    ].filter(Boolean);
+
+    return `Applying "${result.title}" will replace the existing ${fields.join(
+      " and "
+    )}. Continue?`;
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -131,7 +150,7 @@ export function HistoryFormModal({
                 title={
                   gameLookup.available
                     ? undefined
-                    : "Unavailable until a RAWG API key is configured."
+                    : "Unavailable until IGDB credentials are configured."
                 }
               >
                 Find details
@@ -258,7 +277,7 @@ export function HistoryFormModal({
 
       {pendingLookupResult && (
         <ConfirmDialog
-          message={`Applying "${pendingLookupResult.title}" will replace the existing release date. Continue?`}
+          message={lookupOverwriteMessage(pendingLookupResult)}
           confirmLabel="Apply details"
           variant="default"
           onConfirm={() => applyLookupResult(pendingLookupResult)}

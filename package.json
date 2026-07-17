@@ -18,7 +18,7 @@
     "electron:build:mac": "pnpm electron:package -- --mac dmg",
     "electron:build:win": "pnpm electron:package -- --win nsis",
     "electron:build:linux": "pnpm electron:package -- --linux AppImage deb",
-    "electron:build:private": "INCLUDE_RAWG_KEY=true pnpm electron:build:mac",
+    "electron:build:private": "INCLUDE_IGDB_CREDENTIALS=true pnpm electron:build:mac",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "jest",

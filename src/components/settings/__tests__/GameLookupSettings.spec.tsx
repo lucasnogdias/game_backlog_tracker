@@ -12,8 +12,8 @@ function setDesktopSettings(
         canConfigure: true,
         configured: false,
       }),
-      saveRawgApiKey: jest.fn().mockResolvedValue(undefined),
-      clearRawgApiKey: jest.fn().mockResolvedValue(undefined),
+      saveIgdbCredentials: jest.fn().mockResolvedValue(undefined),
+      clearIgdbCredentials: jest.fn().mockResolvedValue(undefined),
       ...overrides,
     },
   });
@@ -29,7 +29,7 @@ describe("GameLookupSettings", () => {
     render(<GameLookupSettings />);
 
     expect(
-      await screen.findByText(/local development uses rawg_api_key/i)
+      await screen.findByText(/local development uses igdb_client_id/i)
     ).toBeInTheDocument();
   });
 
@@ -39,20 +39,26 @@ describe("GameLookupSettings", () => {
       .fn()
       .mockResolvedValueOnce({ canConfigure: true, configured: false })
       .mockResolvedValueOnce({ canConfigure: true, configured: true });
-    const saveRawgApiKey = jest.fn().mockResolvedValue(undefined);
-    setDesktopSettings({ getGameLookupStatus, saveRawgApiKey });
+    const saveIgdbCredentials = jest.fn().mockResolvedValue(undefined);
+    setDesktopSettings({ getGameLookupStatus, saveIgdbCredentials });
 
     render(<GameLookupSettings />);
 
     await screen.findByText("Game lookup is currently not configured.");
-    const input = screen.getByLabelText("RAWG API key");
-    await user.type(input, "private-key");
-    await user.click(screen.getByRole("button", { name: "Save key" }));
+    const clientId = screen.getByLabelText("IGDB client ID");
+    const clientSecret = screen.getByLabelText("IGDB client secret");
+    await user.type(clientId, "private-client-id");
+    await user.type(clientSecret, "private-client-secret");
+    await user.click(screen.getByRole("button", { name: "Save credentials" }));
 
     await waitFor(() => {
-      expect(saveRawgApiKey).toHaveBeenCalledWith("private-key");
+      expect(saveIgdbCredentials).toHaveBeenCalledWith(
+        "private-client-id",
+        "private-client-secret"
+      );
     });
-    expect(input).toHaveValue("");
+    expect(clientId).toHaveValue("");
+    expect(clientSecret).toHaveValue("");
     expect(
       await screen.findByText("Game lookup has been configured.")
     ).toBeInTheDocument();
@@ -64,19 +70,21 @@ describe("GameLookupSettings", () => {
       .fn()
       .mockResolvedValueOnce({ canConfigure: true, configured: true })
       .mockResolvedValueOnce({ canConfigure: true, configured: false });
-    const clearRawgApiKey = jest.fn().mockResolvedValue(undefined);
-    setDesktopSettings({ getGameLookupStatus, clearRawgApiKey });
+    const clearIgdbCredentials = jest.fn().mockResolvedValue(undefined);
+    setDesktopSettings({ getGameLookupStatus, clearIgdbCredentials });
 
     render(<GameLookupSettings />);
 
     await screen.findByText("Game lookup is currently configured.");
-    await user.click(screen.getByRole("button", { name: "Remove saved key" }));
+    await user.click(
+      screen.getByRole("button", { name: "Remove saved credentials" })
+    );
 
     await waitFor(() => {
-      expect(clearRawgApiKey).toHaveBeenCalledTimes(1);
+      expect(clearIgdbCredentials).toHaveBeenCalledTimes(1);
     });
     expect(
-      await screen.findByText("Your saved RAWG API key has been removed.")
+      await screen.findByText("Your saved IGDB credentials have been removed.")
     ).toBeInTheDocument();
   });
 });

@@ -7,11 +7,11 @@ per-game Journal notes.
 
 Download installers and release notes from
 [GitHub Releases](https://github.com/lucasnogdias/game_backlog_tracker/releases). The
-[User Guide](docs/USER_GUIDE.md) covers installation, game tracking, optional RAWG lookup,
+[User Guide](docs/USER_GUIDE.md) covers installation, game tracking, optional IGDB lookup,
 backups, recovery, and manual updates.
 
-Public releases are keyless: game tracking works normally, while RAWG lookup can be enabled with
-your own key in **Settings**. A public release never contains a RAWG API key.
+Public releases are keyless: game tracking works normally, while IGDB lookup can be enabled with
+your own credentials in **Settings**. A public release never contains IGDB credentials.
 
 ## Features
 
@@ -21,7 +21,7 @@ your own key in **Settings**. A public release never contains a RAWG API key.
   including playtime and impressions.
 - **Journal** -- add timestamped notes to History games.
 - **Data management** -- export and restore ZIP/CSV backups with per-title conflict resolution.
-- **Game lookup** -- optionally use RAWG to fill release-date and estimated-playtime details.
+- **Game lookup** -- optionally use IGDB to fill release dates, estimated playtime, and cover art.
 
 ## Development
 
@@ -49,8 +49,8 @@ To run the desktop shell during development, start `pnpm dev` first, then in ano
 pnpm electron:dev
 ```
 
-Development game lookup reads `RAWG_API_KEY` from an untracked `.env` file. Do not use
-`NEXT_PUBLIC_RAWG_API_KEY`.
+Development game lookup reads `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` from an untracked `.env`
+file. Do not expose either variable through `NEXT_PUBLIC_` environment variables.
 
 ### Quality checks
 
@@ -81,14 +81,14 @@ pnpm electron:build:linux
 ```
 
 `pnpm electron:build` is an alias for the macOS build. Build Windows and Linux installers on their
-matching platforms. For a private macOS build with a default RAWG key, copy
+matching platforms. For a private macOS build with default IGDB credentials, copy
 `.env.private.example` to ignored `.env.private`, add the key, then run:
 
 ```bash
 pnpm electron:build:private
 ```
 
-Private builds contain that key and must never be published to GitHub Releases.
+Private builds contain those credentials and must never be published to GitHub Releases.
 
 ## Releases
 

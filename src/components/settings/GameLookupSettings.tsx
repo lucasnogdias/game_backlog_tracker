@@ -10,7 +10,8 @@ interface LookupStatus {
 
 export function GameLookupSettings() {
   const [status, setStatus] = useState<LookupStatus | null>(null);
-  const [apiKey, setApiKey] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export function GameLookupSettings() {
       });
   }, []);
 
-  async function saveKey(event: FormEvent) {
+  async function saveCredentials(event: FormEvent) {
     event.preventDefault();
     if (!window.desktopSettings) return;
 
@@ -41,36 +42,37 @@ export function GameLookupSettings() {
     setError(null);
     setMessage(null);
     try {
-      await window.desktopSettings.saveRawgApiKey(apiKey);
-      setApiKey("");
+      await window.desktopSettings.saveIgdbCredentials(clientId, clientSecret);
+      setClientId("");
+      setClientSecret("");
       setStatus(await window.desktopSettings.getGameLookupStatus());
       setMessage("Game lookup has been configured.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Unable to save the RAWG API key."
+          : "Unable to save IGDB credentials."
       );
     } finally {
       setIsSaving(false);
     }
   }
 
-  async function clearKey() {
+  async function clearCredentials() {
     if (!window.desktopSettings) return;
 
     setIsSaving(true);
     setError(null);
     setMessage(null);
     try {
-      await window.desktopSettings.clearRawgApiKey();
+      await window.desktopSettings.clearIgdbCredentials();
       setStatus(await window.desktopSettings.getGameLookupStatus());
-      setMessage("Your saved RAWG API key has been removed.");
+      setMessage("Your saved IGDB credentials have been removed.");
     } catch (clearError) {
       setError(
         clearError instanceof Error
           ? clearError.message
-          : "Unable to remove the RAWG API key."
+          : "Unable to remove IGDB credentials."
       );
     } finally {
       setIsSaving(false);
@@ -86,7 +88,7 @@ export function GameLookupSettings() {
       <section className={styles.section}>
         <p className={styles.description}>
           Game lookup keys can be configured from the packaged desktop app. Local
-          development uses RAWG_API_KEY in your .env file.
+          development uses IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in your .env file.
         </p>
         {error && <p className={styles.error}>{error}</p>}
       </section>
@@ -102,13 +104,22 @@ export function GameLookupSettings() {
         Your key is stored in your operating system&apos;s secure storage and is
         only used by the local app.
       </p>
-      <form onSubmit={saveKey} className={styles.form}>
+      <form onSubmit={saveCredentials} className={styles.form}>
         <label className={styles.label}>
-          RAWG API key
+          IGDB client ID
+          <input
+            value={clientId}
+            onChange={(event) => setClientId(event.target.value)}
+            className={styles.input}
+            autoComplete="off"
+          />
+        </label>
+        <label className={styles.label}>
+          IGDB client secret
           <input
             type="password"
-            value={apiKey}
-            onChange={(event) => setApiKey(event.target.value)}
+            value={clientSecret}
+            onChange={(event) => setClientSecret(event.target.value)}
             className={styles.input}
             autoComplete="off"
           />
@@ -116,19 +127,19 @@ export function GameLookupSettings() {
         <div className={styles.actions}>
           <button
             type="submit"
-            disabled={isSaving || !apiKey.trim()}
+            disabled={isSaving || !clientId.trim() || !clientSecret.trim()}
             className={styles.button}
           >
-            {isSaving ? "Saving..." : "Save key"}
+            {isSaving ? "Saving..." : "Save credentials"}
           </button>
           {status.configured && (
             <button
               type="button"
               disabled={isSaving}
-              onClick={clearKey}
+              onClick={clearCredentials}
               className={styles.secondaryButton}
             >
-              Remove saved key
+              Remove saved credentials
             </button>
           )}
         </div>

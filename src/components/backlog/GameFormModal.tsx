@@ -65,6 +65,9 @@ export function GameFormModal({
     if (result.releaseDate) {
       setReleaseDate(result.releaseDate.slice(0, 7));
     }
+    if (result.coverImageUrl) {
+      setCoverImageUrl(result.coverImageUrl);
+    }
     setPendingLookupResult(null);
     setIsLookingUp(false);
   }
@@ -73,8 +76,10 @@ export function GameFormModal({
     const overwritesEstimatedHours =
       result.estimatedHours !== null && estimatedHours !== "";
     const overwritesReleaseDate = result.releaseDate !== null && releaseDate !== "";
+    const overwritesCoverImage =
+      result.coverImageUrl !== null && coverImageUrl !== "";
 
-    if (overwritesEstimatedHours || overwritesReleaseDate) {
+    if (overwritesEstimatedHours || overwritesReleaseDate || overwritesCoverImage) {
       setPendingLookupResult(result);
       setIsLookingUp(false);
       return;
@@ -89,6 +94,9 @@ export function GameFormModal({
         ? "estimated hours"
         : null,
       result.releaseDate !== null && releaseDate !== "" ? "release date" : null,
+      result.coverImageUrl !== null && coverImageUrl !== ""
+        ? "cover image"
+        : null,
     ].filter(Boolean);
 
     return `Applying "${result.title}" will replace the existing ${fields.join(
@@ -147,7 +155,7 @@ export function GameFormModal({
                 title={
                   gameLookup.available
                     ? undefined
-                    : "Unavailable until a RAWG API key is configured."
+                    : "Unavailable until IGDB credentials are configured."
                 }
               >
                 Find details
