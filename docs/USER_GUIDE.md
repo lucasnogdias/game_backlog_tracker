@@ -57,8 +57,8 @@ planned for a future update.
 
 ## Optional IGDB game lookup
 
-Game lookup can fill release dates, estimated playtime, and portrait cover art from IGDB. It is
-optional: you can always enter or replace those details manually.
+Game lookup can fill release dates and portrait cover art from IGDB. It is optional: you can always
+enter or replace those details manually.
 
 1. Create a free Twitch developer application with a **Confidential** client type, then note its
    client ID and client secret. IGDB requires Twitch two-factor authentication.
@@ -68,6 +68,12 @@ optional: you can always enter or replace those details manually.
 The app stores the credentials in your operating system's secure storage and uses them only
 locally. Public releases do not include credentials. You can remove saved credentials from the
 same Settings page at any time.
+
+### Optional RAWG estimated hours
+
+RAWG can add estimated hours when it has a title matching the IGDB game you select. In
+**Settings**, enter a [RAWG API key](https://rawg.io/apidocs) under **Optional RAWG playtime
+estimates**. This is independent of IGDB, and game lookup remains available without it.
 
 ## Back up and restore data
 

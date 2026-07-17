@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, FormEvent } from "react";
+import { useRef, useState, FormEvent, KeyboardEvent } from "react";
 import type { BacklogGameDTO, BacklogGameInput } from "@/types/backlog";
 import type { GameLookupResult } from "@/types/game-lookup";
 import styles from "./GameFormModal.module.css";
@@ -45,20 +45,32 @@ export function GameFormModal({
   const [pendingLookupResult, setPendingLookupResult] =
     useState<GameLookupResult | null>(null);
   const gameLookup = useGameLookupAvailability();
+  const ownedRef = useRef<HTMLInputElement>(null);
+  const platformRef = useRef<HTMLInputElement>(null);
+  const estimatedHoursRef = useRef<HTMLInputElement>(null);
+  const releaseDateRef = useRef<HTMLInputElement>(null);
+  const hypeRef = useRef<HTMLInputElement>(null);
+  const coverImageUrlRef = useRef<HTMLInputElement>(null);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   function addPlatform() {
-    const trimmed = platformDraft.trim();
-    if (trimmed && !platforms.includes(trimmed)) {
-      setPlatforms([...platforms, trimmed]);
-    }
-    setPlatformDraft("");
+    addPlatformDraft();
   }
 
   function removePlatform(platform: string) {
     setPlatforms(platforms.filter((p) => p !== platform));
   }
 
+  function addPlatformDraft(): string | null {
+    const trimmed = platformDraft.trim();
+    setPlatformDraft("");
+    if (!trimmed || platforms.includes(trimmed)) return null;
+    setPlatforms([...platforms, trimmed]);
+    return trimmed;
+  }
+
   function applyLookupResult(result: GameLookupResult) {
+    setTitle(result.title);
     if (result.estimatedHours !== null) {
       setEstimatedHours(result.estimatedHours.toString());
     }
@@ -104,6 +116,38 @@ export function GameFormModal({
     )}. Continue?`;
   }
 
+  function handleTitleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    if (title.trim() && gameLookup.available) {
+      setIsLookingUp(true);
+      return;
+    }
+    ownedRef.current?.focus();
+  }
+
+  function focusNext(
+    event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+    nextField: React.RefObject<HTMLElement | null>
+  ) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    nextField.current?.focus();
+  }
+
+  function handlePlatformKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    addPlatformDraft();
+    estimatedHoursRef.current?.focus();
+  }
+
+  function handleNotesKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (!title.trim()) {
@@ -114,10 +158,14 @@ export function GameFormModal({
     setIsSubmitting(true);
     setError(null);
     try {
+      const draftedPlatform = addPlatformDraft();
+      const submittedPlatforms = draftedPlatform
+        ? [...platforms, draftedPlatform]
+        : platforms;
       await onSubmit({
         title: title.trim(),
         owned,
-        platforms,
+        platforms: submittedPlatforms,
         estimatedHours: estimatedHours ? Number(estimatedHours) : null,
         releaseDate: releaseDate ? `${releaseDate}-01` : null,
         hype: hype ? Number(hype) : null,
@@ -129,6 +177,7 @@ export function GameFormModal({
     } finally {
       setIsSubmitting(false);
     }
+
   }
 
   return (
@@ -145,6 +194,7 @@ export function GameFormModal({
                 className={`${shared.textInput} ${shared.flexibleInput}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={handleTitleKeyDown}
                 autoFocus
               />
               <button
@@ -176,9 +226,11 @@ export function GameFormModal({
 
           <label className={shared.checkboxLabel}>
             <input
+              ref={ownedRef}
               type="checkbox"
               checked={owned}
               onChange={(e) => setOwned(e.target.checked)}
+              onKeyDown={(event) => focusNext(event, platformRef)}
             />
             Owned
           </label>
@@ -202,16 +254,12 @@ export function GameFormModal({
             </div>
             <div className={styles.platformInputRow}>
               <input
+                ref={platformRef}
                 className={`${shared.textInput} ${styles.platformInput}`}
                 value={platformDraft}
                 placeholder="e.g. Switch"
                 onChange={(e) => setPlatformDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addPlatform();
-                  }
-                }}
+                onKeyDown={handlePlatformKeyDown}
               />
               <button
                 type="button"
@@ -228,20 +276,24 @@ export function GameFormModal({
               Est. Hours
               <input
                 type="number"
+                ref={estimatedHoursRef}
                 min={0}
                 step={0.5}
                 className={shared.textInput}
                 value={estimatedHours}
                 onChange={(e) => setEstimatedHours(e.target.value)}
+                onKeyDown={(event) => focusNext(event, releaseDateRef)}
               />
             </label>
             <label className={shared.fieldGroup}>
               Release Date
               <input
                 type="month"
+                ref={releaseDateRef}
                 className={shared.textInput}
                 value={releaseDate}
                 onChange={(e) => setReleaseDate(e.target.value)}
+                onKeyDown={(event) => focusNext(event, hypeRef)}
               />
             </label>
           </div>
@@ -250,11 +302,13 @@ export function GameFormModal({
             Hype (1-10)
             <input
               type="number"
+              ref={hypeRef}
               min={1}
               max={10}
               className={shared.textInput}
               value={hype}
               onChange={(e) => setHype(e.target.value)}
+              onKeyDown={(event) => focusNext(event, coverImageUrlRef)}
             />
           </label>
 
@@ -262,10 +316,12 @@ export function GameFormModal({
             Cover Image URL
             <input
               type="url"
+              ref={coverImageUrlRef}
               className={shared.textInput}
               value={coverImageUrl}
               placeholder="https://..."
               onChange={(e) => setCoverImageUrl(e.target.value)}
+              onKeyDown={(event) => focusNext(event, notesRef)}
             />
           </label>
 
@@ -273,9 +329,11 @@ export function GameFormModal({
             Notes
             <textarea
               className={shared.textarea}
+              ref={notesRef}
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              onKeyDown={handleNotesKeyDown}
             />
           </label>
 

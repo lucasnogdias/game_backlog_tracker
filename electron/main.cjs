@@ -26,6 +26,10 @@ function igdbCredentialsPath() {
   return path.join(app.getPath("userData"), "igdb-credentials.bin");
 }
 
+function rawgKeyPath() {
+  return path.join(app.getPath("userData"), "rawg-api-key.bin");
+}
+
 function defaultSettingsPath() {
   return app.isPackaged
     ? packagedResourcePath("default-settings.json")
@@ -76,6 +80,28 @@ function igdbCredentials() {
   return savedIgdbCredentials() || defaultIgdbCredentials();
 }
 
+function defaultRawgApiKey() {
+  try {
+    const settings = JSON.parse(fs.readFileSync(defaultSettingsPath(), "utf8"));
+    return typeof settings.rawgApiKey === "string" ? settings.rawgApiKey : "";
+  } catch {
+    return "";
+  }
+}
+
+function savedRawgApiKey() {
+  const keyPath = rawgKeyPath();
+  if (!fs.existsSync(keyPath)) return "";
+  if (!safeStorage.isEncryptionAvailable()) {
+    throw new Error("Secure storage is unavailable on this system.");
+  }
+  return safeStorage.decryptString(fs.readFileSync(keyPath));
+}
+
+function rawgApiKey() {
+  return savedRawgApiKey() || defaultRawgApiKey();
+}
+
 function saveIgdbCredentials(clientId, clientSecret) {
   if (!safeStorage.isEncryptionAvailable()) {
     throw new Error("Secure storage is unavailable on this system.");
@@ -84,6 +110,17 @@ function saveIgdbCredentials(clientId, clientSecret) {
     igdbCredentialsPath(),
     safeStorage.encryptString(JSON.stringify({ clientId, clientSecret }))
   );
+}
+
+function saveRawgApiKey(apiKey) {
+  if (!safeStorage.isEncryptionAvailable()) {
+    throw new Error("Secure storage is unavailable on this system.");
+  }
+  fs.writeFileSync(rawgKeyPath(), safeStorage.encryptString(apiKey));
+}
+
+function clearRawgApiKey() {
+  fs.rmSync(rawgKeyPath(), { force: true });
 }
 
 function clearIgdbCredentials() {
@@ -186,6 +223,7 @@ async function startPackagedServer() {
       PORT: String(serverPort),
       IGDB_CLIENT_ID: igdbCredentials().clientId,
       IGDB_CLIENT_SECRET: igdbCredentials().clientSecret,
+      RAWG_API_KEY: rawgApiKey(),
     },
     stdio: "pipe",
   });
@@ -259,6 +297,7 @@ ipcMain.handle("game-lookup:status", () => ({
   configured: Boolean(
     igdbCredentials().clientId && igdbCredentials().clientSecret
   ),
+  rawgConfigured: Boolean(rawgApiKey()),
 }));
 
 ipcMain.handle(
@@ -285,6 +324,25 @@ ipcMain.handle("game-lookup:clear-credentials", async () => {
     throw new Error("Game lookup settings are available in the packaged app.");
   }
   clearIgdbCredentials();
+  await restartPackagedServer();
+});
+
+ipcMain.handle("game-lookup:save-rawg-key", async (_event, apiKey) => {
+  if (typeof apiKey !== "string" || !apiKey.trim()) {
+    throw new Error("A RAWG API key is required.");
+  }
+  if (!app.isPackaged) {
+    throw new Error("Game lookup settings are available in the packaged app.");
+  }
+  saveRawgApiKey(apiKey.trim());
+  await restartPackagedServer();
+});
+
+ipcMain.handle("game-lookup:clear-rawg-key", async () => {
+  if (!app.isPackaged) {
+    throw new Error("Game lookup settings are available in the packaged app.");
+  }
+  clearRawgApiKey();
   await restartPackagedServer();
 });
 

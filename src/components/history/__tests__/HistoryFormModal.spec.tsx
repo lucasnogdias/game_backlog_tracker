@@ -89,6 +89,30 @@ describe("HistoryFormModal", () => {
     );
   });
 
+  it("advances from the platform field to the release date on Enter", async () => {
+    const user = userEvent.setup();
+    render(<HistoryFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);
+
+    await user.click(screen.getByLabelText("Platform"));
+    await user.keyboard("{Enter}");
+
+    expect(screen.getByLabelText("Release Date")).toHaveFocus();
+  });
+
+  it("submits when Enter is pressed in Notes", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<HistoryFormModal onSubmit={onSubmit} onClose={jest.fn()} />);
+
+    await user.type(screen.getByLabelText("Title"), "Celeste");
+    await user.click(screen.getByLabelText("Notes / Review"));
+    await user.keyboard("{Enter}");
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Celeste" })
+    );
+  });
+
   it("submits the selected status when changed", async () => {
     const user = userEvent.setup();
     const onSubmit = jest.fn().mockResolvedValue(undefined);
@@ -187,7 +211,7 @@ describe("HistoryFormModal", () => {
     const user = userEvent.setup();
     const lookupResult: GameLookupResult = {
       id: 9767,
-      title: "Hollow Knight",
+      title: "Hollow Knight: Silksong",
       releaseDate: "2017-02-23",
       estimatedHours: 7,
       coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
@@ -206,6 +230,7 @@ describe("HistoryFormModal", () => {
     await user.click(screen.getByRole("button", { name: /hollow knight/i }));
 
     expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
+    expect(screen.getByLabelText("Title")).toHaveValue("Hollow Knight: Silksong");
     expect(screen.getByLabelText("Cover Image URL")).toHaveValue(
       "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg"
     );
