@@ -30,6 +30,7 @@ function jsonResponse(body: unknown, ok = true) {
 describe("BacklogClient", () => {
   beforeEach(() => {
     global.fetch = jest.fn();
+    window.localStorage.clear();
   });
 
   afterEach(() => {
@@ -52,6 +53,7 @@ describe("BacklogClient", () => {
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
+    expect(window.localStorage.getItem("game-backlog-tracker:view")).toBe("card");
   });
 
   it("adds a new game via the Add Game modal and POSTs it to the API", async () => {

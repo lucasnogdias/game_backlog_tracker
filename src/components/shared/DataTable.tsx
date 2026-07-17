@@ -6,6 +6,7 @@
 
 import styles from "./DataTable.module.css";
 import shared from "@/styles/shared.module.css";
+import { Tooltip } from "./Tooltip";
 
 export interface DataTableColumn<T> {
   header: string;
@@ -61,9 +62,14 @@ export function DataTable<T extends { id: string }>({
                 <td
                   key={column.header}
                   className={cellClassName(column.variant)}
-                  title={column.cellTitle?.(item)}
                 >
-                  {column.render(item)}
+                  {column.variant === "truncate" && column.cellTitle?.(item) ? (
+                    <Tooltip content={column.cellTitle(item)!}>
+                      {column.render(item)}
+                    </Tooltip>
+                  ) : (
+                    column.render(item)
+                  )}
                 </td>
               ))}
               <td className={styles.actionsCell}>{renderActions(item)}</td>

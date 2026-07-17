@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataTable, type DataTableColumn } from "../DataTable";
 
@@ -53,7 +53,8 @@ describe("DataTable", () => {
     expect(screen.getByText("Some notes")).toBeInTheDocument();
   });
 
-  it("applies the cellTitle attribute when provided", () => {
+  it("shows a delayed tooltip for truncated content", () => {
+    jest.useFakeTimers();
     const item = makeItem({ notes: "Truncated content" });
     render(
       <DataTable
@@ -64,10 +65,40 @@ describe("DataTable", () => {
       />
     );
 
-    expect(screen.getByText("Truncated content")).toHaveAttribute(
-      "title",
-      "Truncated content"
+    const note = screen.getByText("Truncated content");
+    Object.defineProperties(note, {
+      clientWidth: { value: 100 },
+      scrollWidth: { value: 200 },
+    });
+    fireEvent.mouseEnter(note);
+    act(() => jest.advanceTimersByTime(500));
+
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Truncated content");
+    jest.useRealTimers();
+  });
+
+  it("does not show a tooltip when the content is not truncated", () => {
+    jest.useFakeTimers();
+    const item = makeItem({ notes: "Short content" });
+    render(
+      <DataTable
+        items={[item]}
+        columns={columns}
+        emptyMessage="Nothing here yet."
+        renderActions={() => null}
+      />
     );
+
+    const note = screen.getByText("Short content");
+    Object.defineProperties(note, {
+      clientWidth: { value: 100 },
+      scrollWidth: { value: 100 },
+    });
+    fireEvent.mouseEnter(note);
+    act(() => jest.advanceTimersByTime(500));
+
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    jest.useRealTimers();
   });
 
   it("renders whatever renderActions returns for each item", async () => {

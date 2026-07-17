@@ -5,6 +5,7 @@
 // used by the Backlog and History pages).
 
 import styles from "./Toolbar.module.css";
+import type { GameView } from "./useGameViewPreference";
 
 export interface SortOption<TField extends string> {
   value: TField;
@@ -12,8 +13,8 @@ export interface SortOption<TField extends string> {
 }
 
 interface ToolbarProps<TField extends string> {
-  view: "list" | "card";
-  onViewChange: (view: "list" | "card") => void;
+  view: GameView;
+  onViewChange: (view: GameView) => void;
   sortField: TField;
   sortDirection: "asc" | "desc";
   onSortChange: (field: TField, direction: "asc" | "desc") => void;

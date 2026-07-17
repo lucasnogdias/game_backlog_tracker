@@ -15,6 +15,7 @@ import { GameFormModal } from "./GameFormModal";
 import { MoveToHistoryModal } from "./MoveToHistoryModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import type { HistoryStatus } from "@/types/history";
+import { useGameViewPreference } from "@/components/shared/useGameViewPreference";
 
 interface BacklogClientProps {
   initialGames: BacklogGameDTO[];
@@ -22,7 +23,7 @@ interface BacklogClientProps {
 
 export function BacklogClient({ initialGames }: BacklogClientProps) {
   const [games, setGames] = useState(initialGames);
-  const [view, setView] = useState<"list" | "card">("list");
+  const [view, setView] = useGameViewPreference();
   const [sortField, setSortField] = useState<BacklogSortField>("hype");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isAdding, setIsAdding] = useState(false);
