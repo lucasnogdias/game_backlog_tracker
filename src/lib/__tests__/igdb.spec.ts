@@ -22,7 +22,7 @@ describe("searchIgdbGames", () => {
     process.env.IGDB_CLIENT_SECRET = originalClientSecret;
   });
 
-  it("returns portrait covers, release dates, and normal completion time", async () => {
+  it("returns portrait covers and release dates", async () => {
     (global.fetch as jest.Mock)
       .mockReturnValueOnce(
         jsonResponse({ access_token: "access-token", expires_in: 3600 })
@@ -36,7 +36,6 @@ describe("searchIgdbGames", () => {
             cover: {
               url: "//images.igdb.com/igdb/image/upload/t_thumb/co1rgi.jpg",
             },
-            game_time_to_beat: { normally: 25_200 },
           },
         ])
       );
@@ -46,7 +45,7 @@ describe("searchIgdbGames", () => {
         id: 9767,
         title: "Hollow Knight",
         releaseDate: "2017-02-23",
-        estimatedHours: 7,
+        estimatedHours: null,
         coverImageUrl:
           "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
       },

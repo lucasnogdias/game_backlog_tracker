@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, FormEvent } from "react";
+import { useRef, useState, FormEvent, KeyboardEvent } from "react";
 import type { HistoryEntryDTO, HistoryEntryInput } from "@/types/history";
 import type { GameLookupResult } from "@/types/game-lookup";
 import { HISTORY_STATUSES } from "@/types/history";
@@ -53,8 +53,16 @@ export function HistoryFormModal({
   const [pendingLookupResult, setPendingLookupResult] =
     useState<GameLookupResult | null>(null);
   const gameLookup = useGameLookupAvailability();
+  const statusRef = useRef<HTMLSelectElement>(null);
+  const playtimeRef = useRef<HTMLInputElement>(null);
+  const finishedOnRef = useRef<HTMLInputElement>(null);
+  const platformRef = useRef<HTMLInputElement>(null);
+  const releaseDateRef = useRef<HTMLInputElement>(null);
+  const coverImageUrlRef = useRef<HTMLInputElement>(null);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   function applyLookupResult(result: GameLookupResult) {
+    setTitle(result.title);
     if (result.releaseDate) {
       setReleaseDate(result.releaseDate.slice(0, 7));
     }
@@ -89,6 +97,31 @@ export function HistoryFormModal({
     return `Applying "${result.title}" will replace the existing ${fields.join(
       " and "
     )}. Continue?`;
+  }
+
+  function handleTitleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    if (title.trim() && gameLookup.available) {
+      setIsLookingUp(true);
+      return;
+    }
+    statusRef.current?.focus();
+  }
+
+  function focusNext(
+    event: KeyboardEvent<HTMLInputElement | HTMLSelectElement>,
+    nextField: React.RefObject<HTMLElement | null>
+  ) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    nextField.current?.focus();
+  }
+
+  function handleNotesKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -140,6 +173,7 @@ export function HistoryFormModal({
                 className={`${shared.textInput} ${shared.flexibleInput}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={handleTitleKeyDown}
                 autoFocus
               />
               <button
@@ -173,10 +207,12 @@ export function HistoryFormModal({
             Status
             <select
               className={shared.select}
+              ref={statusRef}
               value={status}
               onChange={(e) =>
                 setStatus(e.target.value as (typeof HISTORY_STATUSES)[number])
               }
+              onKeyDown={(event) => focusNext(event, playtimeRef)}
             >
               {HISTORY_STATUSES.map((option) => (
                 <option key={option} value={option}>
@@ -191,18 +227,22 @@ export function HistoryFormModal({
               Playtime (HH:mm)
               <input
                 className={shared.textInput}
+                ref={playtimeRef}
                 value={playtime}
                 placeholder="e.g. 45:30"
                 onChange={(e) => setPlaytime(e.target.value)}
+                onKeyDown={(event) => focusNext(event, finishedOnRef)}
               />
             </label>
             <label className={shared.fieldGroup}>
               Finished On
               <input
                 type="date"
+                ref={finishedOnRef}
                 className={shared.textInput}
                 value={finishedOn}
                 onChange={(e) => setFinishedOn(e.target.value)}
+                onKeyDown={(event) => focusNext(event, platformRef)}
               />
             </label>
           </div>
@@ -212,18 +252,22 @@ export function HistoryFormModal({
               Platform
               <input
                 className={shared.textInput}
+                ref={platformRef}
                 value={platform}
                 placeholder="e.g. Switch"
                 onChange={(e) => setPlatform(e.target.value)}
+                onKeyDown={(event) => focusNext(event, releaseDateRef)}
               />
             </label>
             <label className={shared.fieldGroup}>
               Release Date
               <input
                 type="month"
+                ref={releaseDateRef}
                 className={shared.textInput}
                 value={releaseDate}
                 onChange={(e) => setReleaseDate(e.target.value)}
+                onKeyDown={(event) => focusNext(event, coverImageUrlRef)}
               />
             </label>
           </div>
@@ -232,10 +276,12 @@ export function HistoryFormModal({
             Cover Image URL
             <input
               type="url"
+              ref={coverImageUrlRef}
               className={shared.textInput}
               value={coverImageUrl}
               placeholder="https://..."
               onChange={(e) => setCoverImageUrl(e.target.value)}
+              onKeyDown={(event) => focusNext(event, notesRef)}
             />
           </label>
 
@@ -243,9 +289,11 @@ export function HistoryFormModal({
             Notes / Review
             <textarea
               className={shared.textarea}
+              ref={notesRef}
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              onKeyDown={handleNotesKeyDown}
             />
           </label>
 

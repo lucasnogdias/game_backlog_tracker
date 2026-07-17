@@ -21,7 +21,8 @@ your own credentials in **Settings**. A public release never contains IGDB crede
   including playtime and impressions.
 - **Journal** -- add timestamped notes to History games.
 - **Data management** -- export and restore ZIP/CSV backups with per-title conflict resolution.
-- **Game lookup** -- optionally use IGDB to fill release dates, estimated playtime, and cover art.
+- **Game lookup** -- optionally use IGDB to fill release dates and cover art, with RAWG estimates
+  when its separate API key is configured.
 
 ## Development
 
@@ -49,8 +50,9 @@ To run the desktop shell during development, start `pnpm dev` first, then in ano
 pnpm electron:dev
 ```
 
-Development game lookup reads `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` from an untracked `.env`
-file. Do not expose either variable through `NEXT_PUBLIC_` environment variables.
+Development game lookup reads `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, and optionally
+`RAWG_API_KEY` from an untracked `.env` file. Do not expose either credential through
+`NEXT_PUBLIC_` environment variables.
 
 ### Quality checks
 
@@ -81,7 +83,8 @@ pnpm electron:build:linux
 ```
 
 `pnpm electron:build` is an alias for the macOS build. Build Windows and Linux installers on their
-matching platforms. For a private macOS build with default IGDB credentials, copy
+matching platforms. For a private macOS build with default IGDB credentials and optional RAWG
+estimates, copy
 `.env.private.example` to ignored `.env.private`, add the key, then run:
 
 ```bash

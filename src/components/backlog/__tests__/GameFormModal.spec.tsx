@@ -73,7 +73,7 @@ describe("GameFormModal", () => {
     const onSubmit = jest.fn().mockResolvedValue(undefined);
     render(<GameFormModal onSubmit={onSubmit} onClose={jest.fn()} />);
 
-    await user.type(screen.getByLabelText("Title"), "Celeste");
+    await user.type(screen.getByRole("textbox", { name: /title/i }), "Celeste");
     await user.click(screen.getByLabelText("Owned"));
     await user.type(screen.getByLabelText("Hype (1-10)"), "8");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -84,6 +84,63 @@ describe("GameFormModal", () => {
         owned: true,
         hype: 8,
       })
+    );
+  });
+
+  it("adds an unsaved platform draft when submitting", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<GameFormModal onSubmit={onSubmit} onClose={jest.fn()} />);
+
+    await user.type(screen.getByLabelText("Title"), "Celeste");
+    await user.type(screen.getByPlaceholderText("e.g. Switch"), "PS5");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ platforms: ["PS5"] })
+    );
+  });
+
+  it("advances fields and adds a platform draft when lookup is unavailable", async () => {
+    const user = userEvent.setup();
+    Object.defineProperty(window, "desktopSettings", {
+      configurable: true,
+      value: {
+        getGameLookupStatus: jest.fn().mockResolvedValue({
+          canConfigure: true,
+          configured: false,
+          rawgConfigured: false,
+        }),
+      },
+    });
+    render(<GameFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);
+
+    await screen.findByText("Game lookup is unavailable.");
+    await user.type(screen.getByRole("textbox", { name: /title/i }), "Celeste");
+    await user.keyboard("{Enter}");
+    expect(screen.getByLabelText("Owned")).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    const platformInput = screen.getByPlaceholderText("e.g. Switch");
+    expect(platformInput).toHaveFocus();
+
+    await user.type(platformInput, "PS5");
+    await user.keyboard("{Enter}");
+    expect(await screen.findByText("PS5")).toBeInTheDocument();
+    expect(screen.getByLabelText("Est. Hours")).toHaveFocus();
+  });
+
+  it("submits when Enter is pressed in Notes", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<GameFormModal onSubmit={onSubmit} onClose={jest.fn()} />);
+
+    await user.type(screen.getByLabelText("Title"), "Celeste");
+    await user.click(screen.getByLabelText("Notes"));
+    await user.keyboard("{Enter}");
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Celeste" })
     );
   });
 
@@ -129,7 +186,7 @@ describe("GameFormModal", () => {
     const user = userEvent.setup();
     const lookupResult: GameLookupResult = {
       id: 9767,
-      title: "Hollow Knight",
+      title: "Hollow Knight: Silksong",
       releaseDate: "2017-02-23",
       estimatedHours: 7,
       coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
@@ -149,6 +206,7 @@ describe("GameFormModal", () => {
 
     expect(screen.getByLabelText("Est. Hours")).toHaveValue(7);
     expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
+    expect(screen.getByLabelText("Title")).toHaveValue("Hollow Knight: Silksong");
     expect(screen.getByLabelText("Cover Image URL")).toHaveValue(
       "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg"
     );

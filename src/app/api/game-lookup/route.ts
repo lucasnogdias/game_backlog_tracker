@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchIgdbGames } from "@/lib/igdb";
+import {
+  isRawgConfigured,
+  rawgEstimatedHoursForTitle,
+  searchRawgEstimatedHours,
+} from "@/lib/rawg";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("query")?.trim();
@@ -12,7 +17,22 @@ export async function GET(request: NextRequest) {
 
   try {
     const results = await searchIgdbGames(query);
-    return NextResponse.json(results);
+    if (!isRawgConfigured()) {
+      return NextResponse.json(results);
+    }
+
+    try {
+      const estimates = await searchRawgEstimatedHours(query);
+      return NextResponse.json(
+        results.map((result) => ({
+          ...result,
+          estimatedHours: rawgEstimatedHoursForTitle(estimates, result.title),
+        }))
+      );
+    } catch (error) {
+      console.error("RAWG estimate lookup failed:", error);
+      return NextResponse.json(results);
+    }
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to search for game details.";

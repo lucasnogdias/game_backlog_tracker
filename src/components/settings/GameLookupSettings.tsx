@@ -6,19 +6,21 @@ import styles from "./GameLookupSettings.module.css";
 interface LookupStatus {
   canConfigure: boolean;
   configured: boolean;
+  rawgConfigured: boolean;
 }
 
 export function GameLookupSettings() {
   const [status, setStatus] = useState<LookupStatus | null>(null);
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
+  const [rawgApiKey, setRawgApiKey] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!window.desktopSettings) {
-      setStatus({ canConfigure: false, configured: false });
+      setStatus({ canConfigure: false, configured: false, rawgConfigured: false });
       return;
     }
 
@@ -79,6 +81,50 @@ export function GameLookupSettings() {
     }
   }
 
+  async function saveRawgKey(event: FormEvent) {
+    event.preventDefault();
+    if (!window.desktopSettings) return;
+
+    setIsSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await window.desktopSettings.saveRawgApiKey(rawgApiKey);
+      setRawgApiKey("");
+      setStatus(await window.desktopSettings.getGameLookupStatus());
+      setMessage("RAWG estimated playtime has been configured.");
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save the RAWG API key."
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function clearRawgKey() {
+    if (!window.desktopSettings) return;
+
+    setIsSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await window.desktopSettings.clearRawgApiKey();
+      setStatus(await window.desktopSettings.getGameLookupStatus());
+      setMessage("Your saved RAWG API key has been removed.");
+    } catch (clearError) {
+      setError(
+        clearError instanceof Error
+          ? clearError.message
+          : "Unable to remove the RAWG API key."
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   if (!status) {
     return <p>Loading game lookup settings...</p>;
   }
@@ -88,7 +134,8 @@ export function GameLookupSettings() {
       <section className={styles.section}>
         <p className={styles.description}>
           Game lookup keys can be configured from the packaged desktop app. Local
-          development uses IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in your .env file.
+          development uses IGDB_CLIENT_ID, IGDB_CLIENT_SECRET, and optionally RAWG_API_KEY
+          in your .env file.
         </p>
         {error && <p className={styles.error}>{error}</p>}
       </section>
@@ -101,8 +148,8 @@ export function GameLookupSettings() {
         Game lookup is currently {status.configured ? "configured." : "not configured."}
       </p>
       <p className={styles.description}>
-        Your key is stored in your operating system&apos;s secure storage and is
-        only used by the local app.
+        Your credentials are stored in your operating system&apos;s secure storage and
+        are only used by the local app.
       </p>
       <form onSubmit={saveCredentials} className={styles.form}>
         <label className={styles.label}>
@@ -144,6 +191,47 @@ export function GameLookupSettings() {
           )}
         </div>
       </form>
+      <section className={styles.optionalProvider}>
+        <h2 className={styles.providerTitle}>Optional RAWG playtime estimates</h2>
+        <p className={styles.description}>
+          RAWG can add estimated hours when it has a title matching the selected IGDB game.
+        </p>
+        <p className={styles.status}>
+          RAWG estimates are currently{" "}
+          {status.rawgConfigured ? "configured." : "not configured."}
+        </p>
+        <form onSubmit={saveRawgKey} className={styles.form}>
+          <label className={styles.label}>
+            RAWG API key
+            <input
+              type="password"
+              value={rawgApiKey}
+              onChange={(event) => setRawgApiKey(event.target.value)}
+              className={styles.input}
+              autoComplete="off"
+            />
+          </label>
+          <div className={styles.actions}>
+            <button
+              type="submit"
+              disabled={isSaving || !rawgApiKey.trim()}
+              className={styles.button}
+            >
+              {isSaving ? "Saving..." : "Save RAWG key"}
+            </button>
+            {status.rawgConfigured && (
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={clearRawgKey}
+                className={styles.secondaryButton}
+              >
+                Remove RAWG key
+              </button>
+            )}
+          </div>
+        </form>
+      </section>
       {message && <p className={styles.status}>{message}</p>}
       {error && <p className={styles.error}>{error}</p>}
     </section>

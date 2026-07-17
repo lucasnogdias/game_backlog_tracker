@@ -88,6 +88,7 @@ fs.copyFileSync(
 
 let igdbClientId = "";
 let igdbClientSecret = "";
+let rawgApiKey = "";
 if (process.env.INCLUDE_IGDB_CREDENTIALS === "true") {
   dotenv.config({ path: path.join(root, ".env.private") });
   igdbClientId = process.env.IGDB_CLIENT_ID?.trim() ?? "";
@@ -97,9 +98,10 @@ if (process.env.INCLUDE_IGDB_CREDENTIALS === "true") {
       "Private builds require IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in .env.private."
     );
   }
+  rawgApiKey = process.env.RAWG_API_KEY?.trim() ?? "";
 }
 
 fs.writeFileSync(
   path.join(buildDirectory, "default-settings.json"),
-  JSON.stringify({ igdbClientId, igdbClientSecret })
+  JSON.stringify({ igdbClientId, igdbClientSecret, rawgApiKey })
 );

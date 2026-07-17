@@ -7,9 +7,6 @@ interface IgdbGame {
   cover?: {
     url?: string;
   };
-  game_time_to_beat?: {
-    normally?: number;
-  };
 }
 
 interface TwitchTokenResponse {
@@ -45,11 +42,6 @@ function escapeSearchQuery(query: string): string {
 function toIsoDate(timestamp: number | undefined): string | null {
   if (!timestamp) return null;
   return new Date(timestamp * 1000).toISOString().slice(0, 10);
-}
-
-function toEstimatedHours(seconds: number | undefined): number | null {
-  if (!seconds || seconds <= 0) return null;
-  return Math.round((seconds / 3600) * 2) / 2;
 }
 
 function coverImageUrl(url: string | undefined): string | null {
@@ -98,7 +90,7 @@ export async function searchIgdbGames(
     },
     body: [
       `search "${escapeSearchQuery(query)}";`,
-      "fields id,name,first_release_date,cover.url,game_time_to_beat.normally;",
+      "fields id,name,first_release_date,cover.url;",
       "where version_parent = null;",
       "limit 10;",
     ].join(" "),
@@ -112,7 +104,7 @@ export async function searchIgdbGames(
     id: game.id,
     title: game.name,
     releaseDate: toIsoDate(game.first_release_date),
-    estimatedHours: toEstimatedHours(game.game_time_to_beat?.normally),
+    estimatedHours: null,
     coverImageUrl: coverImageUrl(game.cover?.url),
   }));
 }
