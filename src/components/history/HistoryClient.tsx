@@ -16,6 +16,7 @@ import { HistoryFormModal } from "./HistoryFormModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { JournalEntryModal } from "./JournalEntryModal";
 import { PlaytimeSummary } from "./PlaytimeSummary";
+import { useGameViewPreference } from "@/components/shared/useGameViewPreference";
 
 interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];
@@ -24,7 +25,7 @@ interface HistoryClientProps {
 export function HistoryClient({ initialEntries }: HistoryClientProps) {
   const router = useRouter();
   const [entries, setEntries] = useState(initialEntries);
-  const [view, setView] = useState<"list" | "card">("list");
+  const [view, setView] = useGameViewPreference();
   const [sortField, setSortField] = useState<HistorySortField>("addedAt");
   // Default: oldest added first (per spec, games added first show first).
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");

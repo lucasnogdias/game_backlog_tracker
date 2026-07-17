@@ -1,7 +1,12 @@
 .main {
-  margin: 0 auto;
-  max-width: 72rem; /* max-w-6xl */
-  padding: 1.5rem;
+  margin: 0 1.5rem;
+  padding: 1.5rem 0;
+}
+
+@media (min-width: 1024px) {
+  .main {
+    margin: 0 3rem;
+  }
 }
 
 .heading {

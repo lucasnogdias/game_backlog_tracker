@@ -1,0 +1,20 @@
+.trigger {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 100;
+  max-width: min(32rem, calc(100vw - 2rem));
+  border-radius: 0.25rem;
+  background: var(--color-surface-inverse);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text-inverse);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  white-space: normal;
+  pointer-events: none;
+}

@@ -45,23 +45,25 @@ export function CardGrid<T extends CardItem>({
     <div className={styles.grid}>
       {items.map((item) => (
         <div key={item.id} className={styles.card}>
-          {item.coverImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- external, arbitrary user-provided URLs
-            <img
-              src={item.coverImageUrl}
-              alt={`${item.title} cover art`}
-              className={styles.coverImage}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => handlePlaceholderClick(item)}
-              className={styles.coverPlaceholder}
-            >
-              <span className={styles.coverPlaceholderIcon}>🎮</span>
-              Add cover image
-            </button>
-          )}
+          <div className={styles.cover}>
+            {item.coverImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- external, arbitrary user-provided URLs
+              <img
+                src={item.coverImageUrl}
+                alt={`${item.title} cover art`}
+                className={styles.coverImage}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => handlePlaceholderClick(item)}
+                className={styles.coverPlaceholder}
+              >
+                <span className={styles.coverPlaceholderIcon}>🎮</span>
+                Add cover image
+              </button>
+            )}
+          </div>
           <div className={styles.cardBody}>
             <h3 className={styles.cardTitle}>{item.title}</h3>
             {renderMeta(item)}

@@ -36,6 +36,7 @@ function jsonResponse(body: unknown, ok = true) {
 describe("HistoryClient", () => {
   beforeEach(() => {
     global.fetch = jest.fn();
+    window.localStorage.clear();
   });
 
   afterEach(() => {
@@ -59,6 +60,16 @@ describe("HistoryClient", () => {
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
+    expect(window.localStorage.getItem("game-backlog-tracker:view")).toBe("card");
+  });
+
+  it("restores the view selected on another page", async () => {
+    window.localStorage.setItem("game-backlog-tracker:view", "card");
+    render(<HistoryClient initialEntries={[makeEntry()]} />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    });
   });
 
   it("adds a new entry via the Add Entry modal and POSTs it to the API", async () => {
