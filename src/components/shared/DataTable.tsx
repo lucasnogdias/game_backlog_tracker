@@ -5,6 +5,7 @@
 // (currently used by the Backlog and History pages).
 
 import styles from "./DataTable.module.css";
+import shared from "@/styles/shared.module.css";
 
 export interface DataTableColumn<T> {
   header: string;
@@ -37,7 +38,7 @@ export function DataTable<T extends { id: string }>({
   renderActions,
 }: DataTableProps<T>) {
   if (items.length === 0) {
-    return <p className={styles.emptyMessage}>{emptyMessage}</p>;
+    return <p className={shared.emptyState}>{emptyMessage}</p>;
   }
 
   return (

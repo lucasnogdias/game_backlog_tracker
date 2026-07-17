@@ -83,10 +83,10 @@ export function GameLookupModal({
     <div className={shared.overlay}>
       <div className={`${shared.dialog} ${styles.dialog}`}>
         <h2 className={shared.dialogTitle}>Find Game Details</h2>
-        <form onSubmit={handleSubmit} className={styles.searchRow}>
+        <form onSubmit={handleSubmit} className={shared.inlineInputRow}>
           <input
             aria-label="Search game title"
-            className={`${shared.textInput} ${styles.searchInput}`}
+            className={`${shared.textInput} ${shared.flexibleInput}`}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             autoFocus

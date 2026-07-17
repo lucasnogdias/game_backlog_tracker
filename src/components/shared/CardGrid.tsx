@@ -5,6 +5,7 @@
 // fully custom actions row (currently used by the Backlog and History pages).
 
 import styles from "./CardGrid.module.css";
+import shared from "@/styles/shared.module.css";
 
 interface CardItem {
   id: string;
@@ -30,7 +31,7 @@ export function CardGrid<T extends CardItem>({
   renderActions,
 }: CardGridProps<T>) {
   if (items.length === 0) {
-    return <p className={styles.emptyMessage}>{emptyMessage}</p>;
+    return <p className={shared.emptyState}>{emptyMessage}</p>;
   }
 
   function handlePlaceholderClick(item: T) {

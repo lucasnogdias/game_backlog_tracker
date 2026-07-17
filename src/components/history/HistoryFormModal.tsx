@@ -11,6 +11,7 @@ import shared from "@/styles/shared.module.css";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { GameLookupModal } from "@/components/shared/GameLookupModal";
 import { useGameLookupAvailability } from "@/components/shared/useGameLookupAvailability";
+import { toMonthInputValue } from "@/lib/date-input";
 
 interface HistoryFormModalProps {
   initialEntry?: HistoryEntryDTO;
@@ -21,11 +22,6 @@ interface HistoryFormModalProps {
 function toDateInputValue(isoDate: string | null): string {
   if (!isoDate) return "";
   return isoDate.slice(0, 10); // "YYYY-MM-DD"
-}
-
-function toMonthInputValue(isoDate: string | null): string {
-  if (!isoDate) return "";
-  return isoDate.slice(0, 7); // "YYYY-MM"
 }
 
 export function HistoryFormModal({
@@ -120,9 +116,9 @@ export function HistoryFormModal({
         <form onSubmit={handleSubmit} className={shared.form}>
           <label className={shared.fieldGroup}>
             Title
-            <div className={styles.titleInputRow}>
+            <div className={shared.inlineInputRow}>
               <input
-                className={`${shared.textInput} ${styles.titleInput}`}
+                className={`${shared.textInput} ${shared.flexibleInput}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 autoFocus
@@ -130,7 +126,7 @@ export function HistoryFormModal({
               <button
                 type="button"
                 onClick={() => setIsLookingUp(true)}
-                className={styles.lookupButton}
+                className={shared.lookupButton}
                 disabled={!title.trim() || !gameLookup.available}
                 title={
                   gameLookup.available
@@ -142,7 +138,7 @@ export function HistoryFormModal({
               </button>
             </div>
             {!gameLookup.available && (
-              <span className={styles.lookupUnavailable}>
+              <span className={shared.lookupUnavailable}>
                 Game lookup is unavailable.
                 {gameLookup.canConfigure && (
                   <>

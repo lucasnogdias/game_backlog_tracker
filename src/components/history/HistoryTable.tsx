@@ -4,8 +4,7 @@ import type { HistoryEntryDTO } from "@/types/history";
 import { formatPlaytime } from "@/lib/playtime";
 import { formatDate } from "@/lib/format-date";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
-import { ActionsMenu } from "@/components/shared/ActionsMenu";
-import styles from "./HistoryTable.module.css";
+import { HistoryItemActions } from "./HistoryItemActions";
 
 interface HistoryTableProps {
   entries: HistoryEntryDTO[];
@@ -63,31 +62,15 @@ export function HistoryTable({
       columns={COLUMNS}
       emptyMessage="No games in your history yet. Add one once you start playing!"
       renderActions={(entry) => (
-        <div className={styles.actionsRow}>
-          {onAddJournalEntry && (
-            <button
-              type="button"
-              onClick={() => onAddJournalEntry(entry)}
-              className={styles.journalButton}
-            >
-              Add Journal Entry
-            </button>
-          )}
-          <ActionsMenu
-            items={[
-              { label: "Edit", onClick: () => onEdit(entry) },
-              ...(onViewJournal
-                ? [{ label: "View Journal", onClick: () => onViewJournal(entry) }]
-                : []),
-              { label: "Move to Backlog", onClick: () => onMoveToBacklog(entry) },
-              {
-                label: "Delete",
-                onClick: () => onDelete(entry),
-                destructive: true,
-              },
-            ]}
-          />
-        </div>
+        <HistoryItemActions
+          entry={entry}
+          layout="table"
+          onEdit={onEdit}
+          onAddJournalEntry={onAddJournalEntry}
+          onViewJournal={onViewJournal}
+          onDelete={onDelete}
+          onMoveToBacklog={onMoveToBacklog}
+        />
       )}
     />
   );
