@@ -47,7 +47,6 @@ export function GameFormModal({
   const gameLookup = useGameLookupAvailability();
   const ownedRef = useRef<HTMLInputElement>(null);
   const platformRef = useRef<HTMLInputElement>(null);
-  const estimatedHoursRef = useRef<HTMLInputElement>(null);
   const releaseDateRef = useRef<HTMLInputElement>(null);
   const hypeRef = useRef<HTMLInputElement>(null);
   const coverImageUrlRef = useRef<HTMLInputElement>(null);
@@ -131,7 +130,6 @@ export function GameFormModal({
     if (event.key !== "Enter") return;
     event.preventDefault();
     addPlatformDraft();
-    estimatedHoursRef.current?.focus();
   }
 
   function handleNotesKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -268,7 +266,6 @@ export function GameFormModal({
               Est. Hours
               <input
                 type="number"
-                ref={estimatedHoursRef}
                 min={0}
                 step={0.5}
                 className={shared.textInput}
