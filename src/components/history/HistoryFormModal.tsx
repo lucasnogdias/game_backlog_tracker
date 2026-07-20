@@ -319,7 +319,6 @@ export function HistoryFormModal({
           initialQuery={title}
           onSelect={handleLookupSelect}
           onClose={() => setIsLookingUp(false)}
-          showEstimatedHours={false}
         />
       )}
 

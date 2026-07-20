@@ -10,7 +10,6 @@ interface GameLookupModalProps {
   initialQuery: string;
   onSelect: (result: GameLookupResult) => void;
   onClose: () => void;
-  showEstimatedHours?: boolean;
 }
 
 function formatReleaseDate(releaseDate: string | null): string {
@@ -22,7 +21,6 @@ export function GameLookupModal({
   initialQuery,
   onSelect,
   onClose,
-  showEstimatedHours = true,
 }: GameLookupModalProps) {
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<GameLookupResult[]>([]);
@@ -123,9 +121,6 @@ export function GameLookupModal({
                   <p className={styles.resultTitle}>{result.title}</p>
                   <p className={styles.resultDetails}>
                     {formatReleaseDate(result.releaseDate)}
-                    {showEstimatedHours &&
-                      result.estimatedHours !== null &&
-                      ` · Average playtime: ${result.estimatedHours}h`}
                   </p>
                 </div>
               </div>

@@ -69,12 +69,6 @@ The app stores the credentials in your operating system's secure storage and use
 locally. Public releases do not include credentials. You can remove saved credentials from the
 same Settings page at any time.
 
-### Optional RAWG estimated hours
-
-RAWG can add estimated hours when it has a title matching the IGDB game you select. In
-**Settings**, enter a [RAWG API key](https://rawg.io/apidocs) under **Optional RAWG playtime
-estimates**. This is independent of IGDB, and game lookup remains available without it.
-
 ## Back up and restore data
 
 Open **Data** regularly and select **Download Backup**. The downloaded ZIP includes CSV files for

@@ -109,7 +109,6 @@ describe("GameFormModal", () => {
         getGameLookupStatus: jest.fn().mockResolvedValue({
           canConfigure: true,
           configured: false,
-          rawgConfigured: false,
         }),
       },
     });
@@ -182,13 +181,12 @@ describe("GameFormModal", () => {
     ).toBeInTheDocument();
   });
 
-  it("fills empty release date and estimated hours from a selected lookup result", async () => {
+  it("fills empty release date and cover image from a selected lookup result", async () => {
     const user = userEvent.setup();
     const lookupResult: GameLookupResult = {
       id: 9767,
       title: "Hollow Knight: Silksong",
       releaseDate: "2017-02-23",
-      estimatedHours: 7,
       coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
@@ -204,7 +202,7 @@ describe("GameFormModal", () => {
     await user.click(screen.getByRole("button", { name: "Find details" }));
     await user.click(screen.getByRole("button", { name: /hollow knight/i }));
 
-    expect(screen.getByLabelText("Est. Hours")).toHaveValue(7);
+    expect(screen.getByLabelText("Est. Hours")).toHaveValue(null);
     expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
     expect(screen.getByLabelText("Title")).toHaveValue("Hollow Knight: Silksong");
     expect(screen.getByLabelText("Cover Image URL")).toHaveValue(
@@ -218,7 +216,6 @@ describe("GameFormModal", () => {
       id: 9767,
       title: "Hollow Knight",
       releaseDate: "2017-02-23",
-      estimatedHours: 7,
       coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
@@ -241,14 +238,14 @@ describe("GameFormModal", () => {
 
     expect(
       screen.getByText(
-        /will replace the existing estimated hours and release date/i
+        /will replace the existing release date/i
       )
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Est. Hours")).toHaveValue(30);
 
     await user.click(screen.getByRole("button", { name: "Apply details" }));
 
-    expect(screen.getByLabelText("Est. Hours")).toHaveValue(7);
+    expect(screen.getByLabelText("Est. Hours")).toHaveValue(30);
     expect(screen.getByLabelText("Release Date")).toHaveValue("2017-02");
   });
 

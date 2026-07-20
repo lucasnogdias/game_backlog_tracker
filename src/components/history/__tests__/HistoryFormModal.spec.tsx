@@ -213,7 +213,6 @@ describe("HistoryFormModal", () => {
       id: 9767,
       title: "Hollow Knight: Silksong",
       releaseDate: "2017-02-23",
-      estimatedHours: 7,
       coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
@@ -242,7 +241,6 @@ describe("HistoryFormModal", () => {
       id: 9767,
       title: "Hollow Knight",
       releaseDate: "2017-02-23",
-      estimatedHours: 7,
       coverImageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rgi.jpg",
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(
