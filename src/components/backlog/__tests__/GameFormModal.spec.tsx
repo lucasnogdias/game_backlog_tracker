@@ -101,7 +101,7 @@ describe("GameFormModal", () => {
     );
   });
 
-  it("advances fields and adds a platform draft when lookup is unavailable", async () => {
+  it("keeps platform focus to add multiple drafts when lookup is unavailable", async () => {
     const user = userEvent.setup();
     Object.defineProperty(window, "desktopSettings", {
       configurable: true,
@@ -126,7 +126,12 @@ describe("GameFormModal", () => {
     await user.type(platformInput, "PS5");
     await user.keyboard("{Enter}");
     expect(await screen.findByText("PS5")).toBeInTheDocument();
-    expect(screen.getByLabelText("Est. Hours")).toHaveFocus();
+    expect(platformInput).toHaveFocus();
+
+    await user.type(platformInput, "Switch");
+    await user.keyboard("{Enter}");
+    expect(await screen.findByText("Switch")).toBeInTheDocument();
+    expect(platformInput).toHaveFocus();
   });
 
   it("submits when Enter is pressed in Notes", async () => {
