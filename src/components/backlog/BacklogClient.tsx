@@ -4,9 +4,8 @@ import { useMemo, useState } from "react";
 import type {
   BacklogGameDTO,
   BacklogGameInput,
-  BacklogSortField,
-  SortDirection,
 } from "@/types/backlog";
+import { BACKLOG_SORT_FIELDS } from "@/types/backlog";
 import { sortBacklogGames } from "@/lib/sort-backlog";
 import { BacklogToolbar } from "./BacklogToolbar";
 import { BacklogTable } from "./BacklogTable";
@@ -16,6 +15,7 @@ import { MoveToHistoryModal } from "./MoveToHistoryModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import type { HistoryStatus } from "@/types/history";
 import { useGameViewPreference } from "@/components/shared/useGameViewPreference";
+import { useSortPreference } from "@/components/shared/useSortPreference";
 
 interface BacklogClientProps {
   initialGames: BacklogGameDTO[];
@@ -24,8 +24,12 @@ interface BacklogClientProps {
 export function BacklogClient({ initialGames }: BacklogClientProps) {
   const [games, setGames] = useState(initialGames);
   const [view, setView] = useGameViewPreference();
-  const [sortField, setSortField] = useState<BacklogSortField>("hype");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortField, sortDirection, setSortPreference] = useSortPreference(
+    "game-backlog-tracker:backlog-sort",
+    "hype",
+    "desc",
+    BACKLOG_SORT_FIELDS
+  );
   const [isAdding, setIsAdding] = useState(false);
   const [editingGame, setEditingGame] = useState<BacklogGameDTO | null>(null);
   const [deletingGame, setDeletingGame] = useState<BacklogGameDTO | null>(null);
@@ -94,10 +98,7 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
         onViewChange={setView}
         sortField={sortField}
         sortDirection={sortDirection}
-        onSortChange={(field, direction) => {
-          setSortField(field);
-          setSortDirection(direction);
-        }}
+        onSortChange={setSortPreference}
         onAddClick={() => setIsAdding(true)}
       />
 

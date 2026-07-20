@@ -72,6 +72,34 @@ describe("HistoryClient", () => {
     });
   });
 
+  it("persists its own sort preference without changing the Backlog preference", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem("game-backlog-tracker:backlog-sort:field", "title");
+    window.localStorage.setItem("game-backlog-tracker:backlog-sort:direction", "asc");
+    render(<HistoryClient initialEntries={[makeEntry()]} />);
+
+    await user.selectOptions(screen.getByRole("combobox"), "status");
+    await user.click(screen.getByRole("button", { name: "Toggle sort direction" }));
+
+    expect(window.localStorage.getItem("game-backlog-tracker:history-sort:field")).toBe("status");
+    expect(window.localStorage.getItem("game-backlog-tracker:history-sort:direction")).toBe("desc");
+    expect(window.localStorage.getItem("game-backlog-tracker:backlog-sort:field")).toBe("title");
+    expect(window.localStorage.getItem("game-backlog-tracker:backlog-sort:direction")).toBe("asc");
+  });
+
+  it("restores a saved sort preference", async () => {
+    window.localStorage.setItem("game-backlog-tracker:history-sort:field", "status");
+    window.localStorage.setItem("game-backlog-tracker:history-sort:direction", "desc");
+    render(<HistoryClient initialEntries={[makeEntry()]} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox")).toHaveValue("status");
+    });
+    expect(screen.getByRole("button", { name: "Toggle sort direction" })).toHaveTextContent(
+      "↓ Newest first"
+    );
+  });
+
   it("adds a new entry via the Add Entry modal and POSTs it to the API", async () => {
     const user = userEvent.setup();
     const created = makeEntry({ id: "2", title: "Celeste" });
