@@ -11,12 +11,9 @@ function setDesktopSettings(
       getGameLookupStatus: jest.fn().mockResolvedValue({
         canConfigure: true,
         configured: false,
-        rawgConfigured: false,
       }),
       saveIgdbCredentials: jest.fn().mockResolvedValue(undefined),
       clearIgdbCredentials: jest.fn().mockResolvedValue(undefined),
-      saveRawgApiKey: jest.fn().mockResolvedValue(undefined),
-      clearRawgApiKey: jest.fn().mockResolvedValue(undefined),
       ...overrides,
     },
   });
@@ -44,12 +41,10 @@ describe("GameLookupSettings", () => {
       .mockResolvedValueOnce({
         canConfigure: true,
         configured: false,
-        rawgConfigured: false,
       })
       .mockResolvedValueOnce({
         canConfigure: true,
         configured: true,
-        rawgConfigured: false,
       });
     const saveIgdbCredentials = jest.fn().mockResolvedValue(undefined);
     setDesktopSettings({ getGameLookupStatus, saveIgdbCredentials });
@@ -83,12 +78,10 @@ describe("GameLookupSettings", () => {
       .mockResolvedValueOnce({
         canConfigure: true,
         configured: true,
-        rawgConfigured: false,
       })
       .mockResolvedValueOnce({
         canConfigure: true,
         configured: false,
-        rawgConfigured: false,
       });
     const clearIgdbCredentials = jest.fn().mockResolvedValue(undefined);
     setDesktopSettings({ getGameLookupStatus, clearIgdbCredentials });
@@ -108,34 +101,4 @@ describe("GameLookupSettings", () => {
     ).toBeInTheDocument();
   });
 
-  it("saves an optional RAWG key separately from IGDB credentials", async () => {
-    const user = userEvent.setup();
-    const saveRawgApiKey = jest.fn().mockResolvedValue(undefined);
-    const getGameLookupStatus = jest
-      .fn()
-      .mockResolvedValueOnce({
-        canConfigure: true,
-        configured: true,
-        rawgConfigured: false,
-      })
-      .mockResolvedValueOnce({
-        canConfigure: true,
-        configured: true,
-        rawgConfigured: true,
-      });
-    setDesktopSettings({ getGameLookupStatus, saveRawgApiKey });
-
-    render(<GameLookupSettings />);
-
-    await screen.findByText("Game lookup is currently configured.");
-    await user.type(screen.getByLabelText("RAWG API key"), "private-rawg-key");
-    await user.click(screen.getByRole("button", { name: "Save RAWG key" }));
-
-    await waitFor(() => {
-      expect(saveRawgApiKey).toHaveBeenCalledWith("private-rawg-key");
-    });
-    expect(
-      await screen.findByText("RAWG estimated playtime has been configured.")
-    ).toBeInTheDocument();
-  });
 });

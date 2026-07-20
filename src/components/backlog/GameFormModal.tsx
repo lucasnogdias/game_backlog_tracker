@@ -71,9 +71,6 @@ export function GameFormModal({
 
   function applyLookupResult(result: GameLookupResult) {
     setTitle(result.title);
-    if (result.estimatedHours !== null) {
-      setEstimatedHours(result.estimatedHours.toString());
-    }
     if (result.releaseDate) {
       setReleaseDate(result.releaseDate.slice(0, 7));
     }
@@ -85,13 +82,11 @@ export function GameFormModal({
   }
 
   function handleLookupSelect(result: GameLookupResult) {
-    const overwritesEstimatedHours =
-      result.estimatedHours !== null && estimatedHours !== "";
     const overwritesReleaseDate = result.releaseDate !== null && releaseDate !== "";
     const overwritesCoverImage =
       result.coverImageUrl !== null && coverImageUrl !== "";
 
-    if (overwritesEstimatedHours || overwritesReleaseDate || overwritesCoverImage) {
+    if (overwritesReleaseDate || overwritesCoverImage) {
       setPendingLookupResult(result);
       setIsLookingUp(false);
       return;
@@ -102,9 +97,6 @@ export function GameFormModal({
 
   function lookupOverwriteMessage(result: GameLookupResult): string {
     const fields = [
-      result.estimatedHours !== null && estimatedHours !== ""
-        ? "estimated hours"
-        : null,
       result.releaseDate !== null && releaseDate !== "" ? "release date" : null,
       result.coverImageUrl !== null && coverImageUrl !== ""
         ? "cover image"

@@ -104,7 +104,6 @@ export async function searchIgdbGames(
     id: game.id,
     title: game.name,
     releaseDate: toIsoDate(game.first_release_date),
-    estimatedHours: null,
     coverImageUrl: coverImageUrl(game.cover?.url),
   }));
 }
