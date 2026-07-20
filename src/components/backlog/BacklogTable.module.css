@@ -1,0 +1,13 @@
+.ownedIndicator {
+  display: inline-grid;
+  width: 1.2rem;
+  height: 1.2rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--color-owned-indicator);
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+}

@@ -6,6 +6,7 @@
 
 import styles from "./CardGrid.module.css";
 import shared from "@/styles/shared.module.css";
+import { Tooltip } from "./Tooltip";
 
 interface CardItem {
   id: string;
@@ -21,6 +22,7 @@ interface CardGridProps<T extends CardItem> {
   emptyMessage: string;
   /** Renders the card's action row content (e.g. buttons, an actions menu). */
   renderActions: (item: T) => React.ReactNode;
+  renderCoverOverlay?: (item: T) => React.ReactNode;
 }
 
 export function CardGrid<T extends CardItem>({
@@ -29,6 +31,7 @@ export function CardGrid<T extends CardItem>({
   renderMeta,
   emptyMessage,
   renderActions,
+  renderCoverOverlay,
 }: CardGridProps<T>) {
   if (items.length === 0) {
     return <p className={shared.emptyState}>{emptyMessage}</p>;
@@ -43,34 +46,45 @@ export function CardGrid<T extends CardItem>({
 
   return (
     <div className={styles.grid}>
-      {items.map((item) => (
-        <div key={item.id} className={styles.card}>
-          <div className={styles.cover}>
-            {item.coverImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- external, arbitrary user-provided URLs
-              <img
-                src={item.coverImageUrl}
-                alt={`${item.title} cover art`}
-                className={styles.coverImage}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => handlePlaceholderClick(item)}
-                className={styles.coverPlaceholder}
-              >
-                <span className={styles.coverPlaceholderIcon}>🎮</span>
-                Add cover image
-              </button>
-            )}
+      {items.map((item) => {
+        const coverOverlay = renderCoverOverlay?.(item);
+
+        return (
+          <div key={item.id} className={styles.card}>
+            <div className={styles.cover}>
+              {coverOverlay && (
+                <span className={styles.coverOverlay}>{coverOverlay}</span>
+              )}
+              {item.coverImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- external, arbitrary user-provided URLs
+                <img
+                  src={item.coverImageUrl}
+                  alt={`${item.title} cover art`}
+                  className={styles.coverImage}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handlePlaceholderClick(item)}
+                  className={styles.coverPlaceholder}
+                >
+                  <span className={styles.coverPlaceholderIcon}>🎮</span>
+                  Add cover image
+                </button>
+              )}
+            </div>
+            <div className={styles.cardBody}>
+              <h3 className={styles.cardTitle}>
+                <Tooltip content={item.title} multiline>
+                  {item.title}
+                </Tooltip>
+              </h3>
+              {renderMeta(item)}
+              <div className={styles.cardActions}>{renderActions(item)}</div>
+            </div>
           </div>
-          <div className={styles.cardBody}>
-            <h3 className={styles.cardTitle}>{item.title}</h3>
-            {renderMeta(item)}
-            <div className={styles.cardActions}>{renderActions(item)}</div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

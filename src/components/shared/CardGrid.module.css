@@ -36,8 +36,26 @@
 }
 
 .cover {
-  flex: 0 0 clamp(6rem, 35%, 10rem);
+  position: relative;
+  flex: 0 0 clamp(6.5rem, 40%, 11rem);
   align-self: stretch;
+}
+
+.coverOverlay {
+  position: absolute;
+  z-index: 1;
+  top: 0.375rem;
+  left: 0.375rem;
+  display: grid;
+  width: 1.2rem;
+  height: 1.2rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--color-owned-indicator);
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .coverImage {

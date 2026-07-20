@@ -19,6 +19,7 @@
   --color-text-subtle: #525252; /* neutral-600 */
   --color-text-inverse: #ffffff;
   --color-danger: #dc2626; /* red-600 */
+  --color-owned-indicator: #166534; /* green-800 */
   --color-overlay: rgb(0 0 0 / 50%);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -41,6 +42,7 @@
     --color-text-muted: #737373; /* neutral-500 */
     --color-text-subtle: #d4d4d4; /* neutral-300 */
     --color-text-inverse: #171717;
+    --color-owned-indicator: #166534; /* green-800 */
   }
 }
 

@@ -25,6 +25,11 @@ export function BacklogCards({
       items={games}
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your backlog yet. Add one to get started!"
+      renderCoverOverlay={(game) =>
+        game.owned ? (
+          <span aria-label="Owned">✓</span>
+        ) : null
+      }
       renderActions={(game) => (
         <BacklogItemActions
           game={game}

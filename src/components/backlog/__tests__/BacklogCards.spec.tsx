@@ -54,6 +54,22 @@ describe("BacklogCards", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows an ownership indicator only for owned games", () => {
+    const ownedGame = makeGame({ owned: true });
+    const unownedGame = makeGame({ id: "2", owned: false });
+    render(
+      <BacklogCards
+        games={[ownedGame, unownedGame]}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onSetCoverImage={jest.fn()}
+        onMoveToHistory={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByLabelText("Owned")).toHaveLength(1);
+  });
+
   it("renders an image when a cover image URL is set", () => {
     const game = makeGame({ coverImageUrl: "https://example.com/cover.jpg" });
     render(
