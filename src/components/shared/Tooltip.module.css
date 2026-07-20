@@ -5,6 +5,15 @@
   white-space: nowrap;
 }
 
+.multilineTrigger {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
 .tooltip {
   position: fixed;
   z-index: 100;

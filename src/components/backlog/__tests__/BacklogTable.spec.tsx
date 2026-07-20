@@ -39,7 +39,7 @@ describe("BacklogTable", () => {
     expect(screen.getByText("Switch, PC")).toBeInTheDocument();
     expect(screen.getByText("30h")).toBeInTheDocument();
     expect(screen.getByText("9")).toBeInTheDocument();
-    expect(screen.getByText("✅")).toBeInTheDocument();
+    expect(screen.getByText("✓")).toBeInTheDocument();
   });
 
   it("falls back to placeholder dashes for missing optional fields", () => {

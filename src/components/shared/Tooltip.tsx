@@ -13,11 +13,12 @@ import styles from "./Tooltip.module.css";
 interface TooltipProps {
   content: string;
   children: ReactNode;
+  multiline?: boolean;
 }
 
 const SHOW_DELAY_MS = 350;
 
-export function Tooltip({ content, children }: TooltipProps) {
+export function Tooltip({ content, children, multiline = false }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ left: 0, top: 0 });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -25,7 +26,13 @@ export function Tooltip({ content, children }: TooltipProps) {
 
   function show() {
     const trigger = document.getElementById(tooltipId);
-    if (!trigger || trigger.scrollWidth <= trigger.clientWidth) return;
+    if (
+      !trigger ||
+      (trigger.scrollWidth <= trigger.clientWidth &&
+        trigger.scrollHeight <= trigger.clientHeight)
+    ) {
+      return;
+    }
 
     const bounds = trigger.getBoundingClientRect();
     setPosition({
@@ -49,7 +56,7 @@ export function Tooltip({ content, children }: TooltipProps) {
     <>
       <span
         id={tooltipId}
-        className={styles.trigger}
+        className={`${styles.trigger} ${multiline ? styles.multilineTrigger : ""}`}
         onMouseEnter={show}
         onMouseLeave={hide}
         onFocus={show}

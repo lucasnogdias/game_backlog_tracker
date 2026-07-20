@@ -4,6 +4,7 @@ import type { BacklogGameDTO } from "@/types/backlog";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { formatMonthYear } from "@/lib/format-date";
 import { BacklogItemActions } from "./BacklogItemActions";
+import styles from "./BacklogTable.module.css";
 
 interface BacklogTableProps {
   games: BacklogGameDTO[];
@@ -23,7 +24,17 @@ const COLUMNS: DataTableColumn<BacklogGameDTO>[] = [
     variant: "emphasis",
     render: (game) => game.title,
   },
-  { header: "Owned", render: (game) => (game.owned ? "✅" : "—") },
+  {
+    header: "Owned",
+    render: (game) =>
+      game.owned ? (
+        <span className={styles.ownedIndicator} aria-label="Owned">
+          ✓
+        </span>
+      ) : (
+        "—"
+      ),
+  },
   {
     header: "Platform(s)",
     render: (game) => game.platforms.join(", ") || "—",
