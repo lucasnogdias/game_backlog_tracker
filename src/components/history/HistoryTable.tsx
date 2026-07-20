@@ -5,6 +5,8 @@ import { formatPlaytime } from "@/lib/playtime";
 import { formatDate } from "@/lib/format-date";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { HistoryItemActions } from "./HistoryItemActions";
+import { HISTORY_STATUS_CLASS_NAMES } from "./history-status-styles";
+import styles from "./HistoryStatus.module.css";
 
 interface HistoryTableProps {
   entries: HistoryEntryDTO[];
@@ -26,7 +28,12 @@ const COLUMNS: DataTableColumn<HistoryEntryDTO>[] = [
     variant: "emphasis",
     render: (entry) => entry.title,
   },
-  { header: "Status", render: (entry) => entry.status },
+  {
+    header: "Status",
+    render: (entry) => (
+      <span className={styles[HISTORY_STATUS_CLASS_NAMES[entry.status]]}>{entry.status}</span>
+    ),
+  },
   {
     header: "Playtime",
     render: (entry) => formatPlaytime(entry.playtimeMinutes) || "—",
