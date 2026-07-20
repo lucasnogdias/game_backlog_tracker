@@ -1,0 +1,23 @@
+.finished {
+  color: var(--color-status-finished);
+}
+
+.completed {
+  color: var(--color-status-completed);
+}
+
+.paused {
+  color: var(--color-status-paused);
+}
+
+.abandoned {
+  color: var(--color-status-abandoned);
+}
+
+.inProgress {
+  color: var(--color-status-in-progress);
+}
+
+.recurrent {
+  color: var(--color-status-recurrent);
+}

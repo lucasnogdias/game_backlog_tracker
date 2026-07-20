@@ -20,6 +20,12 @@
   --color-text-inverse: #ffffff;
   --color-danger: #dc2626; /* red-600 */
   --color-owned-indicator: #166534; /* green-800 */
+  --color-status-finished: #5c8c64;
+  --color-status-completed: #8b6fa8;
+  --color-status-paused: #a67c33;
+  --color-status-abandoned: #b45f5f;
+  --color-status-in-progress: #527db6;
+  --color-status-recurrent: #4d8d8d;
   --color-overlay: rgb(0 0 0 / 50%);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -43,6 +49,12 @@
     --color-text-subtle: #d4d4d4; /* neutral-300 */
     --color-text-inverse: #171717;
     --color-owned-indicator: #166534; /* green-800 */
+    --color-status-finished: #86b98e;
+    --color-status-completed: #b99ad8;
+    --color-status-paused: #d1a95c;
+    --color-status-abandoned: #db8888;
+    --color-status-in-progress: #86b1e8;
+    --color-status-recurrent: #73b7b7;
   }
 }
 

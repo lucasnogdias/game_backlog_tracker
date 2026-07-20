@@ -2,6 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HistoryTable } from "../HistoryTable";
 import type { HistoryEntryDTO } from "@/types/history";
+import { HISTORY_STATUSES } from "@/types/history";
+import { HISTORY_STATUS_CLASS_NAMES } from "../history-status-styles";
+import styles from "../HistoryStatus.module.css";
 
 function makeEntry(overrides: Partial<HistoryEntryDTO> = {}): HistoryEntryDTO {
   return {
@@ -58,6 +61,24 @@ describe("HistoryTable", () => {
 
     // Multiple "—" placeholders are expected (playtime, finished on, platform, release year, notes)
     expect(screen.getAllByText("—").length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("colors the status text for every status", () => {
+    const entries = HISTORY_STATUSES.map((status, index) =>
+      makeEntry({ id: String(index), title: `${status} game`, status })
+    );
+    render(
+      <HistoryTable
+        entries={entries}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onMoveToBacklog={jest.fn()}
+      />
+    );
+
+    for (const status of HISTORY_STATUSES) {
+      expect(screen.getByText(status)).toHaveClass(styles[HISTORY_STATUS_CLASS_NAMES[status]]);
+    }
   });
 
   it("calls onEdit with the entry when Edit is clicked", async () => {

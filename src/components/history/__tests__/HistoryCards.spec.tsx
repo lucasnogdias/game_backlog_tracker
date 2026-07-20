@@ -2,6 +2,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HistoryCards } from "../HistoryCards";
 import type { HistoryEntryDTO } from "@/types/history";
+import { HISTORY_STATUSES } from "@/types/history";
+import {
+  HISTORY_STATUS_BORDER_COLORS,
+  HISTORY_STATUS_CLASS_NAMES,
+} from "../history-status-styles";
+import styles from "../HistoryStatus.module.css";
 
 function makeEntry(overrides: Partial<HistoryEntryDTO> = {}): HistoryEntryDTO {
   return {
@@ -136,6 +142,29 @@ describe("HistoryCards", () => {
 
     expect(screen.getByText("No platform set")).toBeInTheDocument();
     expect(screen.getByText("Playtime: —")).toBeInTheDocument();
+  });
+
+  it("colors status text and card borders for every status", () => {
+    const entries = HISTORY_STATUSES.map((status, index) =>
+      makeEntry({ id: String(index), title: `${status} game`, status })
+    );
+    render(
+      <HistoryCards
+        entries={entries}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onSetCoverImage={jest.fn()}
+        onMoveToBacklog={jest.fn()}
+      />
+    );
+
+    for (const status of HISTORY_STATUSES) {
+      const statusText = screen.getByText(status);
+      expect(statusText).toHaveClass(styles[HISTORY_STATUS_CLASS_NAMES[status]]);
+      expect(statusText.parentElement?.parentElement).toHaveStyle({
+        borderColor: HISTORY_STATUS_BORDER_COLORS[status],
+      });
+    }
   });
 
   it("calls its visible and menu action callbacks with the entry", async () => {

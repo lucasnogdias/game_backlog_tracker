@@ -23,6 +23,7 @@ interface CardGridProps<T extends CardItem> {
   /** Renders the card's action row content (e.g. buttons, an actions menu). */
   renderActions: (item: T) => React.ReactNode;
   renderCoverOverlay?: (item: T) => React.ReactNode;
+  getCardBorderColor?: (item: T) => string;
 }
 
 export function CardGrid<T extends CardItem>({
@@ -32,6 +33,7 @@ export function CardGrid<T extends CardItem>({
   emptyMessage,
   renderActions,
   renderCoverOverlay,
+  getCardBorderColor,
 }: CardGridProps<T>) {
   if (items.length === 0) {
     return <p className={shared.emptyState}>{emptyMessage}</p>;
@@ -50,7 +52,11 @@ export function CardGrid<T extends CardItem>({
         const coverOverlay = renderCoverOverlay?.(item);
 
         return (
-          <div key={item.id} className={styles.card}>
+          <div
+            key={item.id}
+            className={styles.card}
+            style={{ borderColor: getCardBorderColor?.(item) }}
+          >
             <div className={styles.cover}>
               {coverOverlay && (
                 <span className={styles.coverOverlay}>{coverOverlay}</span>
