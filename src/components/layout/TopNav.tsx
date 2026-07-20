@@ -6,10 +6,10 @@ export function TopNav() {
     <nav className={styles.nav}>
       <div className={styles.inner}>
         <span className={styles.brand}>Game Backlog Tracker</span>
-        <Link href="/backlog" className={styles.link}>
+        <Link href="/backlog" prefetch={false} className={styles.link}>
           Backlog
         </Link>
-        <Link href="/history" className={styles.link}>
+        <Link href="/history" prefetch={false} className={styles.link}>
           History
         </Link>
         <Link href="/data" className={styles.link}>
