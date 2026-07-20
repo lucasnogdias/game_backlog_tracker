@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import type {
   HistoryEntryDTO,
   HistoryEntryInput,
-  HistorySortField,
-  SortDirection,
 } from "@/types/history";
+import { HISTORY_SORT_FIELDS } from "@/types/history";
 import { sortHistoryEntries } from "@/lib/sort-history";
 import { HistoryToolbar } from "./HistoryToolbar";
 import { HistoryTable } from "./HistoryTable";
@@ -17,6 +16,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { JournalEntryModal } from "./JournalEntryModal";
 import { PlaytimeSummary } from "./PlaytimeSummary";
 import { useGameViewPreference } from "@/components/shared/useGameViewPreference";
+import { useSortPreference } from "@/components/shared/useSortPreference";
 
 interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];
@@ -26,9 +26,12 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
   const router = useRouter();
   const [entries, setEntries] = useState(initialEntries);
   const [view, setView] = useGameViewPreference();
-  const [sortField, setSortField] = useState<HistorySortField>("addedAt");
-  // Default: oldest added first (per spec, games added first show first).
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortField, sortDirection, setSortPreference] = useSortPreference(
+    "game-backlog-tracker:history-sort",
+    "addedAt",
+    "asc",
+    HISTORY_SORT_FIELDS
+  );
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<HistoryEntryDTO | null>(
     null
@@ -109,10 +112,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
         onViewChange={setView}
         sortField={sortField}
         sortDirection={sortDirection}
-        onSortChange={(field, direction) => {
-          setSortField(field);
-          setSortDirection(direction);
-        }}
+        onSortChange={setSortPreference}
         onAddClick={() => setIsAdding(true)}
       />
       <PlaytimeSummary entries={entries} />

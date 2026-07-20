@@ -23,6 +23,16 @@ export type HistorySortField =
   | "releaseDate"
   | "addedAt";
 
+export const HISTORY_SORT_FIELDS: readonly HistorySortField[] = [
+  "title",
+  "status",
+  "playtimeMinutes",
+  "finishedOn",
+  "platform",
+  "releaseDate",
+  "addedAt",
+];
+
 export type SortDirection = "asc" | "desc";
 
 export interface HistoryEntryDTO {

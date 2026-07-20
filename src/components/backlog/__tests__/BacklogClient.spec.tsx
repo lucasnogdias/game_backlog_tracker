@@ -56,6 +56,30 @@ describe("BacklogClient", () => {
     expect(window.localStorage.getItem("game-backlog-tracker:view")).toBe("card");
   });
 
+  it("persists its sort field and direction", async () => {
+    const user = userEvent.setup();
+    render(<BacklogClient initialGames={[makeGame()]} />);
+
+    await user.selectOptions(screen.getByRole("combobox"), "title");
+    await user.click(screen.getByRole("button", { name: "Toggle sort direction" }));
+
+    expect(window.localStorage.getItem("game-backlog-tracker:backlog-sort:field")).toBe("title");
+    expect(window.localStorage.getItem("game-backlog-tracker:backlog-sort:direction")).toBe("asc");
+  });
+
+  it("restores a saved sort preference", async () => {
+    window.localStorage.setItem("game-backlog-tracker:backlog-sort:field", "title");
+    window.localStorage.setItem("game-backlog-tracker:backlog-sort:direction", "asc");
+    render(<BacklogClient initialGames={[makeGame()]} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox")).toHaveValue("title");
+    });
+    expect(screen.getByRole("button", { name: "Toggle sort direction" })).toHaveTextContent(
+      "↑ Asc"
+    );
+  });
+
   it("adds a new game via the Add Game modal and POSTs it to the API", async () => {
     const user = userEvent.setup();
     const created = makeGame({ id: "2", title: "Celeste", hype: 8 });

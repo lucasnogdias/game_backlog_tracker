@@ -9,6 +9,15 @@ export type BacklogSortField =
   | "releaseDate"
   | "hype";
 
+export const BACKLOG_SORT_FIELDS: readonly BacklogSortField[] = [
+  "title",
+  "owned",
+  "platforms",
+  "estimatedHours",
+  "releaseDate",
+  "hype",
+];
+
 export type SortDirection = "asc" | "desc";
 
 export interface BacklogGameDTO {
