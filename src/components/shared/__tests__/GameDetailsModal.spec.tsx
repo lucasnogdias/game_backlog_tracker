@@ -132,6 +132,26 @@ describe("GameDetailsModal", () => {
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
+  it("renders and calls the optional Journal action", async () => {
+    const user = userEvent.setup();
+    const onAddJournalEntry = jest.fn();
+    const onViewJournal = jest.fn();
+    render(
+      <GameDetailsModal
+        details={{ type: "history", entry: historyEntry }}
+        onClose={jest.fn()}
+        onEdit={jest.fn()}
+        onAddJournalEntry={onAddJournalEntry}
+        onViewJournal={onViewJournal}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add Journal Entry" }));
+    await user.click(screen.getByRole("button", { name: "View Journal" }));
+    expect(onAddJournalEntry).toHaveBeenCalledTimes(1);
+    expect(onViewJournal).toHaveBeenCalledTimes(1);
+  });
+
   it.each([
     ["the close button", async (user: ReturnType<typeof userEvent.setup>, onClose: jest.Mock) => {
       await user.click(screen.getByRole("button", { name: "Close details" }));

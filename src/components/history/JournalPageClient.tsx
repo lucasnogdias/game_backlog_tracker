@@ -20,6 +20,7 @@ export function JournalPageClient({
 }: JournalPageClientProps) {
   const [entries, setEntries] = useState(initialEntries);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<JournalEntryDTO | null>(null);
   const [isNewestFirst, setIsNewestFirst] = useState(false);
 
   const sortedEntries = useMemo(
@@ -43,6 +44,25 @@ export function JournalPageClient({
     const created: JournalEntryDTO = await response.json();
     setEntries((previousEntries) => [...previousEntries, created]);
     setIsAdding(false);
+  }
+
+  async function handleEdit(content: string) {
+    if (!editingEntry) return;
+    const response = await fetch(
+      `/api/history/${historyEntry.id}/journal/${editingEntry.id}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      }
+    );
+    if (!response.ok) throw new Error("Failed to update journal entry");
+
+    const updated: JournalEntryDTO = await response.json();
+    setEntries((previousEntries) =>
+      previousEntries.map((entry) => (entry.id === updated.id ? updated : entry))
+    );
+    setEditingEntry(null);
   }
 
   return (
@@ -80,7 +100,16 @@ export function JournalPageClient({
         <div className={styles.entries}>
           {sortedEntries.map((entry) => (
             <article key={entry.id} className={styles.entry}>
-              <p className={styles.entryDate}>{formatDateTime(entry.createdAt)}</p>
+              <div className={styles.entryHeader}>
+                <p className={styles.entryDate}>{formatDateTime(entry.createdAt)}</p>
+                <button
+                  type="button"
+                  className={styles.editButton}
+                  onClick={() => setEditingEntry(entry)}
+                >
+                  Edit
+                </button>
+              </div>
               <p className={styles.entryContent}>{entry.content}</p>
             </article>
           ))}
@@ -92,6 +121,15 @@ export function JournalPageClient({
           gameTitle={historyEntry.title}
           onSubmit={handleAdd}
           onClose={() => setIsAdding(false)}
+        />
+      )}
+
+      {editingEntry && (
+        <JournalEntryModal
+          gameTitle={historyEntry.title}
+          initialContent={editingEntry.content}
+          onSubmit={handleEdit}
+          onClose={() => setEditingEntry(null)}
         />
       )}
     </>

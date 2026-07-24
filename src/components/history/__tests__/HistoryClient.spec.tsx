@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockPush = jest.fn();
@@ -116,6 +116,30 @@ describe("HistoryClient", () => {
     await user.click(screen.getByRole("button", { name: "Edit" }));
 
     expect(screen.getByRole("heading", { name: "Edit Entry" })).toBeInTheDocument();
+  });
+
+  it("navigates to the Journal from details", async () => {
+    const user = userEvent.setup();
+    render(<HistoryClient initialEntries={[makeEntry()]} />);
+
+    await user.click(screen.getByText("Hollow Knight"));
+    await user.click(screen.getByRole("button", { name: "View Journal" }));
+
+    expect(mockPush).toHaveBeenCalledWith("/history/1/journal");
+  });
+
+  it("opens the Journal entry modal from details", async () => {
+    const user = userEvent.setup();
+    render(<HistoryClient initialEntries={[makeEntry()]} />);
+
+    await user.click(screen.getByText("Hollow Knight"));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "Add Journal Entry" })
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Add Journal Entry for Hollow Knight" })
+    ).toBeInTheDocument();
   });
 
   it("adds a new entry via the Add Entry modal and POSTs it to the API", async () => {

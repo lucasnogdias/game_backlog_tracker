@@ -32,3 +32,20 @@ export async function createJournalEntry(
 
   return journalEntryToDTO(entry);
 }
+
+export async function updateJournalEntry(
+  historyEntryId: string,
+  id: string,
+  content: string
+): Promise<JournalEntryDTO | null> {
+  const existing = await prisma.journalEntry.findFirst({
+    where: { id, historyEntryId },
+  });
+  if (!existing) return null;
+
+  const entry = await prisma.journalEntry.update({
+    where: { id },
+    data: { content },
+  });
+  return journalEntryToDTO(entry);
+}

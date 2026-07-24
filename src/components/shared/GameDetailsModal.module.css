@@ -102,6 +102,25 @@
   padding-right: 0.5rem;
 }
 
+.journalAction {
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 1440px) {
+  .dialog {
+    width: min(78vw, 68rem);
+    max-width: 78%;
+  }
+
+  .content {
+    grid-template-columns: minmax(24rem, 32rem) minmax(0, 1fr);
+  }
+
+  .details {
+    max-width: 32rem;
+  }
+}
+
 @media (max-width: 600px) {
   .content {
     grid-template-columns: 1fr;

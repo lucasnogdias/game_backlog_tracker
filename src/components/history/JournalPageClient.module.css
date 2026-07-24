@@ -66,6 +66,26 @@
   font-size: 0.875rem;
 }
 
+.entryHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.editButton {
+  border: none;
+  background: none;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0;
+}
+
+.editButton:hover {
+  text-decoration: underline;
+}
+
 .entryContent {
   margin: 0;
   white-space: pre-wrap;
