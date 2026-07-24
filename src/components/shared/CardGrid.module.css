@@ -35,6 +35,15 @@
   border: 1px solid var(--color-border);
 }
 
+.card[role="button"] {
+  cursor: pointer;
+}
+
+.card[role="button"]:focus-visible {
+  outline: 2px solid var(--color-text-subtle);
+  outline-offset: 2px;
+}
+
 .cover {
   position: relative;
   flex: 0 0 clamp(6.5rem, 40%, 11rem);

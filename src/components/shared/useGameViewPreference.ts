@@ -11,7 +11,7 @@ function isGameView(value: string | null): value is GameView {
 }
 
 export function useGameViewPreference(): [GameView, (view: GameView) => void] {
-  const [view, setView] = useState<GameView>("list");
+  const [view, setView] = useState<GameView>("card");
 
   useEffect(() => {
     const savedView = window.localStorage.getItem(GAME_VIEW_PREFERENCE_KEY);

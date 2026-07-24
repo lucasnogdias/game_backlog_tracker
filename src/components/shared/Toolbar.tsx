@@ -67,17 +67,6 @@ export function Toolbar<TField extends string>({
         <div className={styles.viewToggle}>
           <button
             type="button"
-            onClick={() => onViewChange("list")}
-            className={
-              view === "list"
-                ? `${styles.viewButton} ${styles.viewButtonActive}`
-                : styles.viewButton
-            }
-          >
-            List
-          </button>
-          <button
-            type="button"
             onClick={() => onViewChange("card")}
             className={
               view === "card"
@@ -86,6 +75,17 @@ export function Toolbar<TField extends string>({
             }
           >
             Card
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewChange("list")}
+            className={
+              view === "list"
+                ? `${styles.viewButton} ${styles.viewButtonActive}`
+                : styles.viewButton
+            }
+          >
+            List
           </button>
         </div>
         <button type="button" onClick={onAddClick} className={styles.addButton}>

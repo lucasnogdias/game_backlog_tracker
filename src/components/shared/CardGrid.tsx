@@ -24,6 +24,7 @@ interface CardGridProps<T extends CardItem> {
   renderActions: (item: T) => React.ReactNode;
   renderCoverOverlay?: (item: T) => React.ReactNode;
   getCardBorderColor?: (item: T) => string;
+  onItemClick?: (item: T) => void;
 }
 
 export function CardGrid<T extends CardItem>({
@@ -34,6 +35,7 @@ export function CardGrid<T extends CardItem>({
   renderActions,
   renderCoverOverlay,
   getCardBorderColor,
+  onItemClick,
 }: CardGridProps<T>) {
   if (items.length === 0) {
     return <p className={shared.emptyState}>{emptyMessage}</p>;
@@ -56,6 +58,20 @@ export function CardGrid<T extends CardItem>({
             key={item.id}
             className={styles.card}
             style={{ borderColor: getCardBorderColor?.(item) }}
+            role={onItemClick ? "button" : undefined}
+            tabIndex={onItemClick ? 0 : undefined}
+            onClick={(event) => {
+              if (!onItemClick || (event.target as HTMLElement).closest("button, a, input, select, textarea")) {
+                return;
+              }
+              onItemClick(item);
+            }}
+            onKeyDown={(event) => {
+              if (onItemClick && (event.key === "Enter" || event.key === " ")) {
+                event.preventDefault();
+                onItemClick(item);
+              }
+            }}
           >
             <div className={styles.cover}>
               {coverOverlay && (

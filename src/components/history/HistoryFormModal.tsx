@@ -120,6 +120,7 @@ export function HistoryFormModal({
 
   function handleNotesKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key !== "Enter") return;
+    if (event.shiftKey) return;
     event.preventDefault();
     event.currentTarget.form?.requestSubmit();
   }

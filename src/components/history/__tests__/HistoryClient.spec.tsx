@@ -44,23 +44,22 @@ describe("HistoryClient", () => {
     mockPush.mockReset();
   });
 
-  it("renders the initial entries in list view by default", () => {
+  it("renders the initial entries in card view by default", () => {
     render(<HistoryClient initialEntries={[makeEntry()]} />);
 
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
-    // List view renders a table
-    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("switches to card view when the Card button is clicked", async () => {
+  it("switches to list view when the List button is clicked", async () => {
     const user = userEvent.setup();
     render(<HistoryClient initialEntries={[makeEntry()]} />);
 
-    await user.click(screen.getByRole("button", { name: "Card" }));
+    await user.click(screen.getByRole("button", { name: "List" }));
 
-    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
-    expect(window.localStorage.getItem("game-backlog-tracker:view")).toBe("card");
+    expect(window.localStorage.getItem("game-backlog-tracker:view")).toBe("list");
   });
 
   it("restores the view selected on another page", async () => {
@@ -98,6 +97,25 @@ describe("HistoryClient", () => {
     expect(screen.getByRole("button", { name: "Toggle sort direction" })).toHaveTextContent(
       "↓ Newest first"
     );
+  });
+
+  it("opens details from a card", async () => {
+    const user = userEvent.setup();
+    render(<HistoryClient initialEntries={[makeEntry()]} />);
+
+    await user.click(screen.getByText("Hollow Knight"));
+
+    expect(screen.getByRole("dialog", { name: "Hollow Knight" })).toBeInTheDocument();
+  });
+
+  it("opens the existing edit form from details", async () => {
+    const user = userEvent.setup();
+    render(<HistoryClient initialEntries={[makeEntry()]} />);
+
+    await user.click(screen.getByText("Hollow Knight"));
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+
+    expect(screen.getByRole("heading", { name: "Edit Entry" })).toBeInTheDocument();
   });
 
   it("adds a new entry via the Add Entry modal and POSTs it to the API", async () => {
@@ -277,8 +295,10 @@ describe("HistoryClient", () => {
       createdAt: "2024-02-01T00:00:00.000Z",
     });
 
+    window.localStorage.setItem("game-backlog-tracker:view", "list");
     render(<HistoryClient initialEntries={[entryA, entryB]} />);
 
+    await screen.findByRole("table");
     const rows = () => screen.getAllByRole("row").slice(1); // skip header row
     // Default sort: addedAt asc -> Alpha (added first) before Beta
     expect(rows()[0]).toHaveTextContent("Alpha Game");

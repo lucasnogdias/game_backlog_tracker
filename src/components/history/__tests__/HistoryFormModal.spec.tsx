@@ -113,6 +113,18 @@ describe("HistoryFormModal", () => {
     );
   });
 
+  it("adds a line break without submitting when Shift+Enter is pressed in Notes", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn();
+    render(<HistoryFormModal onSubmit={onSubmit} onClose={jest.fn()} />);
+
+    await user.click(screen.getByLabelText("Notes / Review"));
+    await user.keyboard("{Shift>}{Enter}{/Shift}");
+
+    expect(screen.getByLabelText("Notes / Review")).toHaveValue("\n");
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("submits the selected status when changed", async () => {
     const user = userEvent.setup();
     const onSubmit = jest.fn().mockResolvedValue(undefined);
