@@ -37,23 +37,22 @@ describe("BacklogClient", () => {
     jest.restoreAllMocks();
   });
 
-  it("renders the initial games in list view by default", () => {
+  it("renders the initial games in card view by default", () => {
     render(<BacklogClient initialGames={[makeGame()]} />);
 
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
-    // List view renders a table
-    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("switches to card view when the Card button is clicked", async () => {
+  it("switches to list view when the List button is clicked", async () => {
     const user = userEvent.setup();
     render(<BacklogClient initialGames={[makeGame()]} />);
 
-    await user.click(screen.getByRole("button", { name: "Card" }));
+    await user.click(screen.getByRole("button", { name: "List" }));
 
-    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
-    expect(window.localStorage.getItem("game-backlog-tracker:view")).toBe("card");
+    expect(window.localStorage.getItem("game-backlog-tracker:view")).toBe("list");
   });
 
   it("persists its sort field and direction", async () => {
@@ -78,6 +77,30 @@ describe("BacklogClient", () => {
     expect(screen.getByRole("button", { name: "Toggle sort direction" })).toHaveTextContent(
       "↑ Asc"
     );
+  });
+
+  it("opens details from a table row but not an action control", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem("game-backlog-tracker:view", "list");
+    render(<BacklogClient initialGames={[makeGame()]} />);
+
+    await screen.findByRole("table");
+    await user.click(screen.getByText("Hollow Knight"));
+    expect(screen.getByRole("dialog", { name: "Hollow Knight" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close details" }));
+
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("opens the existing edit form from details", async () => {
+    const user = userEvent.setup();
+    render(<BacklogClient initialGames={[makeGame()]} />);
+
+    await user.click(screen.getByText("Hollow Knight"));
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+
+    expect(screen.getByRole("heading", { name: "Edit Game" })).toBeInTheDocument();
   });
 
   it("adds a new game via the Add Game modal and POSTs it to the API", async () => {
@@ -197,8 +220,10 @@ describe("BacklogClient", () => {
     const gameA = makeGame({ id: "1", title: "Alpha Game", hype: 3 });
     const gameB = makeGame({ id: "2", title: "Beta Game", hype: 9 });
 
+    window.localStorage.setItem("game-backlog-tracker:view", "list");
     render(<BacklogClient initialGames={[gameA, gameB]} />);
 
+    await screen.findByRole("table");
     const rows = () => screen.getAllByRole("row").slice(1); // skip header row
     // Default sort: hype desc -> Beta (9) before Alpha (3)
     expect(rows()[0]).toHaveTextContent("Beta Game");

@@ -148,6 +148,18 @@ describe("GameFormModal", () => {
     );
   });
 
+  it("adds a line break without submitting when Shift+Enter is pressed in Notes", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn();
+    render(<GameFormModal onSubmit={onSubmit} onClose={jest.fn()} />);
+
+    await user.click(screen.getByLabelText("Notes"));
+    await user.keyboard("{Shift>}{Enter}{/Shift}");
+
+    expect(screen.getByLabelText("Notes")).toHaveValue("\n");
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("adds and removes platform tags", async () => {
     const user = userEvent.setup();
     render(<GameFormModal onSubmit={jest.fn()} onClose={jest.fn()} />);

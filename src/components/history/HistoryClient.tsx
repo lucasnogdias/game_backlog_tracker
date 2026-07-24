@@ -17,6 +17,7 @@ import { JournalEntryModal } from "./JournalEntryModal";
 import { PlaytimeSummary } from "./PlaytimeSummary";
 import { useGameViewPreference } from "@/components/shared/useGameViewPreference";
 import { useSortPreference } from "@/components/shared/useSortPreference";
+import { GameDetailsModal } from "@/components/shared/GameDetailsModal";
 
 interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];
@@ -42,6 +43,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
   const [movingEntry, setMovingEntry] = useState<HistoryEntryDTO | null>(null);
   const [addingJournalEntry, setAddingJournalEntry] =
     useState<HistoryEntryDTO | null>(null);
+  const [detailsEntry, setDetailsEntry] = useState<HistoryEntryDTO | null>(null);
 
   const sortedEntries = useMemo(
     () => sortHistoryEntries(entries, sortField, sortDirection),
@@ -125,6 +127,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
           onViewJournal={(entry) => router.push(`/history/${entry.id}/journal`)}
           onDelete={setDeletingEntry}
           onMoveToBacklog={setMovingEntry}
+          onViewDetails={setDetailsEntry}
         />
       ) : (
         <HistoryCards
@@ -135,6 +138,7 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
           onDelete={setDeletingEntry}
           onSetCoverImage={handleSetCoverImage}
           onMoveToBacklog={setMovingEntry}
+          onViewDetails={setDetailsEntry}
         />
       )}
 
@@ -179,6 +183,17 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
           gameTitle={addingJournalEntry.title}
           onSubmit={(content) => handleAddJournalEntry(addingJournalEntry, content)}
           onClose={() => setAddingJournalEntry(null)}
+        />
+      )}
+
+      {detailsEntry && (
+        <GameDetailsModal
+          details={{ type: "history", entry: detailsEntry }}
+          onClose={() => setDetailsEntry(null)}
+          onEdit={() => {
+            setDetailsEntry(null);
+            setEditingEntry(detailsEntry);
+          }}
         />
       )}
     </div>

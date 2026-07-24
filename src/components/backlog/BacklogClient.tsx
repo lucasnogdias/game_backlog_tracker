@@ -16,6 +16,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import type { HistoryStatus } from "@/types/history";
 import { useGameViewPreference } from "@/components/shared/useGameViewPreference";
 import { useSortPreference } from "@/components/shared/useSortPreference";
+import { GameDetailsModal } from "@/components/shared/GameDetailsModal";
 
 interface BacklogClientProps {
   initialGames: BacklogGameDTO[];
@@ -34,6 +35,7 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
   const [editingGame, setEditingGame] = useState<BacklogGameDTO | null>(null);
   const [deletingGame, setDeletingGame] = useState<BacklogGameDTO | null>(null);
   const [movingGame, setMovingGame] = useState<BacklogGameDTO | null>(null);
+  const [detailsGame, setDetailsGame] = useState<BacklogGameDTO | null>(null);
 
   const sortedGames = useMemo(
     () => sortBacklogGames(games, sortField, sortDirection),
@@ -108,6 +110,7 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
           onEdit={setEditingGame}
           onDelete={setDeletingGame}
           onMoveToHistory={setMovingGame}
+          onViewDetails={setDetailsGame}
         />
       ) : (
         <BacklogCards
@@ -116,6 +119,7 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
           onDelete={setDeletingGame}
           onSetCoverImage={handleSetCoverImage}
           onMoveToHistory={setMovingGame}
+          onViewDetails={setDetailsGame}
         />
       )}
 
@@ -147,6 +151,17 @@ export function BacklogClient({ initialGames }: BacklogClientProps) {
           game={movingGame}
           onSubmit={(input) => handleMoveToHistory(movingGame, input)}
           onClose={() => setMovingGame(null)}
+        />
+      )}
+
+      {detailsGame && (
+        <GameDetailsModal
+          details={{ type: "backlog", game: detailsGame }}
+          onClose={() => setDetailsGame(null)}
+          onEdit={() => {
+            setDetailsGame(null);
+            setEditingGame(detailsGame);
+          }}
         />
       )}
     </div>

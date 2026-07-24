@@ -19,6 +19,7 @@ interface HistoryCardsProps {
   onDelete: (entry: HistoryEntryDTO) => void;
   onSetCoverImage: (entry: HistoryEntryDTO, url: string) => void;
   onMoveToBacklog: (entry: HistoryEntryDTO) => void;
+  onViewDetails?: (entry: HistoryEntryDTO) => void;
 }
 
 export function HistoryCards({
@@ -29,12 +30,14 @@ export function HistoryCards({
   onDelete,
   onSetCoverImage,
   onMoveToBacklog,
+  onViewDetails,
 }: HistoryCardsProps) {
   return (
     <CardGrid
       items={entries}
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your history yet. Add one once you start playing!"
+      onItemClick={onViewDetails}
       getCardBorderColor={(entry) => HISTORY_STATUS_BORDER_COLORS[entry.status]}
       renderActions={(entry) => (
         <HistoryItemActions

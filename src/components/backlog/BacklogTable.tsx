@@ -11,6 +11,7 @@ interface BacklogTableProps {
   onEdit: (game: BacklogGameDTO) => void;
   onDelete: (game: BacklogGameDTO) => void;
   onMoveToHistory: (game: BacklogGameDTO) => void;
+  onViewDetails?: (game: BacklogGameDTO) => void;
 }
 
 function formatReleaseDate(isoDate: string | null): string {
@@ -61,12 +62,14 @@ export function BacklogTable({
   onEdit,
   onDelete,
   onMoveToHistory,
+  onViewDetails,
 }: BacklogTableProps) {
   return (
     <DataTable
       items={games}
       columns={COLUMNS}
       emptyMessage="No games in your backlog yet. Add one to get started!"
+      onItemClick={onViewDetails}
       renderActions={(game) => (
         <BacklogItemActions
           game={game}

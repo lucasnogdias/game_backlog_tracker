@@ -24,6 +24,7 @@ interface DataTableProps<T extends { id: string }> {
   emptyMessage: string;
   /** Renders the row's action cell content (e.g. buttons, an actions menu). */
   renderActions: (item: T) => React.ReactNode;
+  onItemClick?: (item: T) => void;
 }
 
 function cellClassName(variant: DataTableColumn<unknown>["variant"]): string {
@@ -37,6 +38,7 @@ export function DataTable<T extends { id: string }>({
   columns,
   emptyMessage,
   renderActions,
+  onItemClick,
 }: DataTableProps<T>) {
   if (items.length === 0) {
     return <p className={shared.emptyState}>{emptyMessage}</p>;
@@ -57,7 +59,23 @@ export function DataTable<T extends { id: string }>({
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr key={item.id} className={styles.row}>
+            <tr
+              key={item.id}
+              className={onItemClick ? `${styles.row} ${styles.rowClickable}` : styles.row}
+              tabIndex={onItemClick ? 0 : undefined}
+              onClick={(event) => {
+                if (!onItemClick || (event.target as HTMLElement).closest("button, a, input, select, textarea")) {
+                  return;
+                }
+                onItemClick(item);
+              }}
+              onKeyDown={(event) => {
+                if (onItemClick && (event.key === "Enter" || event.key === " ")) {
+                  event.preventDefault();
+                  onItemClick(item);
+                }
+              }}
+            >
               {columns.map((column) => (
                 <td
                   key={column.header}

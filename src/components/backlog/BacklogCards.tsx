@@ -11,6 +11,7 @@ interface BacklogCardsProps {
   onDelete: (game: BacklogGameDTO) => void;
   onSetCoverImage: (game: BacklogGameDTO, url: string) => void;
   onMoveToHistory: (game: BacklogGameDTO) => void;
+  onViewDetails?: (game: BacklogGameDTO) => void;
 }
 
 export function BacklogCards({
@@ -19,12 +20,14 @@ export function BacklogCards({
   onDelete,
   onSetCoverImage,
   onMoveToHistory,
+  onViewDetails,
 }: BacklogCardsProps) {
   return (
     <CardGrid
       items={games}
       onSetCoverImage={onSetCoverImage}
       emptyMessage="No games in your backlog yet. Add one to get started!"
+      onItemClick={onViewDetails}
       renderCoverOverlay={(game) =>
         game.owned ? (
           <span aria-label="Owned">✓</span>

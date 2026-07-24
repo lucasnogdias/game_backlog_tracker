@@ -15,6 +15,7 @@ interface HistoryTableProps {
   onViewJournal?: (entry: HistoryEntryDTO) => void;
   onDelete: (entry: HistoryEntryDTO) => void;
   onMoveToBacklog: (entry: HistoryEntryDTO) => void;
+  onViewDetails?: (entry: HistoryEntryDTO) => void;
 }
 
 function formatReleaseYear(isoDate: string | null): string {
@@ -62,12 +63,14 @@ export function HistoryTable({
   onViewJournal,
   onDelete,
   onMoveToBacklog,
+  onViewDetails,
 }: HistoryTableProps) {
   return (
     <DataTable
       items={entries}
       columns={COLUMNS}
       emptyMessage="No games in your history yet. Add one once you start playing!"
+      onItemClick={onViewDetails}
       renderActions={(entry) => (
         <HistoryItemActions
           entry={entry}
