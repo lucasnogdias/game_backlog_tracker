@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import styles from "./DataManagementClient.module.css";
 
 type Collection = "backlog" | "history";
@@ -59,6 +59,13 @@ export function DataManagementClient() {
   const [isApplying, setIsApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [journalImagesDirectory, setJournalImagesDirectory] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    void window.journalMedia?.getDirectory?.().then(setJournalImagesDirectory);
+  }, []);
 
   function handleArchiveChange(event: ChangeEvent<HTMLInputElement>) {
     setArchive(event.target.files?.[0] ?? null);
@@ -160,7 +167,9 @@ export function DataManagementClient() {
         </p>
         <p className={styles.warning}>
           Journal screenshot files are not currently included in exports and
-          cannot be restored from a backup.
+          cannot be restored from a backup.{journalImagesDirectory && (
+            <> You can retrieve them from <code>{journalImagesDirectory}</code>.</>
+          )}
         </p>
         <a href="/api/data-backup" className={styles.button}>
           Download Backup
@@ -176,7 +185,9 @@ export function DataManagementClient() {
         </p>
         <p className={styles.warning}>
           Journal screenshot files are not currently included in exports and
-          cannot be restored from a backup.
+          cannot be restored from a backup.{journalImagesDirectory && (
+            <> You can retrieve them from <code>{journalImagesDirectory}</code>.</>
+          )}
         </p>
         <label>
           Backup archive

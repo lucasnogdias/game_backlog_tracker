@@ -6,6 +6,7 @@ export async function saveJournalFiles(
   historyEntryId: string,
   journalEntryId: string,
   gameTitle: string,
+  journalEntryNumber: number,
   files: File[]
 ): Promise<JournalImageAttachmentInput[]> {
   if (!files.length) return [];
@@ -21,7 +22,7 @@ export async function saveJournalFiles(
           historyEntryId,
           journalEntryId,
           gameTitle,
-          name: file.name,
+          journalEntryNumber,
           mimeType: file.type as JournalImageAttachmentInput["mimeType"],
           data: await file.arrayBuffer(),
         })

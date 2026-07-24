@@ -214,6 +214,7 @@ describe("HistoryClient", () => {
         content: "Reached Greenpath.",
         createdAt: "2026-01-01T00:00:00.000Z",
         attachments: [],
+        journalEntryNumber: 1,
         })
       )
       .mockReturnValueOnce(jsonResponse({}));
@@ -232,7 +233,7 @@ describe("HistoryClient", () => {
       );
     });
     expect(window.journalMedia.save).toHaveBeenCalledWith(
-      expect.objectContaining({ journalEntryId: "journal-1" })
+      expect.objectContaining({ journalEntryId: "journal-1", journalEntryNumber: 1 })
     );
     expect(global.fetch).toHaveBeenLastCalledWith(
       "/api/history/1/journal/journal-1",

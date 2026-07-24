@@ -18,11 +18,12 @@ declare global {
         historyEntryId: string;
         journalEntryId: string;
         gameTitle: string;
-        name: string;
+        journalEntryNumber: number;
         mimeType: "image/png" | "image/jpeg" | "image/webp";
         data: ArrayBuffer;
       }) => Promise<import("./journal").JournalImageAttachmentInput>;
       remove: (storageKey: string) => Promise<void>;
+      getDirectory?: () => Promise<string>;
       read: (storageKey: string) => Promise<string>;
     };
   }

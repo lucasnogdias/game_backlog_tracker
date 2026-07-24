@@ -75,7 +75,7 @@ function journalImageFile(storageKey) {
   if (
     typeof storageKey !== "string" ||
     path.basename(storageKey) !== storageKey ||
-    !/^[-a-z0-9]+\.{1}[a-z0-9]+$/i.test(storageKey)
+    !/^[-_a-z0-9]+\.{1}[a-z0-9]+$/i.test(storageKey)
   ) {
     throw new Error("Screenshot reference is invalid.");
   }
@@ -366,7 +366,8 @@ ipcMain.handle("journal-media:save", (_event, payload) => {
     typeof payload.historyEntryId !== "string" ||
     typeof payload.journalEntryId !== "string" ||
     typeof payload.gameTitle !== "string" ||
-    typeof payload.name !== "string" ||
+    !Number.isInteger(payload.journalEntryNumber) ||
+    payload.journalEntryNumber < 1 ||
     !Object.hasOwn(JOURNAL_IMAGE_TYPES, payload.mimeType)
   ) {
     throw new Error("Screenshot details are invalid.");
@@ -379,16 +380,25 @@ ipcMain.handle("journal-media:save", (_event, payload) => {
     throw new Error("The screenshot file does not match its image format.");
   }
 
-  const id = randomUUID();
   const extension = JOURNAL_IMAGE_TYPES[payload.mimeType];
-  const storageKey = `${safeFilenamePart(payload.gameTitle)}-journal-${payload.journalEntryId}-${id}.${extension}`;
-  const file = journalImageFile(storageKey);
+  const filenamePrefix = `${safeFilenamePart(payload.gameTitle)}_journal_entry${payload.journalEntryNumber}`;
   fs.mkdirSync(journalImagesPath(), { recursive: true });
+  const existingImageNumbers = fs
+    .readdirSync(journalImagesPath())
+    .map((file) => {
+      const match = file.match(
+        new RegExp(`^${filenamePrefix}_image(\\d+)\\.(png|jpg|webp)$`, "i")
+      );
+      return match ? Number(match[1]) : 0;
+    });
+  const imageNumber = Math.max(0, ...existingImageNumbers) + 1;
+  const storageKey = `${filenamePrefix}_image${imageNumber}.${extension}`;
+  const file = journalImageFile(storageKey);
   fs.writeFileSync(file, buffer, { flag: "wx" });
   return {
-    id,
+    id: randomUUID(),
     storageKey,
-    originalName: path.basename(payload.name).slice(0, 255) || "screenshot",
+    originalName: storageKey,
     mimeType: payload.mimeType,
     size: buffer.length,
   };
@@ -397,6 +407,8 @@ ipcMain.handle("journal-media:save", (_event, payload) => {
 ipcMain.handle("journal-media:remove", (_event, storageKey) => {
   fs.rmSync(journalImageFile(storageKey), { force: true });
 });
+
+ipcMain.handle("journal-media:get-directory", () => journalImagesPath());
 
 ipcMain.handle("journal-media:read", (_event, storageKey) => {
   const file = journalImageFile(storageKey);

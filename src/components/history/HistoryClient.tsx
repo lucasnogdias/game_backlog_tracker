@@ -28,6 +28,8 @@ interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];
 }
 
+type CreatedJournalEntry = JournalEntryDTO & { journalEntryNumber: number };
+
 export function HistoryClient({ initialEntries }: HistoryClientProps) {
   const router = useRouter();
   const [entries, setEntries] = useState(initialEntries);
@@ -113,12 +115,13 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
       body: JSON.stringify({ content }),
     });
     if (!response.ok) throw new Error("Failed to add journal entry");
-    const created: JournalEntryDTO = await response.json();
+    const created: CreatedJournalEntry = await response.json();
     if (files.length) {
       const attachments: JournalImageAttachmentInput[] = await saveJournalFiles(
         entry.id,
         created.id,
         entry.title,
+        created.journalEntryNumber,
         files
       );
       try {

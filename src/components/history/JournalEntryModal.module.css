@@ -15,6 +15,17 @@
   font-size: 0.875rem;
 }
 
+.dropZone {
+  margin-top: 0.5rem;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+}
+
+.dropZone:hover {
+  background: var(--color-surface-hover);
+}
+
 .attachmentList {
   display: flex;
   flex-direction: column;

@@ -19,10 +19,14 @@ interface JournalPageClientProps {
   initialEntries: JournalEntryDTO[];
 }
 
+type CreatedJournalEntry = JournalEntryDTO & { journalEntryNumber: number };
+
 function JournalScreenshots({
   attachments,
+  onSelect,
 }: {
   attachments: JournalImageAttachmentDTO[];
+  onSelect: (source: string, name: string) => void;
 }) {
   const [sources, setSources] = useState<Record<string, string>>({});
   const [error, setError] = useState(false);
@@ -64,19 +68,67 @@ function JournalScreenshots({
     <div className={styles.screenshots}>
       {attachments.map((attachment) =>
         sources[attachment.id] ? (
-          // eslint-disable-next-line @next/next/no-img-element -- IPC returns a local data URL.
-          <img
+          <button
             key={attachment.id}
-            src={sources[attachment.id]}
-            alt={attachment.originalName}
-            className={styles.screenshot}
-          />
+            type="button"
+            className={styles.screenshotButton}
+            onClick={() => onSelect(sources[attachment.id], attachment.originalName)}
+            aria-label={`Expand screenshot ${attachment.originalName}`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- IPC returns a local data URL. */}
+            <img
+              src={sources[attachment.id]}
+              alt={attachment.originalName}
+              className={styles.screenshot}
+            />
+          </button>
         ) : (
           <span key={attachment.id} className={styles.screenshotLoading}>
             Loading {attachment.originalName}…
           </span>
         )
       )}
+    </div>
+  );
+}
+
+function ScreenshotLightbox({
+  source,
+  name,
+  onClose,
+}: {
+  source: string;
+  name: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div
+      className={styles.lightbox}
+      role="dialog"
+      aria-modal="true"
+      aria-label={name}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- IPC returns a local data URL. */}
+      <img src={source} alt={name} className={styles.lightboxImage} />
+      <button
+        type="button"
+        className={styles.lightboxClose}
+        onClick={onClose}
+        aria-label="Close screenshot"
+      >
+        ×
+      </button>
     </div>
   );
 }
@@ -89,6 +141,10 @@ export function JournalPageClient({
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntryDTO | null>(null);
   const [isNewestFirst, setIsNewestFirst] = useState(false);
+  const [selectedScreenshot, setSelectedScreenshot] = useState<{
+    source: string;
+    name: string;
+  } | null>(null);
 
   const sortedEntries = useMemo(
     () =>
@@ -128,16 +184,18 @@ export function JournalPageClient({
     });
     if (!response.ok) throw new Error("Failed to add journal entry");
 
-    let created: JournalEntryDTO = await response.json();
+    const created: CreatedJournalEntry = await response.json();
+    let savedEntry: JournalEntryDTO = created;
     const savedAttachments = await saveJournalFiles(
       historyEntry.id,
       created.id,
       historyEntry.title,
+      created.journalEntryNumber,
       files
     );
     if (savedAttachments.length) {
       try {
-        created = await updateAttachments(created, content, savedAttachments);
+        savedEntry = await updateAttachments(created, content, savedAttachments);
       } catch (error) {
         await Promise.all(
           savedAttachments.map((attachment) =>
@@ -147,7 +205,7 @@ export function JournalPageClient({
         throw error;
       }
     }
-    setEntries((previousEntries) => [...previousEntries, created]);
+    setEntries((previousEntries) => [...previousEntries, savedEntry]);
     setIsAdding(false);
   }
 
@@ -161,6 +219,9 @@ export function JournalPageClient({
       historyEntry.id,
       editingEntry.id,
       historyEntry.title,
+      [...entries]
+        .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
+        .findIndex((entry) => entry.id === editingEntry.id) + 1,
       files
     );
     let updated: JournalEntryDTO;
@@ -237,7 +298,10 @@ export function JournalPageClient({
                 </button>
               </div>
               <p className={styles.entryContent}>{entry.content}</p>
-              <JournalScreenshots attachments={entry.attachments} />
+              <JournalScreenshots
+                attachments={entry.attachments}
+                onSelect={(source, name) => setSelectedScreenshot({ source, name })}
+              />
             </article>
           ))}
         </div>
@@ -246,6 +310,7 @@ export function JournalPageClient({
       {isAdding && (
         <JournalEntryModal
           gameTitle={historyEntry.title}
+          journalEntryNumber={entries.length + 1}
           onSubmit={handleAdd}
           onClose={() => setIsAdding(false)}
         />
@@ -254,10 +319,22 @@ export function JournalPageClient({
       {editingEntry && (
         <JournalEntryModal
           gameTitle={historyEntry.title}
+          journalEntryNumber={
+            [...entries]
+              .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
+              .findIndex((entry) => entry.id === editingEntry.id) + 1
+          }
           initialContent={editingEntry.content}
           initialAttachments={editingEntry.attachments}
           onSubmit={handleEdit}
           onClose={() => setEditingEntry(null)}
+        />
+      )}
+      {selectedScreenshot && (
+        <ScreenshotLightbox
+          source={selectedScreenshot.source}
+          name={selectedScreenshot.name}
+          onClose={() => setSelectedScreenshot(null)}
         />
       )}
     </>

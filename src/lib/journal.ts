@@ -81,6 +81,10 @@ export async function createJournalEntry(
   return journalEntryToDTO(entry);
 }
 
+export async function journalEntryNumber(historyEntryId: string): Promise<number> {
+  return prisma.journalEntry.count({ where: { historyEntryId } });
+}
+
 export async function updateJournalEntry(
   historyEntryId: string,
   id: string,

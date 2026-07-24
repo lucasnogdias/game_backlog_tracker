@@ -159,9 +159,7 @@ describe("JournalPageClient", () => {
     await user.click(screen.getByRole("button", { name: "Save Entry" }));
 
     expect(
-      await screen.findByText(
-        "Something went wrong saving this journal entry. Please try again."
-      )
+      await screen.findByText("Unable to save journal entry: Failed to add journal entry")
     ).toBeInTheDocument();
   });
 
@@ -204,6 +202,37 @@ describe("JournalPageClient", () => {
     );
   });
 
+  it("opens and dismisses an expanded screenshot", async () => {
+    const user = userEvent.setup();
+    window.journalMedia = {
+      save: jest.fn(),
+      remove: jest.fn(),
+      read: jest.fn().mockResolvedValue("data:image/png;base64,aW1hZ2U="),
+    };
+    const entry: JournalEntryDTO = {
+      ...journalEntries[0],
+      attachments: [
+        {
+          id: "image-1",
+          storageKey: "hollow-knight-journal-1-image-1.png",
+          originalName: "greenpath.png",
+          mimeType: "image/png",
+          size: 5,
+          createdAt: "2026-01-02T10:01:00.000Z",
+        },
+      ],
+    };
+    render(<JournalPageClient historyEntry={historyEntry} initialEntries={[entry]} />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Expand screenshot greenpath.png" })
+    );
+    expect(screen.getByRole("dialog", { name: "greenpath.png" })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "greenpath.png" })).not.toBeInTheDocument();
+  });
+
   it("saves selected screenshots and persists their metadata with a new entry", async () => {
     const user = userEvent.setup();
     const file = new File(["image"], "mantis.webp", { type: "image/webp" });
@@ -227,6 +256,7 @@ describe("JournalPageClient", () => {
       content: "Defeated the Mantis Lords.",
       createdAt: "2026-01-04T10:00:00.000Z",
       attachments: [],
+      journalEntryNumber: 1,
     };
     const updated = {
       ...created,
@@ -253,7 +283,7 @@ describe("JournalPageClient", () => {
 
     await waitFor(() => {
       expect(window.journalMedia!.save).toHaveBeenCalledWith(
-        expect.objectContaining({ journalEntryId: "journal-3", name: "mantis.webp" })
+        expect.objectContaining({ journalEntryId: "journal-3", journalEntryNumber: 1 })
       );
     });
     expect(global.fetch).toHaveBeenLastCalledWith(
