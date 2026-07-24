@@ -47,6 +47,29 @@ describe("JournalEntryModal", () => {
     });
   });
 
+  it("pre-fills and saves an existing entry", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    render(
+      <JournalEntryModal
+        gameTitle="Hollow Knight"
+        initialContent="Met Hornet today."
+        onSubmit={onSubmit}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Edit Journal Entry for Hollow Knight" })
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Journal Entry")).toHaveValue("Met Hornet today.");
+
+    await user.type(screen.getByLabelText("Journal Entry"), " Again.");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    expect(onSubmit).toHaveBeenCalledWith("Met Hornet today. Again.");
+  });
+
   it("shows a save error when the parent action fails", async () => {
     const user = userEvent.setup();
     const onSubmit = jest.fn().mockRejectedValue(new Error("Network error"));

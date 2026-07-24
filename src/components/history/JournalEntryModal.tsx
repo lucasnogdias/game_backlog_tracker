@@ -8,14 +8,17 @@ interface JournalEntryModalProps {
   gameTitle: string;
   onSubmit: (content: string) => Promise<void>;
   onClose: () => void;
+  initialContent?: string;
 }
 
 export function JournalEntryModal({
   gameTitle,
   onSubmit,
   onClose,
+  initialContent,
 }: JournalEntryModalProps) {
-  const [content, setContent] = useState("");
+  const isEditing = initialContent !== undefined;
+  const [content, setContent] = useState(initialContent ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +43,9 @@ export function JournalEntryModal({
   return (
     <div className={shared.overlay}>
       <div className={`${shared.dialog} ${styles.dialog}`}>
-        <h2 className={shared.dialogTitle}>Add Journal Entry for {gameTitle}</h2>
+        <h2 className={shared.dialogTitle}>
+          {isEditing ? "Edit" : "Add"} Journal Entry for {gameTitle}
+        </h2>
         <form onSubmit={handleSubmit} className={shared.form}>
           <label className={shared.fieldGroup}>
             Journal Entry
@@ -64,7 +69,7 @@ export function JournalEntryModal({
               disabled={isSubmitting}
               className={`${shared.button} ${shared.buttonPrimary}`}
             >
-              {isSubmitting ? "Saving..." : "Save Entry"}
+              {isSubmitting ? "Saving..." : isEditing ? "Save Changes" : "Save Entry"}
             </button>
           </div>
         </form>

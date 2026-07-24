@@ -194,6 +194,14 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
             setDetailsEntry(null);
             setEditingEntry(detailsEntry);
           }}
+          onAddJournalEntry={() => {
+            setDetailsEntry(null);
+            setAddingJournalEntry(detailsEntry);
+          }}
+          onViewJournal={() => {
+            setDetailsEntry(null);
+            router.push(`/history/${detailsEntry.id}/journal`);
+          }}
         />
       )}
     </div>

@@ -108,6 +108,37 @@ describe("JournalPageClient", () => {
     );
   });
 
+  it("edits a journal entry without changing its chronological position", async () => {
+    const user = userEvent.setup();
+    const updated: JournalEntryDTO = {
+      ...journalEntries[0],
+      content: "Reached Greenpath and found Cornifer.",
+    };
+    (global.fetch as jest.Mock).mockReturnValueOnce(jsonResponse(updated));
+
+    render(<JournalPageClient historyEntry={historyEntry} initialEntries={journalEntries} />);
+
+    await user.click(screen.getAllByRole("button", { name: "Edit" })[0]);
+    expect(screen.getByLabelText("Journal Entry")).toHaveValue("Reached Greenpath.");
+    await user.clear(screen.getByLabelText("Journal Entry"));
+    await user.type(
+      screen.getByLabelText("Journal Entry"),
+      "Reached Greenpath and found Cornifer."
+    );
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Reached Greenpath and found Cornifer.")).toBeInTheDocument();
+    });
+    expect(screen.getAllByRole("article")[0]).toHaveTextContent(
+      "Reached Greenpath and found Cornifer."
+    );
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/history/history-1/journal/journal-1",
+      expect.objectContaining({ method: "PATCH" })
+    );
+  });
+
   it("keeps the modal open and surfaces an API error when saving fails", async () => {
     const user = userEvent.setup();
     (global.fetch as jest.Mock).mockReturnValueOnce(

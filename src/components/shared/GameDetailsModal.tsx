@@ -16,6 +16,8 @@ interface GameDetailsModalProps {
   details: GameDetails;
   onClose: () => void;
   onEdit: () => void;
+  onAddJournalEntry?: () => void;
+  onViewJournal?: () => void;
 }
 
 interface Detail {
@@ -64,7 +66,13 @@ function getDetails(details: GameDetails): Detail[] {
   ];
 }
 
-export function GameDetailsModal({ details, onClose, onEdit }: GameDetailsModalProps) {
+export function GameDetailsModal({
+  details,
+  onClose,
+  onEdit,
+  onAddJournalEntry,
+  onViewJournal,
+}: GameDetailsModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const activeElement = useRef<HTMLElement | null>(null);
   const item = details.type === "backlog" ? details.game : details.entry;
@@ -150,6 +158,20 @@ export function GameDetailsModal({ details, onClose, onEdit }: GameDetailsModalP
                 <dd>{field.value}</dd>
               </div>
             ))}
+            {onAddJournalEntry && (
+              <div className={styles.journalAction}>
+                <button type="button" className={shared.textAction} onClick={onAddJournalEntry}>
+                  Add Journal Entry
+                </button>
+              </div>
+            )}
+            {onViewJournal && (
+              <div className={styles.journalAction}>
+                <button type="button" className={shared.textAction} onClick={onViewJournal}>
+                  View Journal
+                </button>
+              </div>
+            )}
           </dl>
         </div>
       </div>
