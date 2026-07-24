@@ -1,3 +1,34 @@
 .dialog {
   max-width: 32rem; /* max-w-lg */
 }
+
+.attachments {
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+}
+
+.helpText,
+.unavailable {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.attachmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.removeAttachment {
+  margin-left: 0.5rem;
+  border: 0;
+  background: none;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  text-decoration: underline;
+}

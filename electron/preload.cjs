@@ -6,3 +6,9 @@ contextBridge.exposeInMainWorld("desktopSettings", {
     ipcRenderer.invoke("game-lookup:save-credentials", clientId, clientSecret),
   clearIgdbCredentials: () => ipcRenderer.invoke("game-lookup:clear-credentials"),
 });
+
+contextBridge.exposeInMainWorld("journalMedia", {
+  save: (payload) => ipcRenderer.invoke("journal-media:save", payload),
+  remove: (storageKey) => ipcRenderer.invoke("journal-media:remove", storageKey),
+  read: (storageKey) => ipcRenderer.invoke("journal-media:read", storageKey),
+});

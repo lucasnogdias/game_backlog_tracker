@@ -1,5 +1,6 @@
 const { app, BrowserWindow, dialog, ipcMain, safeStorage } = require("electron");
 const { spawn } = require("child_process");
+const { randomUUID } = require("crypto");
 const fs = require("fs");
 const http = require("http");
 const net = require("net");
@@ -20,6 +21,70 @@ function databasePath() {
 
 function backupsPath() {
   return path.join(app.getPath("userData"), "backups");
+}
+
+const JOURNAL_IMAGE_TYPES = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+const MAX_JOURNAL_IMAGE_SIZE = 10 * 1024 * 1024;
+
+function journalImagesPath() {
+  return path.join(app.getPath("userData"), "journal-images");
+}
+
+function safeFilenamePart(value) {
+  return value
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48) || "game";
+}
+
+function imageBuffer(data) {
+  if (
+    !data ||
+    !(
+      Buffer.isBuffer(data) ||
+      data instanceof ArrayBuffer ||
+      ArrayBuffer.isView(data)
+    )
+  ) {
+    throw new Error("Screenshot data is invalid.");
+  }
+  return Buffer.from(data);
+}
+
+function imageMatchesType(buffer, mimeType) {
+  if (mimeType === "image/png") {
+    return buffer.subarray(0, 8).equals(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    );
+  }
+  if (mimeType === "image/jpeg") {
+    return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  }
+  return (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).equals(Buffer.from("RIFF")) &&
+    buffer.subarray(8, 12).equals(Buffer.from("WEBP"))
+  );
+}
+
+function journalImageFile(storageKey) {
+  if (
+    typeof storageKey !== "string" ||
+    path.basename(storageKey) !== storageKey ||
+    !/^[-a-z0-9]+\.{1}[a-z0-9]+$/i.test(storageKey)
+  ) {
+    throw new Error("Screenshot reference is invalid.");
+  }
+  const root = journalImagesPath();
+  const file = path.resolve(root, storageKey);
+  if (!file.startsWith(`${root}${path.sep}`)) {
+    throw new Error("Screenshot reference is invalid.");
+  }
+  return file;
 }
 
 function removeLegacyRawgKey() {
@@ -292,6 +357,63 @@ ipcMain.handle("game-lookup:clear-credentials", async () => {
   }
   clearIgdbCredentials();
   await restartPackagedServer();
+});
+
+ipcMain.handle("journal-media:save", (_event, payload) => {
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    typeof payload.historyEntryId !== "string" ||
+    typeof payload.journalEntryId !== "string" ||
+    typeof payload.gameTitle !== "string" ||
+    typeof payload.name !== "string" ||
+    !Object.hasOwn(JOURNAL_IMAGE_TYPES, payload.mimeType)
+  ) {
+    throw new Error("Screenshot details are invalid.");
+  }
+  const buffer = imageBuffer(payload.data);
+  if (!buffer.length || buffer.length > MAX_JOURNAL_IMAGE_SIZE) {
+    throw new Error("Each screenshot must be 10 MB or smaller.");
+  }
+  if (!imageMatchesType(buffer, payload.mimeType)) {
+    throw new Error("The screenshot file does not match its image format.");
+  }
+
+  const id = randomUUID();
+  const extension = JOURNAL_IMAGE_TYPES[payload.mimeType];
+  const storageKey = `${safeFilenamePart(payload.gameTitle)}-journal-${payload.journalEntryId}-${id}.${extension}`;
+  const file = journalImageFile(storageKey);
+  fs.mkdirSync(journalImagesPath(), { recursive: true });
+  fs.writeFileSync(file, buffer, { flag: "wx" });
+  return {
+    id,
+    storageKey,
+    originalName: path.basename(payload.name).slice(0, 255) || "screenshot",
+    mimeType: payload.mimeType,
+    size: buffer.length,
+  };
+});
+
+ipcMain.handle("journal-media:remove", (_event, storageKey) => {
+  fs.rmSync(journalImageFile(storageKey), { force: true });
+});
+
+ipcMain.handle("journal-media:read", (_event, storageKey) => {
+  const file = journalImageFile(storageKey);
+  const buffer = fs.readFileSync(file);
+  const extension = path.extname(file).toLowerCase();
+  const mimeType =
+    extension === ".png"
+      ? "image/png"
+      : extension === ".jpg"
+        ? "image/jpeg"
+        : extension === ".webp"
+          ? "image/webp"
+          : null;
+  if (!mimeType || !imageMatchesType(buffer, mimeType)) {
+    throw new Error("Screenshot file is invalid.");
+  }
+  return `data:${mimeType};base64,${buffer.toString("base64")}`;
 });
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();

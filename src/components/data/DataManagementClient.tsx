@@ -158,6 +158,10 @@ export function DataManagementClient() {
           Download a ZIP archive containing your Backlog, History, and Journal
           data as CSV files. Your account details and API keys are never included.
         </p>
+        <p className={styles.warning}>
+          Journal screenshot files are not currently included in exports and
+          cannot be restored from a backup.
+        </p>
         <a href="/api/data-backup" className={styles.button}>
           Download Backup
         </a>
@@ -169,6 +173,10 @@ export function DataManagementClient() {
           Upload a backup ZIP to validate it before any data changes. Matching
           game titles are reviewed individually; unrelated current data stays
           untouched.
+        </p>
+        <p className={styles.warning}>
+          Journal screenshot files are not currently included in exports and
+          cannot be restored from a backup.
         </p>
         <label>
           Backup archive

@@ -1,8 +1,12 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { JournalEntryModal } from "../JournalEntryModal";
 
 describe("JournalEntryModal", () => {
+  afterEach(() => {
+    delete window.journalMedia;
+  });
+
   it("renders the game title and requires content", async () => {
     const user = userEvent.setup();
     const onSubmit = jest.fn();
@@ -43,7 +47,7 @@ describe("JournalEntryModal", () => {
     await user.click(screen.getByRole("button", { name: "Save Entry" }));
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith("Met Hornet today.");
+      expect(onSubmit).toHaveBeenCalledWith("Met Hornet today.", [], []);
     });
   });
 
@@ -67,7 +71,7 @@ describe("JournalEntryModal", () => {
     await user.type(screen.getByLabelText("Journal Entry"), " Again.");
     await user.click(screen.getByRole("button", { name: "Save Changes" }));
 
-    expect(onSubmit).toHaveBeenCalledWith("Met Hornet today. Again.");
+    expect(onSubmit).toHaveBeenCalledWith("Met Hornet today. Again.", [], []);
   });
 
   it("shows a save error when the parent action fails", async () => {
@@ -86,9 +90,7 @@ describe("JournalEntryModal", () => {
     await user.click(screen.getByRole("button", { name: "Save Entry" }));
 
     expect(
-      await screen.findByText(
-        "Something went wrong saving this journal entry. Please try again."
-      )
+      await screen.findByText("Unable to save journal entry: Network error")
     ).toBeInTheDocument();
   });
 
@@ -107,5 +109,52 @@ describe("JournalEntryModal", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("adds and removes desktop screenshot files before saving", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest.fn().mockResolvedValue(undefined);
+    window.journalMedia = {
+      save: jest.fn(),
+      remove: jest.fn(),
+      read: jest.fn(),
+    };
+    render(
+      <JournalEntryModal
+        gameTitle="Hollow Knight"
+        onSubmit={onSubmit}
+        onClose={jest.fn()}
+      />
+    );
+
+    const screenshot = new File(["image"], "hornet.png", { type: "image/png" });
+    await user.upload(screen.getByLabelText("Add screenshots"), screenshot);
+    expect(screen.getByText("hornet.png")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remove hornet.png" }));
+    expect(screen.queryByText("hornet.png")).not.toBeInTheDocument();
+  });
+
+  it("rejects unsupported and oversized screenshot files", () => {
+    window.journalMedia = {
+      save: jest.fn(),
+      remove: jest.fn(),
+      read: jest.fn(),
+    };
+    render(
+      <JournalEntryModal
+        gameTitle="Hollow Knight"
+        onSubmit={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Add screenshots"), {
+      target: {
+        files: [new File(["image"], "hornet.gif", { type: "image/gif" })],
+      },
+    });
+    expect(
+      screen.getByText(/screenshots must be png, jpeg, or webp/i)
+    ).toBeInTheDocument();
   });
 });

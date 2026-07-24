@@ -42,6 +42,7 @@ describe("HistoryClient", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     mockPush.mockReset();
+    delete window.journalMedia;
   });
 
   it("renders the initial entries in card view by default", () => {
@@ -189,19 +190,39 @@ describe("HistoryClient", () => {
   it("adds a journal entry from the visible row action", async () => {
     const user = userEvent.setup();
     const entry = makeEntry();
-    (global.fetch as jest.Mock).mockReturnValueOnce(
-      jsonResponse({
+    const screenshot = new File(["image"], "greenpath.png", { type: "image/png" });
+    Object.defineProperty(screenshot, "arrayBuffer", {
+      value: jest.fn().mockResolvedValue(new ArrayBuffer(3)),
+    });
+
+    window.journalMedia = {
+      save: jest.fn().mockResolvedValue({
+        id: "image-1",
+        storageKey: "hollow-knight-journal-journal-1-image-1.png",
+        originalName: "greenpath.png",
+        mimeType: "image/png",
+        size: 3,
+      }),
+      remove: jest.fn(),
+      read: jest.fn(),
+    };
+    (global.fetch as jest.Mock)
+      .mockReturnValueOnce(
+        jsonResponse({
         id: "journal-1",
         historyEntryId: entry.id,
         content: "Reached Greenpath.",
         createdAt: "2026-01-01T00:00:00.000Z",
-      })
-    );
+        attachments: [],
+        })
+      )
+      .mockReturnValueOnce(jsonResponse({}));
 
     render(<HistoryClient initialEntries={[entry]} />);
 
     await user.click(screen.getByRole("button", { name: "Add Journal Entry" }));
     await user.type(screen.getByLabelText("Journal Entry"), "Reached Greenpath.");
+    await user.upload(screen.getByLabelText("Add screenshots"), screenshot);
     await user.click(screen.getByRole("button", { name: "Save Entry" }));
 
     await waitFor(() => {
@@ -209,6 +230,36 @@ describe("HistoryClient", () => {
         "/api/history/1/journal",
         expect.objectContaining({ method: "POST" })
       );
+    });
+    expect(window.journalMedia.save).toHaveBeenCalledWith(
+      expect.objectContaining({ journalEntryId: "journal-1" })
+    );
+    expect(global.fetch).toHaveBeenLastCalledWith(
+      "/api/history/1/journal/journal-1",
+      expect.objectContaining({ method: "PATCH" })
+    );
+  });
+
+  it("adds a text-only journal entry without requiring the desktop bridge", async () => {
+    const user = userEvent.setup();
+    const entry = makeEntry();
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      jsonResponse({
+        id: "journal-2",
+        historyEntryId: entry.id,
+        content: "Found Cornifer.",
+        createdAt: "2026-01-02T00:00:00.000Z",
+        attachments: [],
+      })
+    );
+
+    render(<HistoryClient initialEntries={[entry]} />);
+    await user.click(screen.getByRole("button", { name: "Add Journal Entry" }));
+    await user.type(screen.getByLabelText("Journal Entry"), "Found Cornifer.");
+    await user.click(screen.getByRole("button", { name: "Save Entry" }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1);
     });
   });
 
