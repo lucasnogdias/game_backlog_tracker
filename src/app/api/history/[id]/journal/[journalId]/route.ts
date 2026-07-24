@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getHistoryEntryById } from "@/lib/history";
-import { updateJournalEntry } from "@/lib/journal";
+import { updateJournalEntry, validJournalAttachments } from "@/lib/journal";
 import type { JournalEntryInput } from "@/types/journal";
 
 export async function PATCH(
@@ -20,8 +20,19 @@ export async function PATCH(
       { status: 400 }
     );
   }
+  if (body.attachments !== undefined && !validJournalAttachments(body.attachments)) {
+    return NextResponse.json(
+      { error: "Journal image attachments are invalid." },
+      { status: 400 }
+    );
+  }
 
-  const entry = await updateJournalEntry(id, journalId, body.content.trim());
+  const entry = await updateJournalEntry(
+    id,
+    journalId,
+    body.content.trim(),
+    body.attachments
+  );
   if (!entry) {
     return NextResponse.json({ error: "Journal entry not found." }, { status: 404 });
   }

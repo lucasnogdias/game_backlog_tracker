@@ -57,6 +57,28 @@ describe("DataManagementClient", () => {
     );
   });
 
+  it("warns that journal screenshots are excluded from backup and restore", () => {
+    render(<DataManagementClient />);
+
+    expect(
+      screen.getAllByText(/journal screenshot files are not currently included/i)
+    ).toHaveLength(2);
+  });
+
+  it("shows the local screenshot directory in the desktop app", async () => {
+    window.journalMedia = {
+      save: jest.fn(),
+      remove: jest.fn(),
+      getDirectory: jest.fn().mockResolvedValue("/Users/example/journal-images"),
+      read: jest.fn(),
+    };
+    render(<DataManagementClient />);
+
+    expect(
+      await screen.findAllByText("/Users/example/journal-images")
+    ).toHaveLength(2);
+  });
+
   it("previews a valid archive and applies an import with no conflicts", async () => {
     const user = userEvent.setup();
     (global.fetch as jest.Mock)

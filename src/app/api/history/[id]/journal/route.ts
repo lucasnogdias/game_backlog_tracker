@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getHistoryEntryById } from "@/lib/history";
-import { createJournalEntry, listJournalEntries } from "@/lib/journal";
+import {
+  createJournalEntry,
+  journalEntryNumber,
+  listJournalEntries,
+} from "@/lib/journal";
 import type { JournalEntryInput } from "@/types/journal";
 
 export async function GET(
@@ -38,5 +42,8 @@ export async function POST(
   }
 
   const entry = await createJournalEntry(id, body.content.trim());
-  return NextResponse.json(entry, { status: 201 });
+  return NextResponse.json(
+    { ...entry, journalEntryNumber: await journalEntryNumber(id) },
+    { status: 201 }
+  );
 }

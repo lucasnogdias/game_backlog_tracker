@@ -31,7 +31,7 @@ describe("packaged database migrations", () => {
 
     initializeDatabase(databasePath, migrationsPath, path.join(directory, "backups"));
 
-    expect(migrationCount(databasePath)).toBe(3);
+    expect(migrationCount(databasePath)).toBe(4);
   });
 
   it("baselines databases created before migration tracking", () => {
@@ -44,7 +44,7 @@ describe("packaged database migrations", () => {
 
     initializeDatabase(databasePath, migrationsPath, path.join(directory, "backups"));
 
-    expect(migrationCount(databasePath)).toBe(3);
+    expect(migrationCount(databasePath)).toBe(4);
   });
 
   it("restores a pre-migration snapshot when a future migration fails", () => {
@@ -67,7 +67,7 @@ describe("packaged database migrations", () => {
     expect(() =>
       initializeDatabase(databasePath, failingMigrationsPath, backupsPath)
     ).toThrow(/original data was restored/);
-    expect(migrationCount(databasePath)).toBe(3);
+    expect(migrationCount(databasePath)).toBe(4);
     expect(fs.readdirSync(backupsPath)).toContainEqual(
       expect.stringMatching(/^pre-migration-.*\.db$/)
     );

@@ -8,6 +8,7 @@ const LEGACY_MIGRATIONS = [
   "20260703153531_add_user_and_relations",
   "20260713112453_add_journal_entries",
 ];
+const JOURNAL_IMAGE_MIGRATION = "20260724171338_add_journal_image_attachments";
 
 class MigrationError extends Error {
   constructor(message, backupPath) {
@@ -59,6 +60,19 @@ function hasLegacySchema(database) {
   );
 }
 
+function legacyMigrationsForSchema(database) {
+  const hasJournalImageAttachments = Boolean(
+    database
+      .prepare(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'JournalImageAttachment' LIMIT 1"
+      )
+      .get()
+  );
+  return hasJournalImageAttachments
+    ? [...LEGACY_MIGRATIONS, JOURNAL_IMAGE_MIGRATION]
+    : LEGACY_MIGRATIONS;
+}
+
 function appliedMigrations(database) {
   return new Set(
     database
@@ -75,7 +89,8 @@ function baselineLegacyMigrations(database, migrations) {
     );
   }
 
-  const missingLegacyMigration = LEGACY_MIGRATIONS.find(
+  const migrationsToBaseline = legacyMigrationsForSchema(database);
+  const missingLegacyMigration = migrationsToBaseline.find(
     (migration) => !migrations.includes(migration)
   );
   if (missingLegacyMigration) {
@@ -89,7 +104,7 @@ function baselineLegacyMigrations(database, migrations) {
     `INSERT OR IGNORE INTO "${MIGRATION_TABLE}" (migrationName) VALUES (?)`
   );
   const baseline = database.transaction(() => {
-    for (const migration of LEGACY_MIGRATIONS) insert.run(migration);
+    for (const migration of migrationsToBaseline) insert.run(migration);
   });
   baseline();
 }

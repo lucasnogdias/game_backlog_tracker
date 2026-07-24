@@ -82,5 +82,21 @@ model JournalEntry {
   content        String
   createdAt      DateTime     @default(now())
 
+  attachments    JournalImageAttachment[]
+
   @@index([historyEntryId, createdAt])
+}
+
+/// Metadata for screenshots saved by Electron in the local app-data directory.
+model JournalImageAttachment {
+  id             String       @id
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  storageKey     String       @unique
+  originalName   String
+  mimeType       String
+  size           Int
+  createdAt      DateTime     @default(now())
+
+  @@index([journalEntryId])
 }

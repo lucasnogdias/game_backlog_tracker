@@ -90,3 +90,60 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+.screenshots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.screenshot {
+  width: min(100%, 18rem);
+  max-height: 14rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  object-fit: cover;
+}
+
+.screenshotButton {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.lightbox {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-overlay);
+  padding: 2rem;
+}
+
+.lightboxImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border: none;
+  background: none;
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.screenshotLoading,
+.mediaUnavailable {
+  margin: 1rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}

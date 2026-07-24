@@ -13,5 +13,18 @@ declare global {
       ) => Promise<void>;
       clearIgdbCredentials: () => Promise<void>;
     };
+    journalMedia?: {
+      save: (payload: {
+        historyEntryId: string;
+        journalEntryId: string;
+        gameTitle: string;
+        journalEntryNumber: number;
+        mimeType: "image/png" | "image/jpeg" | "image/webp";
+        data: ArrayBuffer;
+      }) => Promise<import("./journal").JournalImageAttachmentInput>;
+      remove: (storageKey: string) => Promise<void>;
+      getDirectory?: () => Promise<string>;
+      read: (storageKey: string) => Promise<string>;
+    };
   }
 }

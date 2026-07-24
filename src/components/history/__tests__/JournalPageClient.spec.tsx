@@ -24,12 +24,14 @@ const journalEntries: JournalEntryDTO[] = [
     historyEntryId: "history-1",
     content: "Reached Greenpath.",
     createdAt: "2026-01-02T10:00:00.000Z",
+    attachments: [],
   },
   {
     id: "journal-2",
     historyEntryId: "history-1",
     content: "Met Hornet.",
     createdAt: "2026-01-03T10:00:00.000Z",
+    attachments: [],
   },
 ];
 
@@ -43,6 +45,10 @@ function jsonResponse(body: unknown, ok = true) {
 describe("JournalPageClient", () => {
   beforeEach(() => {
     global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    delete window.journalMedia;
   });
 
   it("renders a game journal in chronological order by default", () => {
@@ -87,6 +93,7 @@ describe("JournalPageClient", () => {
       historyEntryId: "history-1",
       content: "Defeated the Mantis Lords.",
       createdAt: "2026-01-04T10:00:00.000Z",
+      attachments: [],
     };
     (global.fetch as jest.Mock).mockReturnValueOnce(jsonResponse(created));
 
@@ -152,9 +159,7 @@ describe("JournalPageClient", () => {
     await user.click(screen.getByRole("button", { name: "Save Entry" }));
 
     expect(
-      await screen.findByText(
-        "Something went wrong saving this journal entry. Please try again."
-      )
+      await screen.findByText("Unable to save journal entry: Failed to add journal entry")
     ).toBeInTheDocument();
   });
 
@@ -164,5 +169,158 @@ describe("JournalPageClient", () => {
     expect(
       screen.getByText(/no journal entries yet/i)
     ).toBeInTheDocument();
+  });
+
+  it("loads desktop screenshots through the preload bridge", async () => {
+    window.journalMedia = {
+      save: jest.fn(),
+      remove: jest.fn(),
+      read: jest.fn().mockResolvedValue("data:image/png;base64,aW1hZ2U="),
+    };
+    const entry: JournalEntryDTO = {
+      ...journalEntries[0],
+      attachments: [
+        {
+          id: "image-1",
+          storageKey: "hollow-knight-journal-1-image-1.png",
+          originalName: "greenpath.png",
+          mimeType: "image/png",
+          size: 5,
+          createdAt: "2026-01-02T10:01:00.000Z",
+        },
+      ],
+    };
+
+    render(<JournalPageClient historyEntry={historyEntry} initialEntries={[entry]} />);
+
+    expect(await screen.findByRole("img", { name: "greenpath.png" })).toHaveAttribute(
+      "src",
+      "data:image/png;base64,aW1hZ2U="
+    );
+    expect(window.journalMedia.read).toHaveBeenCalledWith(
+      "hollow-knight-journal-1-image-1.png"
+    );
+  });
+
+  it("opens and dismisses an expanded screenshot", async () => {
+    const user = userEvent.setup();
+    window.journalMedia = {
+      save: jest.fn(),
+      remove: jest.fn(),
+      read: jest.fn().mockResolvedValue("data:image/png;base64,aW1hZ2U="),
+    };
+    const entry: JournalEntryDTO = {
+      ...journalEntries[0],
+      attachments: [
+        {
+          id: "image-1",
+          storageKey: "hollow-knight-journal-1-image-1.png",
+          originalName: "greenpath.png",
+          mimeType: "image/png",
+          size: 5,
+          createdAt: "2026-01-02T10:01:00.000Z",
+        },
+      ],
+    };
+    render(<JournalPageClient historyEntry={historyEntry} initialEntries={[entry]} />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Expand screenshot greenpath.png" })
+    );
+    expect(screen.getByRole("dialog", { name: "greenpath.png" })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "greenpath.png" })).not.toBeInTheDocument();
+  });
+
+  it("saves selected screenshots and persists their metadata with a new entry", async () => {
+    const user = userEvent.setup();
+    const file = new File(["image"], "mantis.webp", { type: "image/webp" });
+    Object.defineProperty(file, "arrayBuffer", {
+      value: jest.fn().mockResolvedValue(new ArrayBuffer(3)),
+    });
+    window.journalMedia = {
+      save: jest.fn().mockResolvedValue({
+        id: "image-1",
+        storageKey: "hollow-knight-journal-journal-3-image-1.webp",
+        originalName: "mantis.webp",
+        mimeType: "image/webp",
+        size: 3,
+      }),
+      remove: jest.fn(),
+      read: jest.fn(),
+    };
+    const created = {
+      id: "journal-3",
+      historyEntryId: "history-1",
+      content: "Defeated the Mantis Lords.",
+      createdAt: "2026-01-04T10:00:00.000Z",
+      attachments: [],
+      journalEntryNumber: 1,
+    };
+    const updated = {
+      ...created,
+      attachments: [
+        {
+          id: "image-1",
+          storageKey: "hollow-knight-journal-journal-3-image-1.webp",
+          originalName: "mantis.webp",
+          mimeType: "image/webp",
+          size: 3,
+          createdAt: "2026-01-04T10:00:01.000Z",
+        },
+      ],
+    };
+    (global.fetch as jest.Mock)
+      .mockReturnValueOnce(jsonResponse(created))
+      .mockReturnValueOnce(jsonResponse(updated));
+
+    render(<JournalPageClient historyEntry={historyEntry} initialEntries={[]} />);
+    await user.click(screen.getByRole("button", { name: "+ Add Journal Entry" }));
+    await user.type(screen.getByLabelText("Journal Entry"), created.content);
+    await user.upload(screen.getByLabelText("Add screenshots"), file);
+    await user.click(screen.getByRole("button", { name: "Save Entry" }));
+
+    await waitFor(() => {
+      expect(window.journalMedia!.save).toHaveBeenCalledWith(
+        expect.objectContaining({ journalEntryId: "journal-3", journalEntryNumber: 1 })
+      );
+    });
+    expect(global.fetch).toHaveBeenLastCalledWith(
+      "/api/history/history-1/journal/journal-3",
+      expect.objectContaining({ method: "PATCH" })
+    );
+  });
+
+  it("removes detached desktop screenshot files after editing", async () => {
+    const user = userEvent.setup();
+    const attachment = {
+      id: "image-1",
+      storageKey: "hollow-knight-journal-journal-1-image-1.png",
+      originalName: "greenpath.png",
+      mimeType: "image/png" as const,
+      size: 5,
+      createdAt: "2026-01-02T10:01:00.000Z",
+    };
+    window.journalMedia = {
+      save: jest.fn(),
+      remove: jest.fn(),
+      read: jest.fn().mockResolvedValue("data:image/png;base64,aW1hZ2U="),
+    };
+    const entry = { ...journalEntries[0], attachments: [attachment] };
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      jsonResponse({ ...entry, content: "Updated.", attachments: [] })
+    );
+
+    render(<JournalPageClient historyEntry={historyEntry} initialEntries={[entry]} />);
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Remove greenpath.png" }));
+    await user.clear(screen.getByLabelText("Journal Entry"));
+    await user.type(screen.getByLabelText("Journal Entry"), "Updated.");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(window.journalMedia!.remove).toHaveBeenCalledWith(attachment.storageKey);
+    });
   });
 });

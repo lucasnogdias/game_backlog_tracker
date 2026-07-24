@@ -6,6 +6,11 @@ import type {
   HistoryEntryDTO,
   HistoryEntryInput,
 } from "@/types/history";
+import type {
+  JournalEntryDTO,
+  JournalImageAttachmentInput,
+} from "@/types/journal";
+import { saveJournalFiles } from "@/lib/journal-media";
 import { HISTORY_SORT_FIELDS } from "@/types/history";
 import { sortHistoryEntries } from "@/lib/sort-history";
 import { HistoryToolbar } from "./HistoryToolbar";
@@ -22,6 +27,8 @@ import { GameDetailsModal } from "@/components/shared/GameDetailsModal";
 interface HistoryClientProps {
   initialEntries: HistoryEntryDTO[];
 }
+
+type CreatedJournalEntry = JournalEntryDTO & { journalEntryNumber: number };
 
 export function HistoryClient({ initialEntries }: HistoryClientProps) {
   const router = useRouter();
@@ -97,13 +104,45 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
     setMovingEntry(null);
   }
 
-  async function handleAddJournalEntry(entry: HistoryEntryDTO, content: string) {
+  async function handleAddJournalEntry(
+    entry: HistoryEntryDTO,
+    content: string,
+    files: File[]
+  ) {
     const response = await fetch(`/api/history/${entry.id}/journal`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
     if (!response.ok) throw new Error("Failed to add journal entry");
+    const created: CreatedJournalEntry = await response.json();
+    if (files.length) {
+      const attachments: JournalImageAttachmentInput[] = await saveJournalFiles(
+        entry.id,
+        created.id,
+        entry.title,
+        created.journalEntryNumber,
+        files
+      );
+      try {
+        const update = await fetch(
+          `/api/history/${entry.id}/journal/${created.id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content, attachments }),
+          }
+        );
+        if (!update.ok) throw new Error("Failed to add journal screenshots");
+      } catch (error) {
+        await Promise.all(
+          attachments.map((attachment) =>
+            window.journalMedia!.remove(attachment.storageKey)
+          )
+        );
+        throw error;
+      }
+    }
     setAddingJournalEntry(null);
   }
 
@@ -181,7 +220,9 @@ export function HistoryClient({ initialEntries }: HistoryClientProps) {
       {addingJournalEntry && (
         <JournalEntryModal
           gameTitle={addingJournalEntry.title}
-          onSubmit={(content) => handleAddJournalEntry(addingJournalEntry, content)}
+          onSubmit={(content, files) =>
+            handleAddJournalEntry(addingJournalEntry, content, files)
+          }
           onClose={() => setAddingJournalEntry(null)}
         />
       )}
