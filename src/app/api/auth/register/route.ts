@@ -13,8 +13,11 @@ export async function POST(request: NextRequest) {
     password: string;
     displayName: string;
   }>;
-  if (typeof body.username !== "string" || typeof body.password !== "string") {
-    return NextResponse.json({ error: "Username and password are required." }, { status: 400 });
+  if (
+    typeof body.username !== "string" ||
+    (body.password !== undefined && typeof body.password !== "string")
+  ) {
+    return NextResponse.json({ error: "A valid username and password are required." }, { status: 400 });
   }
 
   try {

@@ -9,6 +9,8 @@ const LEGACY_MIGRATIONS = [
   "20260713112453_add_journal_entries",
 ];
 const JOURNAL_IMAGE_MIGRATION = "20260724171338_add_journal_image_attachments";
+const SESSION_MIGRATION = "20260824140514_add_local_account_sessions";
+const OPTIONAL_PASSWORD_MIGRATION = "20260824162900_make_account_password_optional";
 
 class MigrationError extends Error {
   constructor(message, backupPath) {
@@ -68,9 +70,18 @@ function legacyMigrationsForSchema(database) {
       )
       .get()
   );
-  return hasJournalImageAttachments
+  const hasSessions = Boolean(
+    database
+      .prepare(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'Session' LIMIT 1"
+      )
+      .get()
+  );
+  const migrations = hasJournalImageAttachments
     ? [...LEGACY_MIGRATIONS, JOURNAL_IMAGE_MIGRATION]
     : LEGACY_MIGRATIONS;
+  if (hasSessions) migrations.push(SESSION_MIGRATION, OPTIONAL_PASSWORD_MIGRATION);
+  return migrations;
 }
 
 function appliedMigrations(database) {
@@ -127,6 +138,20 @@ function restoreBackup(databasePath, backupPath) {
 
 function applyMigration(database, migrationPath, migrationName) {
   const sql = fs.readFileSync(path.join(migrationPath, "migration.sql"), "utf8");
+  if (sql.includes("PRAGMA foreign_keys=OFF")) {
+    database.pragma("foreign_keys = OFF");
+    try {
+      database.exec(sql);
+      database
+        .prepare(
+          `INSERT INTO "${MIGRATION_TABLE}" (migrationName) VALUES (?)`
+        )
+        .run(migrationName);
+    } finally {
+      database.pragma("foreign_keys = ON");
+    }
+    return;
+  }
   const apply = database.transaction(() => {
     database.exec(sql);
     database

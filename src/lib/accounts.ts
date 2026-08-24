@@ -44,16 +44,18 @@ export async function updateAccountRole(id: string, role: AccountDTO["role"]): P
     throw new AuthenticationError("You cannot change your own administrator role.");
   }
 
-  const account = await prisma.user.findUnique({ where: { id } });
-  if (!account) throw new AuthenticationError("Account not found.");
-  if (account.role === "admin" && role === "user") {
-    const adminCount = await prisma.user.count({ where: { role: "admin" } });
-    if (adminCount === 1) {
-      throw new AuthenticationError("At least one administrator account is required.");
+  return prisma.$transaction(async (tx) => {
+    const account = await tx.user.findUnique({ where: { id } });
+    if (!account) throw new AuthenticationError("Account not found.");
+    if (account.role === "admin" && role === "user") {
+      const adminCount = await tx.user.count({ where: { role: "admin" } });
+      if (adminCount === 1) {
+        throw new AuthenticationError("At least one administrator account is required.");
+      }
     }
-  }
 
-  return accountToDTO(await prisma.user.update({ where: { id }, data: { role } }));
+    return accountToDTO(await tx.user.update({ where: { id }, data: { role } }));
+  });
 }
 
 export async function deleteAccount(id: string) {
@@ -61,39 +63,40 @@ export async function deleteAccount(id: string) {
   if (currentUser.role !== "admin" && id !== currentUser.id) {
     throw new AuthenticationError("Administrator access is required.");
   }
-  const account = await prisma.user.findUnique({
-    where: { id },
-    include: {
-      historyEntries: {
-        include: {
-          journalEntries: {
-            include: { attachments: { select: { storageKey: true } } },
+  return prisma.$transaction(async (tx) => {
+    const account = await tx.user.findUnique({
+      where: { id },
+      include: {
+        historyEntries: {
+          include: {
+            journalEntries: {
+              include: { attachments: { select: { storageKey: true } } },
+            },
           },
         },
       },
-    },
+    });
+    if (!account) throw new AuthenticationError("Account not found.");
+    if (account.role === "admin") {
+      if (currentUser.role !== "admin") {
+        throw new AuthenticationError("Administrator access is required.");
+      }
+      const adminCount = await tx.user.count({ where: { role: "admin" } });
+      if (adminCount === 1) {
+        throw new AuthenticationError(
+          "Promote another account before deleting the final administrator."
+        );
+      }
+    }
+
+    const screenshotStorageKeys = account.historyEntries.flatMap((entry) =>
+      entry.journalEntries.flatMap((journal) =>
+        journal.attachments.map((attachment) => attachment.storageKey)
+      )
+    );
+    await tx.user.delete({ where: { id } });
+    return { deletedOwnAccount: id === currentUser.id, screenshotStorageKeys };
   });
-  if (!account) throw new AuthenticationError("Account not found.");
-  if (account.role === "admin") {
-    if (currentUser.role !== "admin") {
-      throw new AuthenticationError("Administrator access is required.");
-    }
-    const adminCount = await prisma.user.count({ where: { role: "admin" } });
-    if (adminCount === 1) {
-      throw new AuthenticationError(
-        "Promote another account before deleting the final administrator."
-      );
-    }
-
-  }
-
-  const screenshotStorageKeys = account.historyEntries.flatMap((entry) =>
-    entry.journalEntries.flatMap((journal) =>
-      journal.attachments.map((attachment) => attachment.storageKey)
-    )
-  );
-  await prisma.user.delete({ where: { id } });
-  return { deletedOwnAccount: id === currentUser.id, screenshotStorageKeys };
 }
 
 export async function getManagedAccount(id: string): Promise<AccountDTO | null> {

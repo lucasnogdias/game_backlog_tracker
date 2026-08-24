@@ -21,13 +21,13 @@ export function sessionCookieOptions(isSecure: boolean) {
   };
 }
 
-export function validateCredentials(username: string, password: string) {
+export function validateCredentials(username: string, password?: string) {
   if (!USERNAME_PATTERN.test(username)) {
     throw new AuthenticationError(
       "Username must be 3-32 characters using letters, numbers, hyphens, or underscores."
     );
   }
-  if (password.length < MINIMUM_PASSWORD_LENGTH) {
+  if (password && password.length < MINIMUM_PASSWORD_LENGTH) {
     throw new AuthenticationError("Password must be at least 12 characters.");
   }
 }
@@ -83,11 +83,11 @@ export async function deleteSession(token: string | undefined): Promise<void> {
 
 export async function registerAccount(
   username: string,
-  password: string,
+  password: string | undefined,
   displayName?: string
 ) {
   validateCredentials(username, password);
-  const passwordHash = await hashPassword(password);
+  const passwordHash = password ? await hashPassword(password) : null;
   const normalizedUsername = username.toLowerCase();
 
   return prisma.$transaction(async (tx) => {
@@ -121,14 +121,45 @@ export async function registerAccount(
   });
 }
 
-export async function authenticateAccount(username: string, password: string) {
+export async function authenticateAccount(username: string, password?: string) {
   const user = await prisma.user.findUnique({
     where: { username: username.toLowerCase() },
   });
-  if (!user || !(await verifyPassword(password, user.passwordHash))) {
+  if (!user || (user.passwordHash && !(await verifyPassword(password ?? "", user.passwordHash)))) {
     throw new AuthenticationError("Invalid username or password.");
   }
+
   return user;
+}
+
+export async function updateOwnPassword(
+  currentPassword: string | undefined,
+  newPassword: string | undefined
+) {
+  const { requireCurrentUser } = await import("@/lib/current-user");
+  const user = await requireCurrentUser();
+  if (user.passwordHash) {
+    if (!currentPassword || !(await verifyPassword(currentPassword, user.passwordHash))) {
+      throw new AuthenticationError("Your current password is incorrect.");
+    }
+  }
+  if (newPassword) validateCredentials(user.username, newPassword);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: newPassword ? await hashPassword(newPassword) : null },
+  });
+}
+
+export async function listLoginAccounts() {
+  const accounts = await prisma.user.findMany({
+    orderBy: { createdAt: "asc" },
+    select: { username: true, displayName: true, passwordHash: true },
+  });
+  return accounts.map((account) => ({
+    username: account.username,
+    displayName: account.displayName,
+    requiresPassword: Boolean(account.passwordHash),
+  }));
 }
 
 export async function needsAccountSetup(): Promise<boolean> {

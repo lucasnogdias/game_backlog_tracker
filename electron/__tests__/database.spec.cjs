@@ -31,7 +31,7 @@ describe("packaged database migrations", () => {
 
     initializeDatabase(databasePath, migrationsPath, path.join(directory, "backups"));
 
-    expect(migrationCount(databasePath)).toBe(4);
+    expect(migrationCount(databasePath)).toBe(6);
   });
 
   it("baselines databases created before migration tracking", () => {
@@ -44,7 +44,39 @@ describe("packaged database migrations", () => {
 
     initializeDatabase(databasePath, migrationsPath, path.join(directory, "backups"));
 
-    expect(migrationCount(databasePath)).toBe(4);
+    expect(migrationCount(databasePath)).toBe(6);
+  });
+
+  it("preserves user-owned games when making passwords optional", () => {
+    const databasePath = path.join(directory, "app.db");
+    const oldMigrationsPath = path.join(directory, "old-migrations");
+    fs.cpSync(migrationsPath, oldMigrationsPath, { recursive: true });
+    fs.rmSync(
+      path.join(oldMigrationsPath, "20260824162900_make_account_password_optional"),
+      { recursive: true }
+    );
+    initializeDatabase(databasePath, oldMigrationsPath, path.join(directory, "backups"));
+
+    const database = new Database(databasePath);
+    database
+      .prepare(
+        'INSERT INTO "User" (id, username, passwordHash, role, updatedAt) VALUES (?, ?, ?, ?, ?)'
+      )
+      .run("user-1", "existing-user", "password-hash", "admin", new Date().toISOString());
+    database
+      .prepare(
+        'INSERT INTO "BacklogGame" (id, userId, title, platforms, updatedAt) VALUES (?, ?, ?, ?, ?)'
+      )
+      .run("game-1", "user-1", "Existing game", "[]", new Date().toISOString());
+    database.close();
+
+    initializeDatabase(databasePath, migrationsPath, path.join(directory, "backups"));
+
+    const upgraded = new Database(databasePath);
+    expect(
+      upgraded.prepare('SELECT title FROM "BacklogGame" WHERE id = ?').get("game-1")
+    ).toEqual({ title: "Existing game" });
+    upgraded.close();
   });
 
   it("restores a pre-migration snapshot when a future migration fails", () => {
@@ -67,7 +99,7 @@ describe("packaged database migrations", () => {
     expect(() =>
       initializeDatabase(databasePath, failingMigrationsPath, backupsPath)
     ).toThrow(/original data was restored/);
-    expect(migrationCount(databasePath)).toBe(4);
+    expect(migrationCount(databasePath)).toBe(6);
     expect(fs.readdirSync(backupsPath)).toContainEqual(
       expect.stringMatching(/^pre-migration-.*\.db$/)
     );

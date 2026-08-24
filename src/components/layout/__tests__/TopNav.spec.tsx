@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { TopNav } from "../TopNav";
 
 jest.mock("next/navigation", () => ({
@@ -22,5 +23,14 @@ describe("TopNav", () => {
 
     const settingsLink = screen.getByRole("link", { name: "Settings" });
     expect(settingsLink).toHaveAttribute("href", "/settings");
+  });
+
+  it("logs out and returns to the login page", async () => {
+    const user = userEvent.setup();
+    global.fetch = jest.fn().mockResolvedValue({ ok: true });
+    render(<TopNav user={{ username: "lucas", displayName: null }} />);
+
+    await user.click(screen.getByRole("button", { name: "Log out" }));
+    expect(global.fetch).toHaveBeenCalledWith("/api/auth/logout", { method: "POST" });
   });
 });

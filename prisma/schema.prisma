@@ -18,7 +18,7 @@ model User {
   username     String   @unique
   /// Presentation name; falls back to username when not provided
   displayName  String?
-  passwordHash String
+  passwordHash String?
   /// One of: "admin" | "user". The first user ever created is always "admin".
   role         String   @default("user")
   createdAt    DateTime @default(now())

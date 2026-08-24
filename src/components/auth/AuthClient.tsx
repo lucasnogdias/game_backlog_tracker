@@ -5,6 +5,9 @@ import shared from "@/styles/shared.module.css";
 import styles from "./AuthClient.module.css";
 
 export function AuthClient() {
+  const [accounts, setAccounts] = useState<
+    { username: string; displayName: string | null; requiresPassword: boolean }[]
+  >([]);
   const [isSetup, setIsSetup] = useState<boolean | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState("");
@@ -12,6 +15,7 @@ export function AuthClient() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const selectedAccount = accounts.find((account) => account.username === username);
 
   useEffect(() => {
     void fetch("/api/auth/setup")
@@ -21,6 +25,17 @@ export function AuthClient() {
       })
       .then(({ needsAccountSetup }) => setIsSetup(needsAccountSetup))
       .catch(() => setError("Unable to prepare account sign-in."));
+  }, []);
+
+  useEffect(() => {
+    void fetch("/api/auth/accounts")
+      .then((response) => response.json())
+      .then((accounts) => {
+        if (Array.isArray(accounts)) {
+          setAccounts(accounts);
+          if (accounts.length) setUsername(accounts[0].username);
+        }
+      });
   }, []);
 
   async function submit(event: FormEvent) {
@@ -63,12 +78,29 @@ export function AuthClient() {
         <form onSubmit={submit} className={shared.form}>
           <label className={shared.fieldGroup}>
             Username
-            <input
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              autoComplete="username"
-              required
-            />
+            {isSetup || isRegistering ? (
+              <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                autoComplete="username"
+                required
+              />
+            ) : (
+              <select
+                value={username}
+                onChange={(event) => {
+                  setUsername(event.target.value);
+                  setPassword("");
+                }}
+                required
+              >
+                {accounts.map((account) => (
+                  <option key={account.username} value={account.username}>
+                    {account.displayName ?? account.username}
+                  </option>
+                ))}
+              </select>
+            )}
           </label>
           {(isSetup || isRegistering) && (
             <label className={shared.fieldGroup}>
@@ -80,6 +112,7 @@ export function AuthClient() {
               />
             </label>
           )}
+          {(isSetup || isRegistering || selectedAccount?.requiresPassword) && (
           <label className={shared.fieldGroup}>
             Password
             <input
@@ -87,10 +120,11 @@ export function AuthClient() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               autoComplete={isSetup || isRegistering ? "new-password" : "current-password"}
-              minLength={12}
-              required
+              minLength={isSetup || isRegistering ? 12 : undefined}
+              required={isSetup || isRegistering || selectedAccount?.requiresPassword}
             />
           </label>
+          )}
           {(isSetup || isRegistering) && (
             <p className={styles.hint}>Use at least 12 characters.</p>
           )}

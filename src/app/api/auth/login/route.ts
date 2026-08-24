@@ -9,8 +9,11 @@ import {
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as Partial<{ username: string; password: string }>;
-  if (typeof body.username !== "string" || typeof body.password !== "string") {
-    return NextResponse.json({ error: "Username and password are required." }, { status: 400 });
+  if (
+    typeof body.username !== "string" ||
+    (body.password !== undefined && typeof body.password !== "string")
+  ) {
+    return NextResponse.json({ error: "A valid account is required." }, { status: 400 });
   }
 
   try {

@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth-constants";
 
-const PUBLIC_PATHS = new Set(["/login", "/api/auth/login", "/api/auth/register", "/api/auth/setup"]);
+const PUBLIC_PATHS = new Set([
+  "/login",
+  "/api/auth/accounts",
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/setup",
+]);
 
 export function middleware(request: NextRequest) {
   if (PUBLIC_PATHS.has(request.nextUrl.pathname) || request.cookies.has(SESSION_COOKIE)) {

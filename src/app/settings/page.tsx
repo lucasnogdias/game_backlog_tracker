@@ -4,6 +4,7 @@ import pageStyles from "./page.module.css";
 import packageJson from "../../../package.json";
 import { requirePageUser } from "@/lib/page-auth";
 import { AccountManagement } from "@/components/settings/AccountManagement";
+import { PasswordSettings } from "@/components/settings/PasswordSettings";
 
 export default async function SettingsPage() {
   const user = await requirePageUser();
@@ -12,6 +13,7 @@ export default async function SettingsPage() {
       <h1 className={styles.heading}>Settings</h1>
       <h2>Game Lookup</h2>
       <GameLookupSettings />
+      <PasswordSettings hasPassword={Boolean(user.passwordHash)} />
       <AccountManagement
         isAdmin={user.role === "admin"}
         currentAccount={{
