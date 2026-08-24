@@ -1,12 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import shared from "@/styles/shared.module.css";
 import styles from "./AuthClient.module.css";
 
 export function AuthClient() {
-  const router = useRouter();
   const [isSetup, setIsSetup] = useState<boolean | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState("");
@@ -41,8 +39,7 @@ export function AuthClient() {
       });
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "Unable to sign in.");
-      router.replace("/backlog");
-      router.refresh();
+      window.location.assign("/backlog");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to sign in.");
     } finally {

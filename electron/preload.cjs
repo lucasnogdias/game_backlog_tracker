@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("desktopSettings", {
 contextBridge.exposeInMainWorld("journalMedia", {
   save: (payload) => ipcRenderer.invoke("journal-media:save", payload),
   remove: (storageKey) => ipcRenderer.invoke("journal-media:remove", storageKey),
+  removeMany: (storageKeys) => ipcRenderer.invoke("journal-media:remove-many", storageKeys),
   getDirectory: () => ipcRenderer.invoke("journal-media:get-directory"),
   read: (storageKey) => ipcRenderer.invoke("journal-media:read", storageKey),
 });

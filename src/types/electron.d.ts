@@ -23,6 +23,7 @@ declare global {
         data: ArrayBuffer;
       }) => Promise<import("./journal").JournalImageAttachmentInput>;
       remove: (storageKey: string) => Promise<void>;
+      removeMany?: (storageKeys: string[]) => Promise<void>;
       getDirectory?: () => Promise<string>;
       read: (storageKey: string) => Promise<string>;
     };

@@ -205,10 +205,14 @@ function iso(value: Date | null) { return value?.toISOString() ?? ""; }
 
 export async function createDataBackup(): Promise<Uint8Array> {
   const user = await requireCurrentUser();
+  return createDataBackupForUser(user.id);
+}
+
+export async function createDataBackupForUser(userId: string): Promise<Uint8Array> {
   const [backlog, history, journals] = await Promise.all([
-    prisma.backlogGame.findMany({ where: { userId: user.id } }),
-    prisma.historyEntry.findMany({ where: { userId: user.id } }),
-    prisma.journalEntry.findMany({ where: { historyEntry: { userId: user.id } } }),
+    prisma.backlogGame.findMany({ where: { userId } }),
+    prisma.historyEntry.findMany({ where: { userId } }),
+    prisma.journalEntry.findMany({ where: { historyEntry: { userId } } }),
   ]);
   return zipSync({
     "manifest.json": strToU8(JSON.stringify({ format: DATA_BACKUP_FORMAT, version: DATA_BACKUP_VERSION, exportedAt: new Date().toISOString() }, null, 2)),
