@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TopNav } from "@/components/layout/TopNav";
+import { getCurrentUser } from "@/lib/current-user";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   description: "Personal games backlog and history tracker",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <TopNav />
+        <TopNav user={await getCurrentUser()} />
         {children}
       </body>
     </html>

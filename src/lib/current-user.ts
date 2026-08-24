@@ -1,29 +1,23 @@
-import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { getSessionUser, SESSION_COOKIE } from "@/lib/auth";
 
 /**
- * Temporary stand-in for real authentication (login screen is deferred —
- * see project plan). Returns the first user in the system, creating a
- * default admin user if none exists yet, so every Backlog/History record
- * can already be scoped to a `userId` ahead of building real auth.
- *
- * `passwordHash` is a placeholder until login is implemented; real
- * passwords will be hashed with bcrypt at that point.
+ * Reads the opaque, httpOnly local session cookie. Data operations must use
+ * this helper rather than accepting a user ID from the client.
  */
-export async function getOrCreateDefaultUser() {
-  const existingUser = await prisma.user.findFirst({
-    orderBy: { createdAt: "asc" },
-  });
+export async function getCurrentUser() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  return getSessionUser(token);
+}
 
-  if (existingUser) {
-    return existingUser;
+export async function requireCurrentUser() {
+  const user = await getCurrentUser();
+  if (!user) throw new AuthenticationRequiredError();
+  return user;
+}
+
+export class AuthenticationRequiredError extends Error {
+  constructor() {
+    super("Sign in is required.");
   }
-
-  return prisma.user.create({
-    data: {
-      username: "local",
-      displayName: "Local User",
-      passwordHash: "unset-no-auth-yet",
-      role: "admin",
-    },
-  });
 }

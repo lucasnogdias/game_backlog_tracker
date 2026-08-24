@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { updateHistoryEntry, deleteHistoryEntry } from "@/lib/history";
 import { HISTORY_STATUSES } from "@/types/history";
 import type { HistoryEntryInput } from "@/types/history";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id } = await params;
   const body = (await request.json()) as Partial<HistoryEntryInput>;
 
@@ -32,6 +35,8 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id } = await params;
   await deleteHistoryEntry(id);
   return NextResponse.json({ success: true });

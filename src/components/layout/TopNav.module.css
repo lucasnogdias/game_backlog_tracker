@@ -24,3 +24,19 @@
 .link:hover {
   text-decoration: underline;
 }
+
+.userName {
+  margin-left: auto;
+  color: var(--color-text-subtle);
+  font-size: 0.875rem;
+}
+
+.logout {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0;
+  text-decoration: underline;
+}

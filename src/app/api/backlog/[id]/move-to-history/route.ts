@@ -3,11 +3,14 @@ import { getBacklogGameById } from "@/lib/backlog";
 import { moveBacklogGameToHistory } from "@/lib/move-game";
 import { HISTORY_STATUSES } from "@/types/history";
 import type { HistoryStatus } from "@/types/history";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id } = await params;
   const body = (await request.json()) as {
     status?: HistoryStatus;

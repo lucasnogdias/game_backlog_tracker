@@ -1,7 +1,7 @@
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import Papa from "papaparse";
 import { prisma } from "@/lib/prisma";
-import { getOrCreateDefaultUser } from "@/lib/current-user";
+import { requireCurrentUser } from "@/lib/current-user";
 import { HISTORY_STATUSES } from "@/types/history";
 
 export const DATA_BACKUP_FORMAT = "game-backlog-tracker-data";
@@ -178,7 +178,7 @@ function conflictsFor<T extends { id: string; title: string }>(backup: T[], loca
 }
 
 async function localCandidates() {
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   const [backlog, history] = await Promise.all([
     prisma.backlogGame.findMany({ where: { userId: user.id }, select: { id: true, title: true } }),
     prisma.historyEntry.findMany({ where: { userId: user.id }, select: { id: true, title: true } }),
@@ -204,7 +204,7 @@ function csv(rows: Record<string, string>[], fields: readonly string[]) {
 function iso(value: Date | null) { return value?.toISOString() ?? ""; }
 
 export async function createDataBackup(): Promise<Uint8Array> {
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   const [backlog, history, journals] = await Promise.all([
     prisma.backlogGame.findMany({ where: { userId: user.id } }),
     prisma.historyEntry.findMany({ where: { userId: user.id } }),
@@ -253,7 +253,7 @@ export async function applyDataBackup(backup: DataBackup, resolutions: BackupRes
   if (!resolutions || Array.isArray(resolutions) || typeof resolutions !== "object" || Object.keys(resolutions).some((key) => key !== "backlog" && key !== "history")) {
     fail("Resolutions must be an object containing backlog and history choices.");
   }
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   return prisma.$transaction(async (tx) => {
     const [localBacklog, localHistory] = await Promise.all([
       tx.backlogGame.findMany({ where: { userId: user.id }, select: { id: true, title: true } }),

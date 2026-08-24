@@ -2,8 +2,10 @@ import { GameLookupSettings } from "@/components/settings/GameLookupSettings";
 import styles from "@/styles/feature-page.module.css";
 import pageStyles from "./page.module.css";
 import packageJson from "../../../package.json";
+import { requirePageUser } from "@/lib/page-auth";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  await requirePageUser();
   return (
     <main className={styles.main}>
       <h1 className={styles.heading}>Settings</h1>

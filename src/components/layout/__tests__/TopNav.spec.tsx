@@ -1,9 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { TopNav } from "../TopNav";
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: jest.fn(), refresh: jest.fn() }),
+}));
+
 describe("TopNav", () => {
   it("renders the app title and primary navigation links", () => {
-    render(<TopNav />);
+    render(<TopNav user={{ username: "lucas", displayName: "Lucas" }} />);
 
     expect(screen.getByText("Game Backlog Tracker")).toBeInTheDocument();
 

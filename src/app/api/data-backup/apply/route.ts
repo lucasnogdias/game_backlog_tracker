@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { applyDataBackup, parseDataBackup, type BackupResolutions } from "@/lib/data-backup";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   try {
     const form = await request.formData();
     const file = form.get("archive") ?? form.get("file");

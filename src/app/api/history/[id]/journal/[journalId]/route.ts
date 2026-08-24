@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getHistoryEntryById } from "@/lib/history";
 import { updateJournalEntry, validJournalAttachments } from "@/lib/journal";
 import type { JournalEntryInput } from "@/types/journal";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; journalId: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id, journalId } = await params;
   const historyEntry = await getHistoryEntryById(id);
   if (!historyEntry) {
