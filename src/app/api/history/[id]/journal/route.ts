@@ -6,11 +6,14 @@ import {
   listJournalEntries,
 } from "@/lib/journal";
 import type { JournalEntryInput } from "@/types/journal";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id } = await params;
   const historyEntry = await getHistoryEntryById(id);
 
@@ -26,6 +29,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id } = await params;
   const historyEntry = await getHistoryEntryById(id);
 

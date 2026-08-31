@@ -408,6 +408,13 @@ ipcMain.handle("journal-media:remove", (_event, storageKey) => {
   fs.rmSync(journalImageFile(storageKey), { force: true });
 });
 
+ipcMain.handle("journal-media:remove-many", (_event, storageKeys) => {
+  if (!Array.isArray(storageKeys)) throw new Error("Screenshot references are invalid.");
+  for (const storageKey of storageKeys) {
+    fs.rmSync(journalImageFile(storageKey), { force: true });
+  }
+});
+
 ipcMain.handle("journal-media:get-directory", () => journalImagesPath());
 
 ipcMain.handle("journal-media:read", (_event, storageKey) => {

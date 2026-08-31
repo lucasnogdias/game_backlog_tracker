@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listBacklogGames, createBacklogGame } from "@/lib/backlog";
 import type { BacklogGameInput } from "@/types/backlog";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function GET() {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const games = await listBacklogGames();
   return NextResponse.json(games);
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const body = (await request.json()) as Partial<BacklogGameInput>;
 
   if (!body.title || !body.title.trim()) {

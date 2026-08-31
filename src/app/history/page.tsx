@@ -1,5 +1,6 @@
 import { listHistoryEntries } from "@/lib/history";
 import { HistoryClient } from "@/components/history/HistoryClient";
+import { requirePageUser } from "@/lib/page-auth";
 import styles from "@/styles/feature-page.module.css";
 
 // Always fetch fresh from the DB — this page must never be statically
@@ -8,6 +9,7 @@ import styles from "@/styles/feature-page.module.css";
 export const dynamic = "force-dynamic";
 
 export default async function HistoryPage() {
+  await requirePageUser();
   const entries = await listHistoryEntries();
 
   return (

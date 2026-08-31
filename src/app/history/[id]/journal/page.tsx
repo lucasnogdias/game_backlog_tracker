@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { JournalPageClient } from "@/components/history/JournalPageClient";
 import { getHistoryEntryById } from "@/lib/history";
 import { listJournalEntries } from "@/lib/journal";
+import { requirePageUser } from "@/lib/page-auth";
 import styles from "@/styles/feature-page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ export default async function JournalPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requirePageUser();
   const { id } = await params;
   const historyEntry = await getHistoryEntryById(id);
 

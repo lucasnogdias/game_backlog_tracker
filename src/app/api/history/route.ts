@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { listHistoryEntries, createHistoryEntry } from "@/lib/history";
 import { HISTORY_STATUSES } from "@/types/history";
 import type { HistoryEntryInput } from "@/types/history";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function GET() {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const entries = await listHistoryEntries();
   return NextResponse.json(entries);
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const body = (await request.json()) as Partial<HistoryEntryInput>;
 
   if (!body.title || !body.title.trim()) {
@@ -38,4 +43,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(entry, { status: 201 });
 }
-

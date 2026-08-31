@@ -1,5 +1,6 @@
 import { listBacklogGames } from "@/lib/backlog";
 import { BacklogClient } from "@/components/backlog/BacklogClient";
+import { requirePageUser } from "@/lib/page-auth";
 import styles from "@/styles/feature-page.module.css";
 
 // Always fetch fresh from the DB — this page must never be statically
@@ -8,6 +9,7 @@ import styles from "@/styles/feature-page.module.css";
 export const dynamic = "force-dynamic";
 
 export default async function BacklogPage() {
+  await requirePageUser();
   const games = await listBacklogGames();
 
   return (

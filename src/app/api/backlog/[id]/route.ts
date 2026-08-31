@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateBacklogGame, deleteBacklogGame } from "@/lib/backlog";
 import type { BacklogGameInput } from "@/types/backlog";
+import { unauthenticatedResponse } from "@/lib/api-auth";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id } = await params;
   const body = (await request.json()) as Partial<BacklogGameInput>;
 
@@ -24,6 +27,8 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await unauthenticatedResponse();
+  if (unauthorized) return unauthorized;
   const { id } = await params;
   await deleteBacklogGame(id);
   return NextResponse.json({ success: true });

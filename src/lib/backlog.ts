@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getOrCreateDefaultUser } from "@/lib/current-user";
+import { requireCurrentUser } from "@/lib/current-user";
 import type { BacklogGameDTO, BacklogGameInput } from "@/types/backlog";
 import type { BacklogGame } from "@/generated/prisma/client";
 
@@ -20,7 +20,7 @@ export function backlogGameToDTO(game: BacklogGame): BacklogGameDTO {
 }
 
 export async function listBacklogGames(): Promise<BacklogGameDTO[]> {
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   const games = await prisma.backlogGame.findMany({
     where: { userId: user.id },
     // Default sort: highest hype first; UI can re-sort client-side.
@@ -32,7 +32,7 @@ export async function listBacklogGames(): Promise<BacklogGameDTO[]> {
 export async function createBacklogGame(
   input: BacklogGameInput
 ): Promise<BacklogGameDTO> {
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   const game = await prisma.backlogGame.create({
     data: {
       userId: user.id,
@@ -53,8 +53,11 @@ export async function updateBacklogGame(
   id: string,
   input: Partial<BacklogGameInput>
 ): Promise<BacklogGameDTO> {
+  const user = await requireCurrentUser();
+  const existing = await prisma.backlogGame.findFirst({ where: { id, userId: user.id } });
+  if (!existing) throw new Error("Backlog game not found.");
   const game = await prisma.backlogGame.update({
-    where: { id },
+    where: { id: existing.id },
     data: {
       ...(input.title !== undefined && { title: input.title }),
       ...(input.owned !== undefined && { owned: input.owned }),
@@ -76,12 +79,14 @@ export async function updateBacklogGame(
 }
 
 export async function deleteBacklogGame(id: string): Promise<void> {
-  await prisma.backlogGame.delete({ where: { id } });
+  const user = await requireCurrentUser();
+  await prisma.backlogGame.deleteMany({ where: { id, userId: user.id } });
 }
 
 export async function getBacklogGameById(
   id: string
 ): Promise<BacklogGameDTO | null> {
-  const game = await prisma.backlogGame.findUnique({ where: { id } });
+  const user = await requireCurrentUser();
+  const game = await prisma.backlogGame.findFirst({ where: { id, userId: user.id } });
   return game ? backlogGameToDTO(game) : null;
 }

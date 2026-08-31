@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getOrCreateDefaultUser } from "@/lib/current-user";
+import { requireCurrentUser } from "@/lib/current-user";
 import type { HistoryEntryDTO, HistoryEntryInput } from "@/types/history";
 import type { HistoryEntry } from "@/generated/prisma/client";
 
@@ -21,7 +21,7 @@ export function historyEntryToDTO(entry: HistoryEntry): HistoryEntryDTO {
 }
 
 export async function listHistoryEntries(): Promise<HistoryEntryDTO[]> {
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   const entries = await prisma.historyEntry.findMany({
     where: { userId: user.id },
     // Default sort: oldest added-to-History first (UI can re-sort/toggle).
@@ -33,7 +33,7 @@ export async function listHistoryEntries(): Promise<HistoryEntryDTO[]> {
 export async function createHistoryEntry(
   input: HistoryEntryInput
 ): Promise<HistoryEntryDTO> {
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   const entry = await prisma.historyEntry.create({
     data: {
       userId: user.id,
@@ -54,8 +54,11 @@ export async function updateHistoryEntry(
   id: string,
   input: Partial<HistoryEntryInput>
 ): Promise<HistoryEntryDTO> {
+  const user = await requireCurrentUser();
+  const existing = await prisma.historyEntry.findFirst({ where: { id, userId: user.id } });
+  if (!existing) throw new Error("History entry not found.");
   const entry = await prisma.historyEntry.update({
-    where: { id },
+    where: { id: existing.id },
     data: {
       ...(input.title !== undefined && { title: input.title }),
       ...(input.status !== undefined && { status: input.status }),
@@ -79,13 +82,14 @@ export async function updateHistoryEntry(
 }
 
 export async function deleteHistoryEntry(id: string): Promise<void> {
-  await prisma.historyEntry.delete({ where: { id } });
+  const user = await requireCurrentUser();
+  await prisma.historyEntry.deleteMany({ where: { id, userId: user.id } });
 }
 
 export async function getHistoryEntryById(
   id: string
 ): Promise<HistoryEntryDTO | null> {
-  const user = await getOrCreateDefaultUser();
+  const user = await requireCurrentUser();
   const entry = await prisma.historyEntry.findFirst({
     where: { id, userId: user.id },
   });
